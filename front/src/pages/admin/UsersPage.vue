@@ -52,12 +52,12 @@
                 </span>
               </td>
               <td class="px-6 py-4 text-right space-x-2">
-                <button @click="openEditModal(user)" class="text-slate-400 hover:text-blue-400 px-2 py-1" title="Modifier">
-                  <i class="fa-solid fa-pencil"></i>
-                </button>
-                <button @click="confirmDelete(user.id)" class="text-slate-400 hover:text-red-400 px-2 py-1" title="Supprimer">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
+                <span @click="openEditModal(user)" class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-full bg-slate-500/20 text-slate-300 hover:bg-slate-500/30 cursor-pointer transition-colors" title="Modifier">
+                  <i class="fa-solid fa-pencil mr-1"></i> Modifier
+                </span>
+                <span @click="confirmDelete(user.id)" class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-full bg-red-500/20 text-red-300 hover:bg-red-500/30 cursor-pointer transition-colors ml-2" title="Supprimer">
+                  <i class="fa-solid fa-trash mr-1"></i> Supprimer
+                </span>
               </td>
             </tr>
              <tr v-if="usersStore.users.length === 0">

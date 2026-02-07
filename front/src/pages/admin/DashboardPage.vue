@@ -1,86 +1,72 @@
 <template>
   <app-layout>
-    <div class="space-y-8">
-      <!-- 1. Welcome Header -->
-      <div>
-        <h2 class="text-2xl font-bold text-white">Bienvenue, {{ authStore.currentUser?.first_name || 'Admin' }} !</h2>
-        <p class="text-slate-400 text-sm mt-1">Voici un aperçu de l'activité de votre cinéma.</p>
+    <div class="space-y-10 p-4 md:p-8 bg-cinema-dark text-slate-100 min-h-screen">
+      <!-- Welcome Header -->
+      <div class="mb-10">
+        <h2 class="text-4xl font-extrabold text-slate-50 leading-tight">Tableau de Bord Administratif</h2>
+        <p class="text-slate-400 text-lg mt-3">Gérez efficacement les opérations de CENTRAL CINEMA.</p>
       </div>
 
-      <!-- 2. Clickable Stat Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <router-link to="/admin/movies" class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:bg-slate-700/50 hover:border-slate-600 transition-all transform hover:-translate-y-1">
-          <div class="flex items-center justify-between">
-            <h3 class="text-slate-300 text-sm font-medium">Films</h3>
-            <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-              <i class="fa-solid fa-film"></i>
-            </div>
+      <!-- Core Metrics Section -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <!-- Metric Card: Films -->
+        <router-link to="/admin/movies" class="group bg-cinema-darkAlt rounded-xl p-6 border border-cinema-dark hover:border-cinema-accent transition-all duration-200 transform hover:-translate-y-1 shadow-lg flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-4">
+            <i class="fa-solid fa-film text-3xl text-cinema-accent group-hover:text-cinema-accentLight transition-colors"></i>
+            <h3 class="text-slate-300 text-sm font-semibold uppercase tracking-wider">Films</h3>
           </div>
-          <p class="text-3xl font-bold text-slate-100 mt-2">{{ moviesStore.movies.length }}</p>
+          <p class="text-5xl font-extrabold text-white">{{ moviesStore.movies.length }}</p>
+          <p class="text-sm text-slate-500 mt-1">Films enregistrés</p>
         </router-link>
-        <router-link to="/admin/sessions" class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:bg-slate-700/50 hover:border-slate-600 transition-all transform hover:-translate-y-1">
-          <div class="flex items-center justify-between">
-            <h3 class="text-slate-300 text-sm font-medium">Séances</h3>
-            <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400">
-              <i class="fa-solid fa-calendar"></i>
-            </div>
+
+        <!-- Metric Card: Séances -->
+        <router-link to="/admin/sessions" class="group bg-cinema-darkAlt rounded-xl p-6 border border-cinema-dark hover:border-purple-400 transition-all duration-200 transform hover:-translate-y-1 shadow-lg flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-4">
+            <i class="fa-solid fa-calendar-alt text-3xl text-purple-400 group-hover:text-purple-300 transition-colors"></i>
+            <h3 class="text-slate-300 text-sm font-semibold uppercase tracking-wider">Séances</h3>
           </div>
-          <p class="text-3xl font-bold text-slate-100 mt-2">{{ sessionsStore.sessions.length }}</p>
+          <p class="text-5xl font-extrabold text-white">{{ sessionsStore.sessions.length }}</p>
+          <p class="text-sm text-slate-500 mt-1">Séances programmées</p>
         </router-link>
-        <router-link to="/admin/users" class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:bg-slate-700/50 hover:border-slate-600 transition-all transform hover:-translate-y-1">
-          <div class="flex items-center justify-between">
-            <h3 class="text-slate-300 text-sm font-medium">Utilisateurs</h3>
-            <div class="p-2 bg-orange-500/10 rounded-lg text-orange-400">
-              <i class="fa-solid fa-users"></i>
-            </div>
+
+        <!-- Metric Card: Utilisateurs -->
+        <router-link to="/admin/users" class="group bg-cinema-darkAlt rounded-xl p-6 border border-cinema-dark hover:border-orange-400 transition-all duration-200 transform hover:-translate-y-1 shadow-lg flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-4">
+            <i class="fa-solid fa-users text-3xl text-orange-400 group-hover:text-orange-300 transition-colors"></i>
+            <h3 class="text-slate-300 text-sm font-semibold uppercase tracking-wider">Utilisateurs</h3>
           </div>
-          <p class="text-3xl font-bold text-slate-100 mt-2">{{ usersStore.users.length }}</p>
+          <p class="text-5xl font-extrabold text-white">{{ usersStore.users.length }}</p>
+          <p class="text-sm text-slate-500 mt-1">Comptes enregistrés</p>
         </router-link>
       </div>
 
-      <!-- 3. Quick Actions Panel -->
-      <div>
-        <h3 class="text-lg font-semibold text-white mb-4">Actions Rapides</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <router-link to="/admin/movies" class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:bg-slate-700/50 hover:border-slate-600 transition-all transform hover:-translate-y-1 flex flex-col items-center justify-center text-slate-300 font-medium text-center">
-            <i class="fa-solid fa-clapperboard text-xl mb-2"></i>
-            <span>Gérer les Films</span>
-          </router-link>
-          <router-link to="/admin/sessions" class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:bg-slate-700/50 hover:border-slate-600 transition-all transform hover:-translate-y-1 flex flex-col items-center justify-center text-slate-300 font-medium text-center">
-            <i class="fa-solid fa-calendar-days text-xl mb-2"></i>
-            <span>Gérer les Séances</span>
-          </router-link>
-          <router-link to="/admin/users" class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:bg-slate-700/50 hover:border-slate-600 transition-all transform hover:-translate-y-1 flex flex-col items-center justify-center text-slate-300 font-medium text-center">
-            <i class="fa-solid fa-users-cog text-xl mb-2"></i>
-            <span>Gérer les Utilisateurs</span>
-          </router-link>
-           <button @click="goToUsersAndCreate" class="bg-blue-600/20 border-blue-500/30 text-blue-300 hover:bg-blue-600/30 rounded-xl p-6 shadow-lg transition-all transform hover:-translate-y-1 flex flex-col items-center justify-center font-medium text-center">
-            <i class="fa-solid fa-user-plus text-xl mb-2"></i>
-            <span>Créer un Utilisateur</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 4. Data-Dense Panels -->
+      <!-- Recent Activity Panels -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Recent Users -->
-        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-          <div class="p-5 border-b border-slate-700 flex justify-between items-center">
-            <h3 class="font-semibold text-slate-100">Derniers Utilisateurs Inscrits</h3>
-            <router-link to="/admin/users" class="text-xs text-blue-400 hover:text-blue-300 transition-colors">
-              Voir tout
+        <!-- Recent Users Panel -->
+        <div class="bg-cinema-darkAlt rounded-xl border border-cinema-dark overflow-hidden shadow-lg">
+          <div class="p-5 border-b border-cinema-dark flex justify-between items-center">
+            <h3 class="font-semibold text-slate-100 text-lg">Derniers Utilisateurs Inscrits</h3>
+            <router-link to="/admin/users" class="text-sm text-cinema-accent hover:text-cinema-accentLight transition-colors flex items-center gap-1">
+              Voir tout <i class="fa-solid fa-arrow-right-long text-xs"></i>
             </router-link>
           </div>
           <div class="p-0">
              <table class="w-full text-left text-sm">
+              <thead class="bg-cinema-dark text-xs text-slate-400 uppercase font-medium border-b border-cinema-dark">
+                <tr>
+                  <th class="px-5 py-3">Nom Complet</th>
+                  <th class="px-5 py-3">Email</th>
+                  <th class="px-5 py-3 text-right">Rôle</th>
+                </tr>
+              </thead>
               <tbody class="divide-y divide-slate-700">
                 <tr v-for="user in recentUsers" :key="user.id" class="hover:bg-slate-700/30 transition-colors">
                   <td class="px-5 py-3">
                     <p class="font-medium text-slate-200">{{ user.first_name }} {{ user.last_name }}</p>
-                    <p class="text-xs text-slate-400">{{ user.email }}</p>
                   </td>
+                  <td class="px-5 py-3 text-xs text-slate-400">{{ user.email }}</td>
                   <td class="px-5 py-3 text-right">
-                     <span 
+                     <span
                       class="px-2 py-1 rounded-full text-xs font-medium"
                       :class="user.role === 'admin' ? 'bg-purple-500/20 text-purple-300' : 'bg-sky-500/20 text-sky-300'"
                     >
@@ -89,23 +75,29 @@
                   </td>
                 </tr>
                  <tr v-if="usersStore.users.length === 0">
-                    <td colspan="2" class="text-center py-6 text-slate-400">Aucun utilisateur.</td>
+                    <td colspan="3" class="text-center py-6 text-slate-400">Aucun utilisateur récent.</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
         
-        <!-- Upcoming Sessions -->
-        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-          <div class="p-5 border-b border-slate-700 flex justify-between items-center">
-            <h3 class="font-semibold text-slate-100">Séances à venir</h3>
-            <router-link to="/admin/sessions" class="text-xs text-blue-400 hover:text-blue-300 transition-colors">
-              Voir tout
+        <!-- Upcoming Sessions Panel -->
+        <div class="bg-cinema-darkAlt rounded-xl border border-cinema-dark overflow-hidden shadow-lg">
+          <div class="p-5 border-b border-cinema-dark flex justify-between items-center">
+            <h3 class="font-semibold text-slate-100 text-lg">Prochaines Séances</h3>
+            <router-link to="/admin/sessions" class="text-sm text-cinema-accent hover:text-cinema-accentLight transition-colors flex items-center gap-1">
+              Voir tout <i class="fa-solid fa-arrow-right-long text-xs"></i>
             </router-link>
           </div>
           <div class="p-0">
             <table class="w-full text-left text-sm">
+              <thead class="bg-cinema-dark text-xs text-slate-400 uppercase font-medium border-b border-cinema-dark">
+                <tr>
+                  <th class="px-5 py-3">Film / Salle</th>
+                  <th class="px-5 py-3 text-right">Date / Heure</th>
+                </tr>
+              </thead>
               <tbody class="divide-y divide-slate-700">
                 <tr v-for="session in upcomingSessions" :key="session.id" class="hover:bg-slate-700/30 transition-colors">
                   <td class="px-5 py-3">
@@ -148,17 +140,17 @@ const sessionsStore = useSessionsStore()
 onMounted(() => {
   if (moviesStore.movies.length === 0) moviesStore.fetchMovies()
   if (usersStore.users.length === 0) usersStore.fetchUsers()
-  if (sessionsStore.sessions.length === 0) sessionsStore.fetchSessions()
+  if (sessionsStore.sessions.length === 0) sessionsStore.fetchAllSessions()
 })
 
 // Computed property for recent users (e.g., last 5)
 const recentUsers = computed(() => {
-  return [...usersStore.users].sort((a, b) => b.id - a.id).slice(0, 5)
+  return [...(usersStore.users || [])].sort((a, b) => b.id - a.id).slice(0, 5)
 })
 
 // Computed property for upcoming sessions
 const upcomingSessions = computed(() => {
-    return [...sessionsStore.sessions]
+    return [...(sessionsStore.sessions || [])]
         .filter(s => new Date(s.date) >= new Date())
         .sort((a, b) => new Date(a.date) - new Date(b.date))
         .slice(0, 5)
@@ -174,11 +166,4 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('fr-FR', options);
 }
 
-// Special navigation function for create button
-const goToUsersAndCreate = () => {
-    // This is a placeholder for now. A better implementation would
-    // use a global event bus or a query param to trigger the modal
-    // automatically on the users page.
-    router.push('/admin/users');
-}
 </script>

@@ -17,8 +17,8 @@ export const useUsersStore = defineStore('users', {
                 const response = await authService.adminGetUsers()
                 this.users = response.data
             } catch (error) {
-                this.error = error.response?.data?.message || error.message
-                console.error('Erreur lors du chargement des utilisateurs:', error)
+                this.error = error.response?.data?.message || error.message || 'Une erreur inconnue est survenue.'
+                console.error('Erreur lors du chargement des utilisateurs:', error.response?.data || error.message, error)
             } finally {
                 this.loading = false
             }

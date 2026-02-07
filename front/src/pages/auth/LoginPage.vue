@@ -130,19 +130,16 @@ const handleSubmit = async () => {
 
   try {
     await authStore.login(formData.value.email, formData.value.password)
-
-    // Log pour le débogage
-    console.log('Rôle reçu après connexion :', authStore.role);
     
-    // Redirection selon le rôle
+    // Redirection après connexion réussie
     if (authStore.isAdmin) {
       router.push('/admin/dashboard')
     } else {
-      // Les clients reviennent à l'accueil
       router.push('/')
     }
   } catch (err) {
-    error.value = err.response?.data?.message || err.message || 'Identifiants incorrects'
+    // L'erreur est déjà traitée et formatée dans le store, on la récupère simplement.
+    error.value = authStore.error
   } finally {
     loading.value = false
   }

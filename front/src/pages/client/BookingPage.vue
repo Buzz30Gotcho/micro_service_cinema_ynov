@@ -142,27 +142,35 @@ import Header from '@/components/common/Header.vue'
 import Footer from '@/components/common/Footer.vue'
 import { useMoviesStore } from '@/stores/movies.store'
 import { useBookingsStore } from '@/stores/bookings.store'
+import { useSessionsStore } from '@/stores/sessions.store' // Import sessions store
+import { storeToRefs } from 'pinia' // Import storeToRefs
 
 const route = useRoute()
 const router = useRouter()
 const moviesStore = useMoviesStore()
 const bookingsStore = useBookingsStore()
+const sessionsStore = useSessionsStore() // Initialize sessions store
+
+// Get reactive access to all sessions from the store
+const { sessions: allSessions } = storeToRefs(sessionsStore)
 
 const bookingStep = ref(1)
 const selectedMovie = ref(null)
 const selectedSession = ref(null)
 const selectedSeats = ref(new Set())
 
-// Utilise les sessions du film sélectionné directement depuis le store de films (solution temporaire)
+// Filter sessions from the sessionsStore based on the selected movie
 const availableSessions = computed(() => {
-  return selectedMovie.value?.sessions || []
-})
+  if (!selectedMovie.value || !allSessions.value) return [];
+  return allSessions.value.filter(session => session.movieId === selectedMovie.value.id);
+});
 
-// Charge les films au montage de la page et gère le movieId de l'URL
+// Charge les films et toutes les sessions au montage de la page et gère le movieId de l'URL
 onMounted(async () => {
   if (moviesStore.movies.length === 0) {
     await moviesStore.fetchMovies()
   }
+  await sessionsStore.fetchAllSessions() // Fetch all sessions
 
   const movieIdFromUrl = route.query.movieId
   if (movieIdFromUrl) {

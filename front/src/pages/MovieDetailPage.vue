@@ -160,7 +160,7 @@ const similarMovies = computed(() => {
 })
 
 // Navigation functions
-const goBack = () => router.push('/films')
+const goBack = () => router.go(-1)
 const goToBooking = () => {
   if (movie.value) {
     router.push(`/client/booking?movieId=${movie.value.id}`)

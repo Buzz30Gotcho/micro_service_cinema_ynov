@@ -1,42 +1,40 @@
 import { defineStore } from 'pinia'
+import { useRouter } from 'vue-router'
 import authService from '@/api/auth.service'
 
 export const useAuthStore = defineStore('auth', {
+    // STATE: User state is now transient (no localStorage)
     state: () => ({
-        user: null,
-        users: [], // Pour la liste des utilisateurs dans le panel admin
-        role: localStorage.getItem('role') || null,
-        isAuthenticated: false,
-        loading: false,
+                user: null,
+                users: [],
+                isAuthenticated: false,
+                isAdmin: false,        loading: false,
         error: null
     }),
 
     getters: {
-        isAdmin: (state) => state.role === 'admin' || state.role === 'Administrateur',
-        isClient: (state) => state.role === 'client' || state.role === 'Client',
-        currentUser: (state) => state.user
+        currentUser: (state) => state.user,
+        isAuthenticated: (state) => !!state.user
     },
 
     actions: {
         async login(email, password) {
             this.loading = true
             this.error = null
+
             try {
-                // S'authentifier et récupérer le profil complet de l'utilisateur, incluant le rôle.
-                // Le backend est censé renvoyer toutes les données nécessaires dans la réponse de login.
-                const response = await authService.login(email, password)
-
-                // Mettre à jour le store avec les données reçues.
-                this.user = response.data.user
-                this.role = response.data.user.role
-                this.isAuthenticated = true
-
-                localStorage.setItem('role', response.data.user.role)
-                localStorage.setItem('user', JSON.stringify(response.data.user))
-
-                return response.data
+                await authService.login(email, password)
+                await this.fetchProfile()
             } catch (error) {
-                this.error = error.response?.data?.message || error.message
+                this.error =
+                    error.response?.data?.error ||
+                    error.response?.data?.message ||
+                    'Email ou mot de passe incorrect'
+
+                this.user = null
+                this.isAuthenticated = false
+                this.isAdmin = false
+
                 throw error
             } finally {
                 this.loading = false
@@ -56,21 +54,21 @@ export const useAuthStore = defineStore('auth', {
                 this.loading = false
             }
         },
-        async logout() {
+
+        async logout(router) {
             this.loading = true
             try {
                 await authService.logout()
             } catch (error) {
-                console.error(error)
+                console.error('Erreur lors de la déconnexion API:', error)
             } finally {
                 this.user = null
-                this.role = null
                 this.isAuthenticated = false
-
-                localStorage.removeItem('role')
-                localStorage.removeItem('user')
-
+                this.isAdmin = false
                 this.loading = false
+                if (router) {
+                    router.push('/login')
+                }
             }
         },
 
@@ -100,17 +98,32 @@ export const useAuthStore = defineStore('auth', {
                 this.loading = false
             }
         },
+
         async fetchProfile() {
             this.loading = true
-            this.error = null
             try {
                 const response = await authService.getProfile()
-                this.user = response.data
+                let userData = response.data.user || response.data;
+
+                if (userData.first_name) {
+                    userData.firstName = userData.first_name;
+                    delete userData.first_name;
+                }
+                if (userData.last_name) {
+                    userData.lastName = userData.last_name;
+                    delete userData.last_name;
+                }
+
+                this.user = userData;
                 this.isAuthenticated = true
-                return response.data
+                const role = this.user.role
+                this.isAdmin = role === 'admin' || role === 'Administrateur'
             } catch (error) {
-                this.error = error.message
-                console.error(error)
+                console.error('Erreur lors de la récupération du profil:', error)
+                this.user = null
+                this.isAuthenticated = false
+                this.isAdmin = false
+                throw error
             } finally {
                 this.loading = false
             }
@@ -120,9 +133,18 @@ export const useAuthStore = defineStore('auth', {
             this.error = null
             try {
                 const response = await authService.updateUser(userData)
-                this.user = response.data
-                localStorage.setItem('user', JSON.stringify(response.data))
-                return response.data
+                let updatedUser = response.data.user || response.data;
+
+                if (updatedUser.first_name) {
+                    updatedUser.firstName = updatedUser.first_name;
+                    delete updatedUser.first_name;
+                }
+                if (updatedUser.last_name) {
+                    updatedUser.lastName = updatedUser.last_name;
+                    delete updatedUser.last_name;
+                }
+
+                this.user = updatedUser;
             } catch (error) {
                 this.error = error.response?.data?.message || error.message
                 throw error
@@ -189,17 +211,15 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        initializeAuth() {
-            const userStr = localStorage.getItem('user')
-            const role = localStorage.getItem('role')
-
-            if (userStr) {
-                this.user = JSON.parse(userStr)
-                this.isAuthenticated = true
-            }
-
-            if (role) {
-                this.role = role
+        // INITIALIZEAUTH: Always tries to fetch the user profile now
+        async initializeAuth() {
+            try {
+                await this.fetchProfile()
+            } catch (error) {
+                console.log('Initialisation échouée, aucune session active ou expirée.')
+                this.user = null
+                this.isAuthenticated = false
+                this.isAdmin = false
             }
         }
     }

@@ -25,10 +25,10 @@ export const authService = {
     logout: () => http.post('auth/logout'),
 
     // Récupérer le profil de l'utilisateur connecté
-    getProfile: () => http.get('auth/user'),
+    getProfile: () => http.get('auth/me'),
 
     // Modifier le user
-    updateUser: (userData) => http.post('auth/update', userData),
+    updateUser: (userData) => http.patch('auth/update', userData),
 
     // mot de passe oublié
     forgotPassword: (email) => http.post('/auth/forgot', { email }),

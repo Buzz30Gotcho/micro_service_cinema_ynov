@@ -224,10 +224,19 @@
 
         <div class="space-y-4 mb-6">
           <div>
-            <label class="text-sm text-slate-400 block mb-2">Nom complet</label>
+            <label class="text-sm text-slate-400 block mb-2">Prénom</label>
             <input
               type="text"
-              v-model="editForm.name"
+              v-model="editForm.firstName"
+              class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+            />
+          </div>
+
+          <div>
+            <label class="text-sm text-slate-400 block mb-2">Nom</label>
+            <input
+              type="text"
+              v-model="editForm.lastName"
               class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
             />
           </div>
@@ -237,16 +246,8 @@
             <input
               type="email"
               v-model="editForm.email"
-              class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
-            />
-          </div>
-
-          <div>
-            <label class="text-sm text-slate-400 block mb-2">Téléphone</label>
-            <input
-              type="tel"
-              v-model="editForm.phone"
-              class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+              disabled
+              class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-slate-400 cursor-not-allowed"
             />
           </div>
         </div>
@@ -267,34 +268,65 @@
         </div>
       </div>
     </div>
+
+    <Toast 
+      :visible="toast.visible"
+      :title="toast.title"
+      :message="toast.message"
+      :type="toast.type"
+      @close="toast.visible = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
 import Header from '@/components/common/Header.vue'
 import Footer from '@/components/common/Footer.vue'
+import Toast from '@/components/common/Toast.vue'
 
 const authStore = useAuthStore()
 
-// Mock user data
+// Toast state
+const toast = ref({
+  visible: false,
+  title: '',
+  message: '',
+  type: 'success',
+});
+
+function showToast(title, message, type = 'success') {
+  toast.value = { visible: true, title, message, type };
+}
+
+// Local user state, initialized from the store
 const user = ref({
-  name: authStore.currentUser?.name || 'John Doe',
-  email: authStore.currentUser?.email || 'user@test.com',
-  phone: '+33 6 12 34 56 78',
-  memberSince: 'Janvier 2024',
-  points: 450,
-  moviesWatched: 24,
-  favoriteGenre: 'Science-Fiction'
-})
+  firstName: authStore.currentUser?.firstName || '',
+  lastName: authStore.currentUser?.lastName || '',
+  email: authStore.currentUser?.email || '',
+  name: `${authStore.currentUser?.firstName || ''} ${authStore.currentUser?.lastName || ''}`.trim(),
+  memberSince: authStore.currentUser?.memberSince || 'Janvier 2024',
+  points: authStore.currentUser?.points || 450,
+  moviesWatched: authStore.currentUser?.moviesWatched || 24,
+  favoriteGenre: authStore.currentUser?.favoriteGenre || 'Science-Fiction',
+});
+
+// Keep the local user ref in sync with the store in case it's changed elsewhere
+watch(() => authStore.currentUser, (newUser) => {
+  if (newUser) {
+    user.value.firstName = newUser.firstName;
+    user.value.lastName = newUser.lastName;
+    user.value.email = newUser.email;
+    user.value.name = `${newUser.firstName || ''} ${newUser.lastName || ''}`.trim();
+  }
+}, { deep: true });
+
 
 const userInitials = computed(() => {
-  return user.value.name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
+  const firstInitial = user.value.firstName ? user.value.firstName[0] : '';
+  const lastInitial = user.value.lastName ? user.value.lastName[0] : '';
+  return (firstInitial + lastInitial).toUpperCase();
 })
 
 // Tabs
@@ -302,56 +334,11 @@ const activeTab = ref('upcoming')
 
 // Mock bookings data
 const bookings = ref([
-  {
-    id: 1,
-    movieTitle: 'Hyperdrive',
-    date: '21 Janvier 2026',
-    time: '21:00',
-    room: 5,
-    seats: 2,
-    total: '25.00',
-    status: 'upcoming'
-  },
-  {
-    id: 2,
-    movieTitle: 'Nocturne',
-    date: '23 Janvier 2026',
-    time: '19:30',
-    room: 3,
-    seats: 3,
-    total: '37.50',
-    status: 'upcoming'
-  },
-  {
-    id: 3,
-    movieTitle: 'Lumières de la Ville',
-    date: '15 Janvier 2026',
-    time: '20:45',
-    room: 3,
-    seats: 2,
-    total: '25.00',
-    status: 'past'
-  },
-  {
-    id: 4,
-    movieTitle: 'Océan Bleu',
-    date: '10 Janvier 2026',
-    time: '15:30',
-    room: 4,
-    seats: 1,
-    total: '12.50',
-    status: 'past'
-  },
-  {
-    id: 5,
-    movieTitle: 'Atlas',
-    date: '5 Janvier 2026',
-    time: '18:00',
-    room: 2,
-    seats: 4,
-    total: '50.00',
-    status: 'past'
-  }
+  { id: 1, movieTitle: 'Hyperdrive', date: '21 Janvier 2026', time: '21:00', room: 5, seats: 2, total: '25.00', status: 'upcoming' },
+  { id: 2, movieTitle: 'Nocturne', date: '23 Janvier 2026', time: '19:30', room: 3, seats: 3, total: '37.50', status: 'upcoming' },
+  { id: 3, movieTitle: 'Lumières de la Ville', date: '15 Janvier 2026', time: '20:45', room: 3, seats: 2, total: '25.00', status: 'past' },
+  { id: 4, movieTitle: 'Océan Bleu', date: '10 Janvier 2026', time: '15:30', room: 4, seats: 1, total: '12.50', status: 'past' },
+  { id: 5, movieTitle: 'Atlas', date: '5 Janvier 2026', time: '18:00', room: 2, seats: 4, total: '50.00', status: 'past' }
 ])
 
 const upcomingBookings = computed(() => {
@@ -365,17 +352,38 @@ const pastBookings = computed(() => {
 // Edit profile
 const showEditModal = ref(false)
 const editForm = ref({
-  name: user.value.name,
-  email: user.value.email,
-  phone: user.value.phone
+  firstName: '',
+  lastName: '',
+  email: ''
 })
 
-const saveProfile = () => {
-  user.value.name = editForm.value.name
-  user.value.email = editForm.value.email
-  user.value.phone = editForm.value.phone
-  showEditModal.value = false
-  alert('✅ Profil mis à jour avec succès !')
+watch(showEditModal, (newValue) => {
+  if (newValue) {
+    editForm.value = {
+      firstName: user.value.firstName,
+      lastName: user.value.lastName,
+      email: user.value.email
+    }
+  }
+})
+
+const saveProfile = async () => {
+  try {
+    const userData = {
+      first_name: editForm.value.firstName,
+      last_name: editForm.value.lastName,
+    };
+    await authStore.updateUser(userData);
+
+    // After successful update, the store's `currentUser` is updated.
+    // The watch above will catch the change and update our local `user` ref.
+    showEditModal.value = false;
+    showToast('Succès', 'Votre profil a été mis à jour avec succès.');
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || error.message || 'Veuillez réessayer.';
+    console.error('Failed to update profile:', error);
+    showToast('Erreur', `La mise à jour du profil a échoué: ${errorMessage}`, 'error');
+  }
 }
 
 // Actions

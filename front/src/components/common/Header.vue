@@ -71,9 +71,19 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const initials = computed(() => {
-  const name = authStore.currentUser?.name
-  if (!name) return '?'
-  return name.split(' ').map(n => n[0]).join('').toUpperCase()
+  const firstName = authStore.currentUser?.firstName;
+  const lastName = authStore.currentUser?.lastName;
+
+  if (!firstName && !lastName) return ''; // Return empty string if no name parts are available
+
+  let initialStr = '';
+  if (firstName) {
+    initialStr += firstName[0];
+  }
+  if (lastName) {
+    initialStr += lastName[0];
+  }
+  return initialStr.toUpperCase();
 })
 
 const goToLogin = () => {
@@ -85,8 +95,7 @@ const goToRegister = () => {
 }
 
 const handleLogout = async () => {
-  await authStore.logout()
-  router.push('/')
+  await authStore.logout(router)
 }
 const goTopagehome = async () => {
   router.push('/')
