@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Instance Folder
+instance/
+.webassets-cache
+
+# DB
+*.sqlite3
+app.db
+
+# Docker
+.dockerignore
+Dockerfile
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea/
+.vscode/

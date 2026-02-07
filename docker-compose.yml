@@ -24,8 +24,6 @@ services:
     restart: always
     env_file:
       - ./services/auth/.env
-    ports:
-      - "27017:27017"
     volumes:
       - mongo_data:/data/db
 
@@ -65,8 +63,6 @@ services:
       DB_PASSWORD: catalog_pass
     ports:
       - "4001:4001"
-
-
 
   booking:
     build: ./services/booking
