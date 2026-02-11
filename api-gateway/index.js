@@ -19,7 +19,7 @@ app.options('*', cors({
 
 // --- Proxy vers microservices
 const services = [
-    { route: '/auth', target: 'http://127.0.0.1:5000' },
+    { route: '/auth', target: 'http://127.0.0.1:4002' },
     { route: '/catalogue', target: 'http://localhost:8001' },
     { route: '/sessions', target: 'http://localhost:8002' },
 ];
