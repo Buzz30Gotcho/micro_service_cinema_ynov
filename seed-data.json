@@ -1,0 +1,69 @@
+{
+  "movies": [
+    {
+      "title": "Inception",
+      "genre": "Science-Fiction",
+      "duration": 148,
+      "rating": 4.8,
+      "year": 2020,
+      "ageRating": "12+",
+      "image": "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=800&q=80",
+      "description": "Un voleur de secrets qui possède l'expertise rare d'extraire des secrets de l'inconscient d'une personne pendant qu'elle rêve.",
+      "director": "Christopher Nolan",
+      "synopsis": "Un thriller psychologique brillant sur la nature de la réalité."
+    },
+    {
+      "title": "Interstellar",
+      "genre": "Science-Fiction",
+      "duration": 169,
+      "rating": 4.7,
+      "year": 2023,
+      "ageRating": "13+",
+      "image": "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80",
+      "description": "Une équipe d'explorateurs voyage à travers un trou de ver de l'espace pour assurer la survie de l'humanité.",
+      "director": "Christopher Nolan",
+      "synopsis": "Une épopée spatiale ambitieuse et émouvante."
+    },
+    {
+      "title": "Dune",
+      "genre": "Science-Fiction",
+      "duration": 156,
+      "rating": 4.5,
+      "year": 2024,
+      "ageRating": "12+",
+      "image": "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80",
+      "description": "Paul Atreides, fils d'une famille noble, doit se rendre sur la planète la plus dangereuse de l'univers pour assurer l'avenir de sa famille et de lui-même.",
+      "director": "Denis Villeneuve",
+      "synopsis": "L'adaptation épique du roman culte de Frank Herbert."
+    }
+  ],
+  "sessions": [
+    {
+      "nameMovie": "Inception",
+      "numberPlace": 100,
+      "hourStart": "19:00",
+      "hourEnd": "21:28",
+      "dateSeance": "2026-02-12",
+      "salleId": "Salle 4",
+      "price": 13.50
+    },
+    {
+      "nameMovie": "Interstellar",
+      "numberPlace": 120,
+      "hourStart": "16:00",
+      "hourEnd": "18:49",
+      "dateSeance": "2026-02-12",
+      "salleId": "Salle 2",
+      "price": 14.00
+    },
+    {
+      "nameMovie": "Dune",
+      "numberPlace": 150,
+      "hourStart": "20:30",
+      "hourEnd": "23:06",
+      "dateSeance": "2026-02-13",
+      "salleId": "Salle 5",
+      "price": 15.00
+    }
+  ]
+}
