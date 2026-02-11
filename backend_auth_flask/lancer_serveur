@@ -1,9 +1,0 @@
-lancer votre application Flask en mode développement avec Docker:
-1- Reconstruire votre image Docker : 
-docker build -t backend-auth-dev
-
-2- Lancer le conteneur en montant vos volumes de code
- docker run -p 5000:5000 -v "$(pwd)/app:/app/app" -v "$(pwd)/app/config.py:/app/app/config.py" backend-auth-dev
- "$(pwd)/app:/app/app" -v "$(pwd)/app/config.py:/app/app/config.py" backend-auth-dev : c'est pour recahrger automatiquement , tout les modifs locals seront visible par le serveur 
- 
- votre application sera accessible sur http://localhost:5000 et se rechargera automatiquement à chaque modification de vos fichiers Python.
