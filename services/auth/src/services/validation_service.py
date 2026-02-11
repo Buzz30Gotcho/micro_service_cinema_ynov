@@ -1,8 +1,8 @@
 from typing import Dict, Tuple, List
 
 USER_SCHEMA_REGISTER = {
-    "required": ["email", "password"],
-    "optional": ["first_name", "last_name"],
+    "required": ["email", "password", "password_confirm"],
+    "optional": ["first_name", "last_name", "role"],
 }
 
 USER_SCHEMA_LOGIN = {
@@ -85,7 +85,15 @@ def validate_payload(payload: dict, schema: Dict[str, List[str]]) -> Tuple[bool,
 
 def validate_user_register(payload: dict) -> Tuple[bool, Dict]:
     """Valide un payload pour l'enregistrement d'un nouvel utilisateur."""
-    return validate_payload(payload, USER_SCHEMA_REGISTER)
+    is_valid,error = validate_payload(payload, USER_SCHEMA_REGISTER)
+    if not is_valid:
+        return False, error
+    # verifier que password et password_confirm sont identiques
+    if payload.get("password") != payload.get("password_confirm"):
+        return False, {"error": "Les mots de passe ne correspondent pas."}
+    if len(payload.get("password", "")) < 3:
+        return False, {"error": "Le mot de passe doit contenir au moins 8 caractères."}
+    return True, {}
 
 
 def validate_user_login(payload: dict) -> Tuple[bool, Dict]:
