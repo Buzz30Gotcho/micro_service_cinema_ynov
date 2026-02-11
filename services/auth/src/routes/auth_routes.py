@@ -144,7 +144,7 @@ def me():
     return response, 200
 
 
-@auth_bp.route("/me", methods=["PATCH"])
+@auth_bp.route("/update", methods=["PATCH"])
 @jwt_required()
 def update_me():
     identity = get_jwt_identity()
