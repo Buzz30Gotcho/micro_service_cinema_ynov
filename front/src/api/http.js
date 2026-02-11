@@ -8,9 +8,8 @@ const http = axios.create({
     withCredentials: true
 })
 
+
 // --- Intercepteur de REQUÊTE ---
-// Le header Authorization n'est plus nécessaire, le navigateur gère les cookies httpOnly
-/*
 http.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token')
@@ -23,23 +22,11 @@ http.interceptors.request.use(
         return Promise.reject(error)
     }
 )
-*/
 
 // --- Intercepteur de RÉPONSE ---
 // Gère le renouvellement du token et les erreurs 401
-let isRefreshing = false
-let failedQueue = []
-
-const processQueue = (error, token = null) => {
-    failedQueue.forEach(prom => {
-        if (error) {
-            prom.reject(error)
-        } else {
-            prom.resolve(token)
-        }
-    })
-    failedQueue = []
-}
+// --- Intercepteur de RÉPONSE ---
+// Gère le renouvellement du token et les erreurs 401
 
 http.interceptors.response.use(
     (response) => response,
@@ -59,35 +46,17 @@ http.interceptors.response.use(
 
         // ✅ CAS 2 : TOKEN EXPIRÉ SUR UNE ROUTE PROTÉGÉE
         // et n'est pas déjà une requête de rafraîchissement
+        // ✅ CAS 2 : TOKEN EXPIRÉ SUR UNE ROUTE PROTÉGÉE
+        // ✅ CAS 2 : TOKEN EXPIRÉ SUR UNE ROUTE PROTÉGÉE
         if (status === 401 && !originalRequest._retry) {
-            if (isRefreshing) {
-                return new Promise(function (resolve, reject) {
-                    failedQueue.push({ resolve, reject })
-                })
-                    .then(token => {
-                                            return http(originalRequest)                    })
-                    .catch(err => {
-                        return Promise.reject(err)
-                    })
+            // Éviter la boucle infinie : si on est déjà en train de se déconnecter, on arrête
+            if (url.includes('auth/logout')) {
+                return Promise.reject(error)
             }
 
             originalRequest._retry = true
-            isRefreshing = true
-
-            return new Promise(async (resolve, reject) => {
-                try {
-                    await authStore.refreshToken() // Assuming this updates the tokens internally
-                    isRefreshing = false
-                    processQueue(null)
-                    resolve(http(originalRequest))
-                } catch (refreshError) {
-                    processQueue(refreshError)
-                    await authStore.logout() // Call logout only if refresh fails
-                    reject(refreshError)
-                } finally {
-                    isRefreshing = false
-                }
-            })
+            await authStore.logout()
+            return Promise.reject(error)
         }
         return Promise.reject(error)
     }

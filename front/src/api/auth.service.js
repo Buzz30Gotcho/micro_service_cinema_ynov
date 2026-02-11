@@ -35,8 +35,7 @@ export const authService = {
 
     // Réinitialiser le mot de passe
     resetPassword: (payload) => http.post('/auth/reset', payload),
-    // refresh token
-    refreshToken: () => http.post('/auth/refresh'),
+
     // ---------------------------
 
     // ADMINISTRATION DES UTILISATEURS (pour le panel admin)
