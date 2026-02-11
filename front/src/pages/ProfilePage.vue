@@ -26,16 +26,12 @@
 
             <div class="space-y-3 text-sm">
               <div class="flex justify-between">
-                <span class="text-slate-400">Membre depuis</span>
-                <span class="font-semibold">{{ user.memberSince }}</span>
+                <span class="text-slate-400">Rôle</span>
+                <span class="font-semibold">{{ authStore.isAdmin ? 'Administrateur' : 'Client' }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-400">Réservations</span>
                 <span class="font-semibold">{{ bookings.length }}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-400">Points fidélité</span>
-                <span class="font-semibold text-yellow-400">{{ user.points }} pts</span>
               </div>
             </div>
 
@@ -54,15 +50,15 @@
               <div class="flex items-center gap-3">
                 <span class="text-2xl">🎬</span>
                 <div>
-                  <div class="font-semibold">{{ user.moviesWatched }}</div>
-                  <div class="text-slate-400 text-xs">Films vus</div>
+                  <div class="font-semibold">{{ pastBookings.length }}</div>
+                  <div class="text-slate-400 text-xs">Séances passées</div>
                 </div>
               </div>
               <div class="flex items-center gap-3">
-                <span class="text-2xl">⭐</span>
+                <span class="text-2xl">🎟️</span>
                 <div>
-                  <div class="font-semibold">{{ user.favoriteGenre }}</div>
-                  <div class="text-slate-400 text-xs">Genre préféré</div>
+                  <div class="font-semibold">{{ upcomingBookings.length }}</div>
+                  <div class="text-slate-400 text-xs">Réservations à venir</div>
                 </div>
               </div>
             </div>
@@ -280,13 +276,15 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
+import { useBookingsStore } from '@/stores/bookings.store'
 import Header from '@/components/common/Header.vue'
 import Footer from '@/components/common/Footer.vue'
 import Toast from '@/components/common/Toast.vue'
 
 const authStore = useAuthStore()
+const bookingsStore = useBookingsStore()
 
 // Toast state
 const toast = ref({
@@ -306,13 +304,9 @@ const user = ref({
   lastName: authStore.currentUser?.lastName || '',
   email: authStore.currentUser?.email || '',
   name: `${authStore.currentUser?.firstName || ''} ${authStore.currentUser?.lastName || ''}`.trim(),
-  memberSince: authStore.currentUser?.memberSince || 'Janvier 2024',
-  points: authStore.currentUser?.points || 450,
-  moviesWatched: authStore.currentUser?.moviesWatched || 24,
-  favoriteGenre: authStore.currentUser?.favoriteGenre || 'Science-Fiction',
 });
 
-// Keep the local user ref in sync with the store in case it's changed elsewhere
+// Keep the local user ref in sync with the store
 watch(() => authStore.currentUser, (newUser) => {
   if (newUser) {
     user.value.firstName = newUser.firstName;
@@ -332,14 +326,36 @@ const userInitials = computed(() => {
 // Tabs
 const activeTab = ref('upcoming')
 
-// Mock bookings data
-const bookings = ref([
-  { id: 1, movieTitle: 'Hyperdrive', date: '21 Janvier 2026', time: '21:00', room: 5, seats: 2, total: '25.00', status: 'upcoming' },
-  { id: 2, movieTitle: 'Nocturne', date: '23 Janvier 2026', time: '19:30', room: 3, seats: 3, total: '37.50', status: 'upcoming' },
-  { id: 3, movieTitle: 'Lumières de la Ville', date: '15 Janvier 2026', time: '20:45', room: 3, seats: 2, total: '25.00', status: 'past' },
-  { id: 4, movieTitle: 'Océan Bleu', date: '10 Janvier 2026', time: '15:30', room: 4, seats: 1, total: '12.50', status: 'past' },
-  { id: 5, movieTitle: 'Atlas', date: '5 Janvier 2026', time: '18:00', room: 2, seats: 4, total: '50.00', status: 'past' }
-])
+// Fetch real bookings on mount
+onMounted(() => {
+  bookingsStore.fetchUserBookings()
+})
+
+// Map reservations from the booking service to display format
+const bookings = computed(() => {
+  return (bookingsStore.bookings || []).map(b => {
+    // Parse the name field which contains "MovieTitle - Date Time"
+    const nameParts = (b.name || '').split(' - ')
+    const movieTitle = nameParts[0] || 'Réservation'
+    const dateTime = nameParts[1] || ''
+    const dateParts = dateTime.split(' ')
+    
+    // Determine if booking is upcoming or past
+    const bookingDate = b.seance?.dateSeance ? new Date(b.seance.dateSeance) : new Date()
+    const isUpcoming = bookingDate >= new Date(new Date().toDateString())
+    
+    return {
+      id: b.id,
+      movieTitle: b.seance?.nameMovie || movieTitle,
+      date: b.seance?.dateSeance || dateParts[0] || '',
+      time: b.seance?.hourStart || dateParts[1] || '',
+      room: b.seance?.salleId || 'N/A',
+      seats: b.seatNumber || '1',
+      total: b.seance?.price || '12.50',
+      status: isUpcoming ? 'upcoming' : 'past',
+    }
+  })
+})
 
 const upcomingBookings = computed(() => {
   return bookings.value.filter(b => b.status === 'upcoming')
@@ -374,9 +390,6 @@ const saveProfile = async () => {
       last_name: editForm.value.lastName,
     };
     await authStore.updateUser(userData);
-
-    // After successful update, the store's `currentUser` is updated.
-    // The watch above will catch the change and update our local `user` ref.
     showEditModal.value = false;
     showToast('Succès', 'Votre profil a été mis à jour avec succès.');
   } catch (error) {
@@ -391,10 +404,14 @@ const downloadTicket = (booking) => {
   alert(`📥 Téléchargement du billet pour ${booking.movieTitle}`)
 }
 
-const cancelBooking = (booking) => {
+const cancelBooking = async (booking) => {
   if (confirm(`Voulez-vous vraiment annuler la réservation pour "${booking.movieTitle}" ?`)) {
-    bookings.value = bookings.value.filter(b => b.id !== booking.id)
-    alert('✅ Réservation annulée avec succès')
+    try {
+      await bookingsStore.cancelBooking(booking.id)
+      showToast('Succès', 'Réservation annulée avec succès.')
+    } catch (error) {
+      showToast('Erreur', 'Erreur lors de l\'annulation.', 'error')
+    }
   }
 }
 </script>

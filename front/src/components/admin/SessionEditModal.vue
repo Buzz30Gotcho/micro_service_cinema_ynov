@@ -9,9 +9,10 @@
           
           <div>
             <label class="block text-sm font-semibold mb-1 text-slate-300">Film</label>
-            <select v-model="form.movieId" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+            <select v-model="form.nameMovie" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+              <option value="" disabled>Sélectionner un film...</option>
               <option v-if="moviesStore.loading">Chargement...</option>
-              <option v-for="movie in moviesStore.movies" :key="movie.id" :value="movie.id">
+              <option v-for="movie in moviesStore.movies" :key="movie.id" :value="movie.title">
                 {{ movie.title }}
               </option>
             </select>
@@ -35,7 +36,18 @@
             </div>
             <div>
               <label class="block text-sm font-semibold mb-1 text-slate-300">Capacité</label>
-              <input v-model="form.capacity" type="number" min="0" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
+              <input v-model.number="form.capacity" type="number" min="0" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold mb-1 text-slate-300">Prix (€)</label>
+              <input v-model.number="form.price" type="number" step="0.01" min="0" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1 text-slate-300">Heure de fin</label>
+              <input v-model="form.hourEnd" type="time" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
             </div>
           </div>
 
@@ -88,14 +100,19 @@ watch(() => props.modelValue, (newValue) => {
   error.value = '';
   if (newValue) {
     if (isEditing.value) {
-      form.value = { ...props.session };
+      form.value = {
+        ...props.session,
+        nameMovie: props.session.nameMovie || props.session.movieId || '',
+      };
     } else {
       form.value = {
-        movieId: null,
+        nameMovie: '',
         date: new Date().toISOString().split('T')[0],
         time: '14:00',
+        hourEnd: '',
         room: '',
-        capacity: 100
+        capacity: 100,
+        price: 9.50,
       };
     }
   }

@@ -125,21 +125,23 @@ const confirmDelete = async (sessionId) => {
 }
 
 onMounted(() => {
-  sessionsStore.fetchSessions()
+  sessionsStore.fetchAllSessions()
   if (moviesStore.movies.length === 0) {
     moviesStore.fetchMovies()
   }
 })
 
 const getMovieTitle = (movieId) => {
-  const movie = moviesStore.movies.find(m => m.id === movieId)
-  return movie?.title || '...'
+  // movieId is now the nameMovie string from the booking service
+  if (typeof movieId === 'string' && movieId.length > 5) return movieId
+  const movie = moviesStore.movies.find(m => m.id === movieId || m.id == movieId)
+  return movie?.title || movieId || '...'
 }
 
 const getMovieImage = (movieId) => {
-  const movie = moviesStore.movies.find(m => m.id === movieId)
-  // Utiliser une image par défaut si le film n'est pas trouvé
-  return movie?.poster_path ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` : 'https://via.placeholder.com/50x70'
+  // Try to find the movie by ID or by title (nameMovie)
+  const movie = moviesStore.movies.find(m => m.id === movieId || m.id == movieId || m.title === movieId)
+  return movie?.image || 'https://via.placeholder.com/50x70'
 }
 
 const getBookingPercentage = (session) => {

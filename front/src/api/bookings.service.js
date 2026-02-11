@@ -1,30 +1,19 @@
 // src/api/bookings.service.js
-/*
 import http from './http'
 
-// Microservice Bookings: Gestion des réservations
+// Microservice Bookings: Gestion des réservations via le booking service (NestJS)
 export const bookingsService = {
-    // Récupérer toutes les réservations (Admin)
-    getBookings: () => http.get('/bookings'),
-
-    // Récupérer les réservations de l'utilisateur connecté
-    getUserBookings: () => http.get('/bookings/my'),
+    // Récupérer toutes les réservations
+    getBookings: () => http.get('/sessions/reservation'),
 
     // Récupérer une réservation spécifique
-    getBookingById: (id) => http.get(`/bookings/${id}`),
+    getBookingById: (id) => http.get(`/sessions/reservation/${id}`),
 
     // Créer une nouvelle réservation
-    createBooking: (bookingData) => http.post('/bookings', bookingData),
-
-    // Mettre à jour une réservation
-    updateBooking: (id, bookingData) => http.put(`/bookings/${id}`, bookingData),
+    createBooking: (bookingData) => http.post('/sessions/reservation', bookingData),
 
     // Annuler une réservation
-    cancelBooking: (id) => http.delete(`/bookings/${id}`),
-
-    // Vérifier la disponibilité des places
-    checkAvailability: (sessionId, seats) => http.post(`/bookings/check-availability`, { sessionId, seats })
+    cancelBooking: (id) => http.delete(`/sessions/reservation/${id}`),
 }
 
 export default bookingsService
-*/

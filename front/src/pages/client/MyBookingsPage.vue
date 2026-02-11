@@ -21,25 +21,19 @@
           :key="booking.id"
           class="bg-slate-800 rounded-xl border border-slate-700 p-6 flex flex-col md:flex-row gap-6 items-start"
         >
-          <!-- Movie Poster -->
-          <div class="w-full md:w-32 aspect-[2/3] rounded-lg overflow-hidden flex-shrink-0">
-            <img :src="getMovieImage(booking.movieId)" class="w-full h-full object-cover">
-          </div>
-
           <!-- Booking Details -->
           <div class="flex-1">
             <div class="flex justify-between items-start">
               <div>
-                <h3 class="text-xl font-bold text-white">{{ getMovieTitle(booking.movieId) }}</h3>
+                <h3 class="text-xl font-bold text-white">{{ booking.name || 'Réservation' }}</h3>
                 <p class="text-slate-400 text-sm mt-1">
-                  {{ booking.room }} • {{ booking.dateTime }}
+                  {{ booking.seance?.salleId || 'N/A' }} • {{ booking.seance?.dateSeance || '' }} {{ booking.seance?.hourStart || '' }}
                 </p>
               </div>
               <span 
-                class="px-3 py-1 text-xs rounded-full border"
-                :class="booking.status === 'confirmed' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'"
+                class="px-3 py-1 text-xs rounded-full border bg-green-500/10 text-green-400 border-green-500/20"
               >
-                {{ booking.status === 'confirmed' ? 'Confirmé' : 'En attente' }}
+                Confirmé
               </span>
             </div>
 
@@ -47,43 +41,22 @@
             <div class="mt-6 grid grid-cols-2 gap-4 max-w-sm">
               <div class="bg-slate-900 p-3 rounded border border-slate-700">
                 <p class="text-xs text-slate-500 uppercase">Places</p>
-                <p class="text-white font-mono">{{ booking.seats?.join(', ') || 'N/A' }}</p>
+                <p class="text-white font-mono">{{ booking.seatNumber || 'N/A' }}</p>
               </div>
               <div class="bg-slate-900 p-3 rounded border border-slate-700">
                 <p class="text-xs text-slate-500 uppercase">Référence</p>
-                <p class="text-white font-mono">#{{ booking.id }}</p>
+                <p class="text-white font-mono text-xs">#{{ booking.id?.substring(0, 8) || booking.id }}</p>
               </div>
             </div>
 
             <!-- Actions -->
             <div class="mt-4 flex gap-2">
               <button 
-                @click="viewDetails(booking)"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-lg transition-colors"
-              >
-                Détails
-              </button>
-              <button 
                 @click="cancelBooking(booking.id)"
                 class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors"
               >
                 Annuler
               </button>
-            </div>
-          </div>
-
-          <!-- QR Code -->
-          <div class="flex-shrink-0 self-center">
-            <div class="w-24 h-24 bg-white p-2 rounded-lg">
-              <div 
-                class="w-full h-full bg-black opacity-80"
-                :style="{
-                  backgroundImage: 'linear-gradient(135deg, #000 25%, transparent 25%), linear-gradient(225deg, #000 25%, transparent 25%), linear-gradient(45deg, #000 25%, transparent 25%), linear-gradient(315deg, #000 25%, transparent 25%)',
-                  backgroundPosition: '10px 0, 10px 0, 0 0, 0 0',
-                  backgroundSize: '10px 10px',
-                  backgroundRepeat: 'repeat'
-                }"
-              ></div>
             </div>
           </div>
         </div>
@@ -112,43 +85,20 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import Header from '@/components/common/Header.vue'
 import Footer from '@/components/common/Footer.vue'
 import { useBookingsStore } from '@/stores/bookings.store'
-import { useMoviesStore } from '@/stores/movies.store'
 
-const router = useRouter()
 const bookingsStore = useBookingsStore()
-const moviesStore = useMoviesStore()
 
-onMounted(async () => {
-  await Promise.all([
-    bookingsStore.fetchUserBookings(),
-    moviesStore.fetchMovies()
-  ])
+onMounted(() => {
+  bookingsStore.fetchUserBookings()
 })
-
-const getMovieTitle = (movieId) => {
-  const movie = moviesStore.getMovieById(movieId)
-  return movie?.title || 'Film inconnu'
-}
-
-const getMovieImage = (movieId) => {
-  const movie = moviesStore.getMovieById(movieId)
-  return movie?.image || 'https://via.placeholder.com/100x150'
-}
-
-const viewDetails = (booking) => {
-  // TODO: Implement details view
-  alert('Détails de la réservation: ' + booking.id)
-}
 
 const cancelBooking = async (bookingId) => {
   if (confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
     try {
       await bookingsStore.cancelBooking(bookingId)
-      alert('Réservation annulée')
     } catch (error) {
       alert('Erreur: ' + error.message)
     }

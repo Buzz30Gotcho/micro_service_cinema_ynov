@@ -162,7 +162,12 @@ const selectedSeats = ref(new Set())
 // Filter sessions from the sessionsStore based on the selected movie
 const availableSessions = computed(() => {
   if (!selectedMovie.value || !allSessions.value) return [];
-  return allSessions.value.filter(session => session.movieId === selectedMovie.value.id);
+  const movieTitle = selectedMovie.value.title
+  const movieId = selectedMovie.value.id
+  return allSessions.value.filter(session => 
+    session.movieId === movieTitle || session.nameMovie === movieTitle ||
+    session.movieId == movieId || session.nameMovie == movieId
+  );
 });
 
 // Charge les films et toutes les sessions au montage de la page et gère le movieId de l'URL
@@ -233,15 +238,13 @@ const confirmBooking = async () => {
   }
 
   try {
-    // Note: createBooking est simulé dans le store pour fonctionner sans backend
+    // Map front-end booking data to reservation DTO expected by the booking service
+    // The reservation DTO needs: name (required), email, seanceId, seatNumber
+    const seatsList = Array.from(selectedSeats.value)
     await bookingsStore.createBooking({
-      movieId: selectedMovie.value.id,
-      movieTitle: selectedMovie.value.title,
-      sessionId: selectedSession.value.id, // Assurez-vous que les sessions ont des ID uniques
-      sessionTime: selectedSession.value.time,
-      sessionDate: selectedSession.value.date,
-      seats: Array.from(selectedSeats.value),
-      totalPrice: (12.50 * selectedSeats.value.size).toFixed(2)
+      name: selectedMovie.value.title + ' - ' + selectedSession.value.date + ' ' + selectedSession.value.time,
+      seanceId: selectedSession.value.id?.toString(),
+      seatNumber: seatsList.join(','),
     })
     
     // Redirection vers la page des réservations de l'utilisateur

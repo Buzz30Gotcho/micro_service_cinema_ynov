@@ -1,18 +1,23 @@
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
+  <div
+    class="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6"
+  >
     <div class="w-full max-w-md">
-
       <!-- Logo -->
       <div class="text-center mb-10">
-        <div class="w-20 h-20 mx-auto rounded-lg bg-blue-600 flex items-center justify-center text-slate-950 text-4xl font-bold shadow-lg mb-4">
+        <div
+          class="w-20 h-20 mx-auto rounded-lg bg-blue-600 flex items-center justify-center text-slate-950 text-4xl font-bold shadow-lg mb-4"
+        >
           🎬
         </div>
         <h1 class="text-3xl font-bold mb-1 text-slate-100">CENTRAL CINEMA</h1>
-        <p class="text-slate-400 text-sm">Votre cinéma en ligne</p>
+        <p class="text-slate-400 text-sm">Réservez en un click</p>
       </div>
 
       <!-- Card -->
-      <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-lg p-8">
+      <div
+        class="bg-slate-900 rounded-2xl border border-slate-800 shadow-lg p-8"
+      >
         <!-- Header -->
         <div class="text-center mb-8">
           <h2 class="text-2xl font-bold mb-2 text-slate-100">Bienvenue 👋</h2>
@@ -23,10 +28,11 @@
 
         <!-- Form -->
         <form @submit.prevent="handleSubmit" class="space-y-4">
-
           <!-- Email -->
           <div>
-            <label class="block text-sm font-semibold mb-1 text-slate-200">Adresse email</label>
+            <label class="block text-sm font-semibold mb-1 text-slate-200"
+              >Adresse email</label
+            >
             <input
               v-model="formData.email"
               type="email"
@@ -38,7 +44,9 @@
 
           <!-- Password -->
           <div>
-            <label class="block text-sm font-semibold mb-1 text-slate-200">Mot de passe</label>
+            <label class="block text-sm font-semibold mb-1 text-slate-200"
+              >Mot de passe</label
+            >
             <div class="relative">
               <input
                 v-model="formData.password"
@@ -52,19 +60,25 @@
                 @click="showPassword = !showPassword"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-400 transition"
               >
-                {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+                {{ showPassword ? "👁️" : "👁️‍🗨️" }}
               </button>
             </div>
           </div>
 
           <div class="text-right">
-            <router-link to="/forgot-password" class="text-sm text-blue-400 hover:underline">
+            <router-link
+              to="/forgot-password"
+              class="text-sm text-blue-400 hover:underline"
+            >
               Mot de passe oublié ?
             </router-link>
           </div>
 
           <!-- Error -->
-          <div v-if="error" class="p-3 bg-red-900/20 border border-red-500/30 rounded text-red-400 text-sm flex items-center gap-2">
+          <div
+            v-if="error"
+            class="p-3 bg-red-900/20 border border-red-500/30 rounded text-red-400 text-sm flex items-center gap-2"
+          >
             ⚠️ <span>{{ error }}</span>
           </div>
 
@@ -77,26 +91,37 @@
             <span v-if="!loading">🔐 Se connecter</span>
             <span v-else>⏳ Connexion en cours...</span>
           </button>
-
         </form>
 
         <!-- Pas de compte -->
         <div class="mt-6 text-center text-sm text-cinema-300">
           <p>
             Pas encore de compte ?
-            <router-link to="/register" class="text-blue-400 font-semibold ml-1 hover:underline">
+            <router-link
+              to="/register"
+              class="text-blue-400 font-semibold ml-1 hover:underline"
+            >
               Créer un compte
             </router-link>
           </p>
         </div>
 
         <!-- Demo Credentials -->
-        <div class="mt-6 p-4 bg-slate-800/50 border border-slate-700 rounded-lg text-xs text-slate-400">
-          <p class="font-semibold mb-2 text-slate-300">🧪 Identifiants de démonstration :</p>
-          <p><strong class="text-blue-400">Admin:</strong> admin@test.com / password</p>
-          <p><strong class="text-blue-400">Client:</strong> user@test.com / password</p>
+        <div
+          class="mt-6 p-4 bg-slate-800/50 border border-slate-700 rounded-lg text-xs text-slate-400"
+        >
+          <p class="font-semibold mb-2 text-slate-300">
+            🧪 Identifiants de démonstration :
+          </p>
+          <p>
+            <strong class="text-blue-400">Admin:</strong> admin@test.com /
+            password
+          </p>
+          <p>
+            <strong class="text-blue-400">Client:</strong> user@test.com /
+            password
+          </p>
         </div>
-
       </div>
 
       <!-- Footer -->
@@ -108,42 +133,42 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth.store'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth.store";
 
-const router = useRouter()
-const authStore = useAuthStore()
+const router = useRouter();
+const authStore = useAuthStore();
 
 const formData = ref({
-  email: '',
-  password: ''
-})
+  email: "",
+  password: "",
+});
 
-const showPassword = ref(false)
-const error = ref('')
-const loading = ref(false)
+const showPassword = ref(false);
+const error = ref("");
+const loading = ref(false);
 
 const handleSubmit = async () => {
-  error.value = ''
-  loading.value = true
+  error.value = "";
+  loading.value = true;
 
   try {
-    await authStore.login(formData.value.email, formData.value.password)
-    
+    await authStore.login(formData.value.email, formData.value.password);
+
     // Redirection après connexion réussie
     if (authStore.isAdmin) {
-      router.push('/admin/dashboard')
+      router.push("/admin/dashboard");
     } else {
-      router.push('/')
+      router.push("/");
     }
   } catch (err) {
     // L'erreur est déjà traitée et formatée dans le store, on la récupère simplement.
-    error.value = authStore.error
+    error.value = authStore.error;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>
 
 <style scoped></style>
