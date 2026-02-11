@@ -65,7 +65,8 @@ http.interceptors.response.use(
                     failedQueue.push({ resolve, reject })
                 })
                     .then(token => {
-                                            return http(originalRequest)                    })
+                        return http(originalRequest)
+                    })
                     .catch(err => {
                         return Promise.reject(err)
                     })
