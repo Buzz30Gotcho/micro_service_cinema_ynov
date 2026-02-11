@@ -24,7 +24,7 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json() or {}
-
+    print("DATA REÇUE :", data)
     # 1. Validation
     is_valid, error_response = validate_user_register(data)
     if not is_valid:
@@ -38,7 +38,13 @@ def register():
 
     # 3. Création de l'utilisateur
     try:
-        new_user = User.create(users_col, data["email"], data["password"])
+        new_user = User.create(
+            users_col,
+            data["email"],
+            data["password"],
+            data.get("first_name"),
+            data.get("last_name"),
+        )
         return jsonify({"message": "Compte créé", "id": new_user.id}), 201
 
     except Exception as e:
@@ -138,7 +144,7 @@ def me():
     return response, 200
 
 
-@auth_bp.route("/me", methods=["PATCH"])
+@auth_bp.route("/update", methods=["PATCH"])
 @jwt_required()
 def update_me():
     identity = get_jwt_identity()

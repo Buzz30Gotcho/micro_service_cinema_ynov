@@ -1,8 +1,22 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
-  "exclude": ["node_modules", "dist"]
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "css.lint.unknownAtRules": "ignore",
+  "css.validate": true,
+  "scss.validate": true,
+  "tailwindCSS.includeLanguages": {
+    "vue": "html"
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  }
 }

@@ -5,3 +5,4 @@ flask_jwt_extended
 flask_login
 datetime
 cryptography
+flask-cors

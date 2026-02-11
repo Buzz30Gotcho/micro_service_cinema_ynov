@@ -1,28 +1,20 @@
-import { fileURLToPath, URL } from "node:url";
+import { fileURLToPath, URL } from 'node:url'
+//import tailwindcss from '@tailwindcss/vite'
 
-import { defineConfig, loadEnv } from "vite";
-import vue from "@vitejs/plugin-vue";
-import vueDevTools from "vite-plugin-vue-devtools";
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import vueDevTools from 'vite-plugin-vue-devtools'
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
-
-  return {
-    plugins: [vue(), vueDevTools()],
-    server: {
-      host: "0.0.0.0",
-      port: 3000,
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [
+    vue(),
+    vueDevTools(),
+    //tailwindcss()
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
     },
-    resolve: {
-      alias: {
-        "@": fileURLToPath(new URL("./src", import.meta.url)),
-      },
-    },
-    define: {
-      __APP_VERSION__: JSON.stringify(
-        process.env.npm_package_version || "0.0.0"
-      ),
-      __API_BASE__: JSON.stringify(env.VITE_API_BASE || ""),
-    },
-  };
-});
+  },
+})

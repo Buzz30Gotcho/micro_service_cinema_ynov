@@ -42,7 +42,7 @@ class User(UserMixin):
         return None
 
     @staticmethod
-    def create(collection, email, password):
+    def create(collection, email, password,first_name=None, last_name=None):
         """
         Crée un nouvel utilisateur.
         """
@@ -53,6 +53,8 @@ class User(UserMixin):
         user_data = {
             "email": email,
             "password": hashed,
+            "first_name": first_name,
+            "last_name": last_name,
             "created_at": now,
             "updated_at": now,
         }
