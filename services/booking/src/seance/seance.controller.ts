@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Delete, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Delete, Param } from '@nestjs/common';
 import { SeanceDto } from '../dto/seance.dto';
 import { SeanceService } from './seance.service';
 import { Seance } from '../entities/seance.entity';
@@ -20,6 +20,11 @@ export class SeanceController {
   @Post()
   async create(@Body() seanceDto: SeanceDto): Promise<Seance> {
     return this.seanceService.create(seanceDto);
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() seanceDto: SeanceDto): Promise<Seance> {
+    return this.seanceService.update(id, seanceDto);
   }
 
   @Delete(':id')

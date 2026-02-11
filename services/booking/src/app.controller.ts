@@ -14,6 +14,19 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get('health')
+  async health(): Promise<Record<string, string>> {
+    try {
+      await this.dataSource.query('SELECT 1');
+      return { status: 'healthy', service: 'booking', db: 'connected' };
+    } catch (err) {
+      throw new HttpException(
+        { status: 'unhealthy', service: 'booking', db: 'disconnected', message: (err as Error).message },
+        503,
+      );
+    }
+  }
+
   @Get('db-test')
   async dbTest(): Promise<Record<string, string>> {
     try {
