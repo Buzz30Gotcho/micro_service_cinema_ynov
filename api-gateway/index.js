@@ -9,28 +9,35 @@ const PORT = 3030;
 // --- Logs et CORS
 app.use(morgan('dev'));
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: '*',
     credentials: true
 }));
 app.options('*', cors({
-    origin: 'http://localhost:5173',
+    origin: '*',
     credentials: true
 }));
 
+// --- Health-check gateway ---
+app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'api-gateway' }));
+
 // --- Proxy vers microservices
 const services = [
+    { route: '/auth/health', target: process.env.AUTH_URL || 'http://127.0.0.1:4002', pathRewrite: { '^/auth/health': '/health' } },
     { route: '/auth', target: process.env.AUTH_URL || 'http://127.0.0.1:4002' },
     { route: '/catalogue', target: process.env.CATALOG_URL || 'http://127.0.0.1:4001' },
-    { route: '/sessions', target: process.env.BOOKING_URL || 'http://127.0.0.1:4003' },
+    { route: '/movies', target: process.env.CATALOG_URL || 'http://127.0.0.1:4001', pathRewrite: { '^/movies': '/catalogue/movies' } },
+    { route: '/sessions', target: process.env.BOOKING_URL || 'http://127.0.0.1:4003', pathRewrite: { '^/sessions': '' } },
+    { route: '/admin', target: process.env.ADMIN_URL || 'http://ms-cinema-admin:4010' },
 ];
 
-services.forEach(({ route, target }) => {
+services.forEach(({ route, target, pathRewrite }) => {
     app.use(
         route,
         createProxyMiddleware({
             target,
             changeOrigin: true,
             secure: false,
+            pathRewrite: pathRewrite || undefined,
             onProxyReq: (proxyReq, req) => {
                 if (req.headers.cookie) {
                     proxyReq.setHeader('cookie', req.headers.cookie);

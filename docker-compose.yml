@@ -47,8 +47,6 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
-    ports:
-      - "5432:5432"
 
   catalog:
     build: ./services/catalog
@@ -84,7 +82,7 @@ services:
     container_name: ms-cinema-admin
     environment:
       APP_PORT: "4010"
-      ALLOWED_SERVICES: "catalog:ms-cinema-catalog,auth:ms-cinema-auth,booking:ms-cinema-booking,postgres:ms-cinema-postgres"
+      ALLOWED_SERVICES: "catalog:ms-cinema-catalog,auth:auth_api,booking:ms-cinema-booking,postgres:ms-cinema-postgres"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
@@ -107,10 +105,12 @@ services:
       - AUTH_URL=http://auth_api:4002
       - CATALOG_URL=http://ms-cinema-catalog:4001
       - BOOKING_URL=http://ms-cinema-booking:4003
+      - ADMIN_URL=http://ms-cinema-admin:4010
     depends_on:
       - auth_api
       - catalog
       - booking
+      - admin
 
 volumes:
   pg_data:
