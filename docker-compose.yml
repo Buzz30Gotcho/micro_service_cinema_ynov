@@ -12,7 +12,7 @@ services:
     environment:
       - MONGO_HOST=auth_bdd
     ports:
-      - "4002:5000"
+      - "4002:4002"
     volumes:
       - ./services/auth:/app
     depends_on:
@@ -97,6 +97,20 @@ services:
       VITE_API_BASE: ""
     ports:
       - "5173:5173"
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: ms-cinema-gateway
+    ports:
+      - "3030:3030"
+    environment:
+      - AUTH_URL=http://auth_api:4002
+      - CATALOG_URL=http://ms-cinema-catalog:4001
+      - BOOKING_URL=http://ms-cinema-booking:4003
+    depends_on:
+      - auth_api
+      - catalog
+      - booking
 
 volumes:
   pg_data:

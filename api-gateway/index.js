@@ -19,9 +19,9 @@ app.options('*', cors({
 
 // --- Proxy vers microservices
 const services = [
-    { route: '/auth', target: 'http://127.0.0.1:4002' },
-    { route: '/catalogue', target: 'http://localhost:8001' },
-    { route: '/sessions', target: 'http://localhost:8002' },
+    { route: '/auth', target: process.env.AUTH_URL || 'http://127.0.0.1:4002' },
+    { route: '/catalogue', target: process.env.CATALOG_URL || 'http://127.0.0.1:4001' },
+    { route: '/sessions', target: process.env.BOOKING_URL || 'http://127.0.0.1:4003' },
 ];
 
 services.forEach(({ route, target }) => {
