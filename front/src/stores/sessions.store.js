@@ -61,12 +61,7 @@ export const useSessionsStore = defineStore('sessions', {
         moviesMap.get(session.movieId).sessions.push(session);
       });
       return Array.from(moviesMap.values());
-    },
-    getSessionById: (state) => (id) => state.sessions.find(session => session.id === id),
-  },
-
-  actions: {
-    async fetchAllSessions() {
+}, getSessionById: (state) => (id) => { return state.sessions.find(session => session.id == id || session.id === String(id)); }, }, actions: { async fetchAllSessions() {
       this.loading = true
       this.error = null
       try {
@@ -80,11 +75,9 @@ export const useSessionsStore = defineStore('sessions', {
         }
         const movies = moviesStore.movies;
 
-        console.log('Raw sessions from API:', rawSessions);
         this.sessions = rawSessions.map(session => normalizeSession(session, movies));
       } catch (e) {
         this.error = 'Erreur lors du chargement des séances.'
-        console.error(e)
       } finally {
         this.loading = false
       }
@@ -101,7 +94,6 @@ export const useSessionsStore = defineStore('sessions', {
         return response.data
       } catch (e) {
         this.error = 'Erreur lors de la création de la séance.'
-        console.error(e)
         throw e
       } finally {
         this.loading = false
@@ -117,7 +109,6 @@ export const useSessionsStore = defineStore('sessions', {
         return response.data
       } catch (e) {
         this.error = 'Erreur lors de la mise à jour de la séance.'
-        console.error(e)
         throw e
       } finally {
         this.loading = false
@@ -131,7 +122,6 @@ export const useSessionsStore = defineStore('sessions', {
         this.sessions = this.sessions.filter(s => s.id !== id)
       } catch (e) {
         this.error = 'Erreur lors de la suppression de la séance.'
-        console.error(e)
         throw e
       } finally {
         this.loading = false

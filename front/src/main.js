@@ -23,7 +23,6 @@ async function initializeApp() {
   try {
     await authStore.initializeAuth()
   } catch (error) {
-    console.error("Failed to initialize authentication state:", error)
   }
 
   app.use(router)
