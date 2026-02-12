@@ -75,6 +75,7 @@ function getJsonBody(): array
  */
 function rowToCamel(array $row): array
 {
+    $image = $row['image'] ?? null;
     return [
         'id'          => (int) $row['id'],
         'title'       => $row['title'],
@@ -83,7 +84,11 @@ function rowToCamel(array $row): array
         'rating'      => $row['rating'] !== null ? (float) $row['rating'] : null,
         'year'        => $row['year'] !== null ? (int) $row['year'] : null,
         'ageRating'   => $row['age_rating'],
-        'image'       => $row['image'],
+        'image'       => $image,
+        // Compatibility fields used by legacy front components
+        'poster'      => $image,
+        'posterUrl'   => $image,
+        'posterRotationDeg' => 0,
         'description' => $row['description'],
         'synopsis'    => $row['synopsis'],
         'director'    => $row['director'],

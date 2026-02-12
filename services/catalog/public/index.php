@@ -31,7 +31,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 $uri    = $_SERVER['REQUEST_URI'];
 $path   = parse_url($uri, PHP_URL_PATH);
 
-// Strip the /catalogue prefix the gateway adds (proxy keeps it)
+// Strip optional gateway prefix
 $path = preg_replace('#^/catalogue#', '', $path) ?: '/';
 
 // ============================================================
@@ -49,8 +49,8 @@ if ($method === 'GET' && $path === '/health') {
     }
 }
 
-// --- GET /movies  (list all) ---
-if ($method === 'GET' && $path === '/movies') {
+// --- GET /movies or /films (list all) ---
+if ($method === 'GET' && ($path === '/movies' || $path === '/films')) {
     try {
         $pdo = getDbConnection();
         $stmt = $pdo->query('SELECT * FROM movies ORDER BY id DESC');
@@ -78,9 +78,9 @@ if ($method === 'GET' && $path === '/movies/stats/all') {
     }
 }
 
-// --- GET /movies/:id ---
-if ($method === 'GET' && preg_match('#^/movies/(\d+)$#', $path, $m)) {
-    $id = (int) $m[1];
+// --- GET /movies/:id or /films/:id ---
+if ($method === 'GET' && preg_match('#^/(movies|films)/(\d+)$#', $path, $m)) {
+    $id = (int) $m[2];
     try {
         $pdo = getDbConnection();
         $stmt = $pdo->prepare('SELECT * FROM movies WHERE id = :id');
@@ -92,6 +92,30 @@ if ($method === 'GET' && preg_match('#^/movies/(\d+)$#', $path, $m)) {
         jsonResponse(rowToCamel($row));
     } catch (Exception $e) {
         jsonResponse(['error' => $e->getMessage()], 500);
+    }
+}
+
+// --- GET /hello ---
+if ($method === 'GET' && $path === '/hello') {
+    jsonResponse(['status' => 'ok', 'message' => 'Hello World']);
+}
+
+// --- GET /db-test ---
+if ($method === 'GET' && $path === '/db-test') {
+    try {
+        $pdo = getDbConnection();
+        $row = $pdo->query('SELECT current_database() AS db, current_user AS user')->fetch();
+        jsonResponse([
+            'status' => 'ok',
+            'db' => $row['db'] ?? null,
+            'user' => $row['user'] ?? null,
+        ]);
+    } catch (Exception $e) {
+        jsonResponse([
+            'status' => 'error',
+            'message' => 'DB connection failed',
+            'error' => $e->getMessage(),
+        ], 500);
     }
 }
 

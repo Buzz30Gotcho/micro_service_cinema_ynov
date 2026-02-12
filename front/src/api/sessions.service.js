@@ -1,26 +1,27 @@
 // src/api/sessions.service.js
 import http from './http'
 
-// Ce service communique avec le microservice booking (NestJS) via l'API gateway
-// Le gateway proxy /sessions -> booking:4003 (pas de reecriture, matches @Controller('sessions'))
+// Ce service communique avec le microservice des sessions/réservations
 export const sessionsService = {
-    // Recuperer toutes les seances
+    // === SÉANCES PUBLIQUES ===
     getAllSessions: () => http.get('/sessions'),
 
-    // Recuperer une seance specifique par son ID
-    getSessionById: (id) => http.get(`/sessions/${id}`),
+    // === ADMINISTRATION DES SÉANCES ===
 
-    // Creer une nouvelle seance
+    // Récupérer toutes les séances
+    adminGetSessions: () => http.get('/sessions'),
+
+    // Récupérer une séance spécifique par son ID
+    adminGetSessionById: (id) => http.get(`/sessions/${id}`),
+
+    // Créer une nouvelle séance
     createSession: (sessionData) => http.post('/sessions', sessionData),
 
-    // Mettre a jour une seance
+    // Mettre à jour une séance
     updateSession: (id, sessionData) => http.put(`/sessions/${id}`, sessionData),
 
-    // Supprimer une seance
-    deleteSession: (id) => http.delete(`/sessions/${id}`),
-
-    // Health check
-    health: () => http.get('/sessions/hello'),
+    // Supprimer une séance
+    deleteSession: (id) => http.delete(`/sessions/${id}`)
 }
 
 export default sessionsService

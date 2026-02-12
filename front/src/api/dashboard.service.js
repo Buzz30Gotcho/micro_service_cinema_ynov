@@ -1,17 +1,21 @@
 // src/api/dashboard.service.js
+/*
 import http from './http'
 
-// Service Admin/DevOps: Gestion des microservices via le admin service (Fastify + Dockerode)
+// Microservice Dashboard: Agrégation des données
 export const dashboardService = {
-    // --- Health checks directs (via gateway) ---
-    getCatalogHealth: () => http.get('/catalogue/health'),
-    getBookingHealth: () => http.get('/sessions/health'),
-    getAuthHealth: () => http.get('/auth/health'),
+    // Obtenir les statistiques globales
+    getStats: () => http.get('/dashboard/stats'),
 
-    // --- Docker container management (via admin service) ---
-    getServiceStatus: (service) => http.get(`/admin/${service}/status`),
-    stopService: (service) => http.post(`/admin/${service}/stop`),
-    startService: (service) => http.post(`/admin/${service}/start`),
+    // Obtenir les services actifs
+    getServiceStatus: () => http.get('/dashboard/services'),
+
+    // Obtenir les sessions récentes
+    getUpcomingSessions: () => http.get('/dashboard/sessions/upcoming'),
+
+    // Obtenir les films populaires
+    getPopularMovies: () => http.get('/dashboard/movies/popular')
 }
 
 export default dashboardService
+*/

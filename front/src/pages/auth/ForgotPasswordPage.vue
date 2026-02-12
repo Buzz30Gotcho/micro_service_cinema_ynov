@@ -1,39 +1,32 @@
 <template>
-  <div
-    class="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6"
-  >
+  <div class="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
     <div class="w-full max-w-md">
+
       <!-- Logo -->
       <div class="text-center mb-10">
         <div class="w-20 h-20 mx-auto rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shadow-lg mb-4">
           <img :src="logoUrl" alt="Central Cinema" class="w-12 h-12 object-contain" />
         </div>
         <h1 class="text-3xl font-bold mb-1 text-slate-100">CENTRAL CINEMA</h1>
-        <p class="text-slate-400 text-sm">Réservez en un click</p>
+        <p class="text-slate-400 text-sm">Votre cinéma en ligne</p>
       </div>
 
       <!-- Card -->
-      <div
-        class="bg-slate-900 rounded-2xl border border-slate-800 shadow-lg p-8"
-      >
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-lg p-8">
         <!-- Header -->
         <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold mb-2 text-slate-100">
-            Mot de passe oublié
-          </h2>
+          <h2 class="text-2xl font-bold mb-2 text-slate-100">Mot de passe oublié</h2>
           <p class="text-slate-400 text-sm">
-            Entrez votre adresse email pour recevoir un lien de
-            réinitialisation.
+            Entrez votre adresse email pour recevoir un lien de réinitialisation.
           </p>
         </div>
 
         <!-- Form -->
         <form @submit.prevent="handleSubmit" class="space-y-4">
+
           <!-- Email -->
           <div>
-            <label class="block text-sm font-semibold mb-1 text-slate-200"
-              >Adresse email</label
-            >
+            <label class="block text-sm font-semibold mb-1 text-slate-200">Adresse email</label>
             <input
               v-model="email"
               type="email"
@@ -67,6 +60,7 @@
               Envoi en cours...
             </span>
           </button>
+
         </form>
 
         <!-- Retour -->
@@ -75,6 +69,7 @@
             &larr; Retour à la connexion
           </router-link>
         </div>
+
       </div>
 
       <!-- Footer -->
@@ -91,31 +86,31 @@ import { useAuthStore } from '@/stores/auth.store'
 import { AlertTriangle, CheckCircle, Loader2 } from 'lucide-vue-next'
 import logoUrl from '@/assets/logo.png'
 
-const authStore = useAuthStore();
+const authStore = useAuthStore()
 
-const email = ref("");
-const loading = ref(false);
-const success = ref(false);
-const error = ref("");
+const email = ref('')
+const loading = ref(false)
+const success = ref(false)
+const error = ref('')
 
 const handleSubmit = async () => {
-  loading.value = true;
-  success.value = false;
-  error.value = "";
+  loading.value = true
+  success.value = false
+  error.value = ''
 
   try {
     // Note: The backend for forgotPassword is not implemented yet.
     // This will likely fail, but we'll show a success message to the user
     // to avoid leaking information about which emails are registered.
-    await authStore.forgotPassword(email.value);
-    success.value = true;
+    await authStore.forgotPassword(email.value)
+    success.value = true
   } catch (err) {
     // In a real application, you might not want to show a specific error here
     // for security reasons (to avoid user enumeration).
     // For now, we'll just show a generic message.
-    success.value = true; // Show success even on error for security
+    success.value = true // Show success even on error for security
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 </script>

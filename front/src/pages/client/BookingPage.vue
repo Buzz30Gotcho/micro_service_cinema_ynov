@@ -18,7 +18,7 @@
             >
               <div class="relative aspect-[2/3] overflow-hidden">
                                   <img 
-                                    :src="movie.image" 
+                                    :src="movie.poster" 
                                     :alt="movie.title" 
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                   >                <div class="absolute inset-0 bg-gradient-to-t from-dark-bg via-transparent to-transparent opacity-90"></div>
@@ -41,7 +41,7 @@
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-1">
               <div class="bg-dark-card rounded-xl border border-dark-border overflow-hidden sticky top-24">
-                <img v-if="selectedMovie" :src="selectedMovie.image" class="w-full aspect-[4/3] object-cover">
+                <img v-if="selectedMovie" :src="selectedMovie.poster" class="w-full aspect-[4/3] object-cover">
                 <div class="p-6">
                   <h2 class="text-2xl font-bold text-light-text mb-2">{{ selectedMovie?.title }}</h2>
                   <p class="text-muted-text text-sm leading-relaxed mt-2">

@@ -26,12 +26,16 @@
 
             <div class="space-y-3 text-sm">
               <div class="flex justify-between">
-                <span class="text-slate-400">Rôle</span>
-                <span class="font-semibold">{{ authStore.isAdmin ? 'Administrateur' : 'Client' }}</span>
+                <span class="text-slate-400">Membre depuis</span>
+                <span class="font-semibold">{{ user.memberSince }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-400">Réservations</span>
                 <span class="font-semibold">{{ bookings.length }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Points fidélité</span>
+                <span class="font-semibold text-yellow-400">{{ user.points }} pts</span>
               </div>
             </div>
 
@@ -50,15 +54,15 @@
               <div class="flex items-center gap-3">
                 <Film :size="20" class="text-slate-200" />
                 <div>
-                  <div class="font-semibold">{{ pastBookings.length }}</div>
-                  <div class="text-slate-400 text-xs">Séances passées</div>
+                  <div class="font-semibold">{{ user.moviesWatched }}</div>
+                  <div class="text-slate-400 text-xs">Films vus</div>
                 </div>
               </div>
               <div class="flex items-center gap-3">
                 <Star :size="20" class="text-yellow-400" />
                 <div>
-                  <div class="font-semibold">{{ upcomingBookings.length }}</div>
-                  <div class="text-slate-400 text-xs">Réservations à venir</div>
+                  <div class="font-semibold">{{ user.favoriteGenre }}</div>
+                  <div class="text-slate-400 text-xs">Genre préféré</div>
                 </div>
               </div>
             </div>
@@ -297,6 +301,7 @@ onMounted(() => {
   }
 });
 
+
 // Toast state
 const toast = ref({
   visible: false,
@@ -315,6 +320,10 @@ const user = ref({
   lastName: authStore.currentUser?.lastName || '',
   email: authStore.currentUser?.email || '',
   name: `${authStore.currentUser?.firstName || ''} ${authStore.currentUser?.lastName || ''}`.trim(),
+  memberSince: authStore.currentUser?.memberSince || 'Janvier 2024',
+  points: authStore.currentUser?.points || 450,
+  moviesWatched: authStore.currentUser?.moviesWatched || 24,
+  favoriteGenre: authStore.currentUser?.favoriteGenre || 'Science-Fiction',
 });
 
 // Keep the local user ref in sync with the store
@@ -405,7 +414,7 @@ const downloadTicket = (booking) => {
 }
 
 const cancelBooking = async (booking) => {
-  if (confirm(`Voulez-vous vraiment annuler la réservation pour "${getMovieTitle(booking.seance?.movieId, booking.seance)}" ?`)) {
+  if (confirm(`Voulez-vous vraiment annuler la réservation pour "${getMovieTitle(booking.seance.movieId, booking.seance)}" ?`)) {
     try {
       await bookingsStore.cancelBooking(booking.id);
       showToast('Succès', 'Réservation annulée avec succès.');

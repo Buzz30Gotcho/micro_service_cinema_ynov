@@ -4,86 +4,80 @@ import dashboardService from '@/api/dashboard.service'
 
 export const useDashboardStore = defineStore('dashboard', {
     state: () => ({
-        services: {
-            catalog: { status: 'unknown', health: null, loading: false },
-            auth:    { status: 'unknown', health: null, loading: false },
-            booking: { status: 'unknown', health: null, loading: false },
-        },
+        stats: null,
+        serviceStatus: [],
+        upcomingSessions: [],
+        popularMovies: [],
         loading: false,
         error: null
     }),
 
+    getters: {
+        getStats: (state) => state.stats,
+        getServiceStatus: (state) => state.serviceStatus,
+        getUpcomingSessions: (state) => state.upcomingSessions,
+        getPopularMovies: (state) => state.popularMovies
+    },
+
     actions: {
-        // Check Docker container state (running/exited/…)
-        async fetchServiceStatus(serviceKey) {
-            this.services[serviceKey].loading = true
+        async fetchStats() {
+            this.loading = true
+            this.error = null
             try {
-                const res = await dashboardService.getServiceStatus(serviceKey)
-                this.services[serviceKey].status = res.data.state || 'unknown'
-            } catch (e) {
-                this.services[serviceKey].status = 'error'
-                console.error(`Status check failed for ${serviceKey}:`, e)
+                const response = await dashboardService.getStats()
+                this.stats = response.data
+                return response.data
+            } catch (error) {
+                this.error = error.message
+                console.error('Erreur lors de la récupération des stats:', error)
             } finally {
-                this.services[serviceKey].loading = false
+                this.loading = false
             }
         },
 
-        // Health-check via the microservice's own /health endpoint
-        async fetchServiceHealth(serviceKey) {
-            this.services[serviceKey].loading = true
+        async fetchServiceStatus() {
+            this.loading = true
+            this.error = null
             try {
-                let res
-                if (serviceKey === 'catalog') res = await dashboardService.getCatalogHealth()
-                else if (serviceKey === 'auth') res = await dashboardService.getAuthHealth()
-                else if (serviceKey === 'booking') res = await dashboardService.getBookingHealth()
-
-                this.services[serviceKey].health = 'healthy'
-            } catch (e) {
-                this.services[serviceKey].health = 'unhealthy'
+                const response = await dashboardService.getServiceStatus()
+                this.serviceStatus = response.data
+                return response.data
+            } catch (error) {
+                this.error = error.message
+                console.error('Erreur lors de la récupération des services:', error)
             } finally {
-                this.services[serviceKey].loading = false
+                this.loading = false
             }
         },
 
-        async stopService(serviceKey) {
-            this.services[serviceKey].loading = true
+        async fetchUpcomingSessions() {
+            this.loading = true
+            this.error = null
             try {
-                await dashboardService.stopService(serviceKey)
-                this.services[serviceKey].status = 'exited'
-                this.services[serviceKey].health = 'unhealthy'
-            } catch (e) {
-                console.error(`Stop failed for ${serviceKey}:`, e)
-                throw e
+                const response = await dashboardService.getUpcomingSessions()
+                this.upcomingSessions = response.data
+                return response.data
+            } catch (error) {
+                this.error = error.message
+                console.error('Erreur lors de la récupération des séances:', error)
             } finally {
-                this.services[serviceKey].loading = false
+                this.loading = false
             }
         },
 
-        async startService(serviceKey) {
-            this.services[serviceKey].loading = true
+        async fetchPopularMovies() {
+            this.loading = true
+            this.error = null
             try {
-                await dashboardService.startService(serviceKey)
-                this.services[serviceKey].status = 'running'
-                // Wait a bit for the service to boot then health-check
-                setTimeout(() => this.fetchServiceHealth(serviceKey), 3000)
-            } catch (e) {
-                console.error(`Start failed for ${serviceKey}:`, e)
-                throw e
+                const response = await dashboardService.getPopularMovies()
+                this.popularMovies = response.data
+                return response.data
+            } catch (error) {
+                this.error = error.message
+                console.error('Erreur lors de la récupération des films:', error)
             } finally {
-                this.services[serviceKey].loading = false
+                this.loading = false
             }
-        },
-
-        // Refresh all three at once
-        async fetchAll() {
-            await Promise.allSettled([
-                this.fetchServiceStatus('catalog'),
-                this.fetchServiceStatus('auth'),
-                this.fetchServiceStatus('booking'),
-                this.fetchServiceHealth('catalog'),
-                this.fetchServiceHealth('auth'),
-                this.fetchServiceHealth('booking'),
-            ])
         }
     }
 })

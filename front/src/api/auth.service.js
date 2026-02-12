@@ -1,6 +1,14 @@
 // src/api/auth.service.js
 import http from './http'
 
+// === COMPTES DE TEST (MODE DÉVELOPPEMENT) ===
+// const TEST_ACCOUNTS = [
+//     { id: 1, email: 'admin@test.com', password: 'password', name: 'Admin User', role: 'admin' },
+//     { id: 2, email: 'user@test.com', password: 'password', name: 'John Doe', role: 'client' }
+// ]
+
+const USE_TEST_MODE = true // Passe à true pour tester sans API
+
 // Microservice Auth/Users: Gestion des utilisateurs et authentification
 export const authService = {
     // Connexion

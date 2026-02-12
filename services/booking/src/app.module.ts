@@ -15,7 +15,7 @@ import { AuthModule } from './auth/auth.module';
       port: Number(process.env.DB_PORT || 5432),
       username: process.env.DB_USER || "postgres",
       password: process.env.DB_PASSWORD || "postgres",
-      database: process.env.DB_NAME || "booking_db",
+      database: process.env.DB_NAME || "seance_db",
       entities: [Seance, Reservation],
       synchronize: true,
     }),

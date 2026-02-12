@@ -1,26 +1,21 @@
 <template>
-  <div
-    class="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6"
-  >
+  <div class="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
     <div class="w-full max-w-md">
+
       <!-- Logo -->
       <div class="text-center mb-10">
         <div class="w-20 h-20 mx-auto rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shadow-lg mb-4">
           <img :src="logoUrl" alt="Central Cinema" class="w-12 h-12 object-contain" />
         </div>
         <h1 class="text-3xl font-bold mb-1 text-slate-100">CENTRAL CINEMA</h1>
-        <p class="text-slate-400 text-sm">Réservez en un click</p>
+        <p class="text-slate-400 text-sm">Votre cinéma en ligne</p>
       </div>
 
       <!-- Card -->
-      <div
-        class="bg-slate-900 rounded-2xl border border-slate-800 shadow-lg p-8"
-      >
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-lg p-8">
         <!-- Header -->
         <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold mb-2 text-slate-100">
-            Réinitialiser le mot de passe
-          </h2>
+          <h2 class="text-2xl font-bold mb-2 text-slate-100">Réinitialiser le mot de passe</h2>
           <p class="text-slate-400 text-sm">
             Entrez votre nouveau mot de passe.
           </p>
@@ -28,11 +23,10 @@
 
         <!-- Form -->
         <form @submit.prevent="handleSubmit" class="space-y-4">
+
           <!-- Password -->
           <div>
-            <label class="block text-sm font-semibold mb-1 text-slate-200"
-              >Nouveau mot de passe</label
-            >
+            <label class="block text-sm font-semibold mb-1 text-slate-200">Nouveau mot de passe</label>
             <input
               v-model="formData.password"
               type="password"
@@ -44,9 +38,7 @@
 
           <!-- Confirm Password -->
           <div>
-            <label class="block text-sm font-semibold mb-1 text-slate-200"
-              >Confirmer le mot de passe</label
-            >
+            <label class="block text-sm font-semibold mb-1 text-slate-200">Confirmer le mot de passe</label>
             <input
               v-model="formData.confirm_password"
               type="password"
@@ -80,8 +72,11 @@
               Enregistrement...
             </span>
           </button>
+
         </form>
+
       </div>
+
     </div>
   </div>
 </template>
@@ -93,45 +88,45 @@ import { useAuthStore } from '@/stores/auth.store'
 import { AlertTriangle, CheckCircle, Loader2 } from 'lucide-vue-next'
 import logoUrl from '@/assets/logo.png'
 
-const route = useRoute();
-const router = useRouter();
-const authStore = useAuthStore();
+const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
 
 const formData = ref({
-  token: "",
-  password: "",
-  confirm_password: "",
-});
+  token: '',
+  password: '',
+  confirm_password: ''
+})
 
-const loading = ref(false);
-const success = ref(false);
-const error = ref("");
+const loading = ref(false)
+const success = ref(false)
+const error = ref('')
 
 onMounted(() => {
-  formData.value.token = route.params.token;
-});
+  formData.value.token = route.params.token
+})
 
 const handleSubmit = async () => {
-  loading.value = true;
-  success.value = false;
-  error.value = "";
+  loading.value = true
+  success.value = false
+  error.value = ''
 
   if (formData.value.password !== formData.value.confirm_password) {
-    error.value = "Les mots de passe ne correspondent pas.";
-    loading.value = false;
-    return;
+    error.value = 'Les mots de passe ne correspondent pas.'
+    loading.value = false
+    return
   }
 
   try {
-    await authStore.resetPassword(formData.value);
-    success.value = true;
+    await authStore.resetPassword(formData.value)
+    success.value = true
     setTimeout(() => {
-      router.push("/login");
-    }, 3000);
+      router.push('/login')
+    }, 3000)
   } catch (err) {
-    error.value = err.response?.data?.message || "Une erreur est survenue.";
+    error.value = err.response?.data?.message || 'Une erreur est survenue.'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 </script>
