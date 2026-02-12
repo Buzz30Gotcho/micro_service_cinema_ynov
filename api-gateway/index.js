@@ -22,7 +22,7 @@ app.options('*', cors({
 const services = [
     { route: '/auth', target: process.env.AUTH_URL || 'http://127.0.0.1:4002' },
     { route: ['/films', '/movies'], target: process.env.CATALOG_URL || 'http://127.0.0.1:4001' },
-    { route: '/sessions', target: process.env.BOOKING_URL || 'http://127.0.0.1:4003' },
+    { route: ['/sessions', '/reservation'], target: process.env.BOOKING_URL || 'http://127.0.0.1:4003' },
 ];
 
 services.forEach(({ route, target }) => {

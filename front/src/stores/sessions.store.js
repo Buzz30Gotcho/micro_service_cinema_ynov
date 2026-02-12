@@ -3,16 +3,29 @@ import sessionsService from '@/api/sessions.service'
 import { useMoviesStore } from '@/stores/movies.store'; // Import useMoviesStore
 
 const normalizeSession = (session, movies) => {
+  const computeDuration = (start, end) => {
+    if (!start || !end) return null;
+    const [h1, m1] = String(start).split(':').map(Number);
+    const [h2, m2] = String(end).split(':').map(Number);
+    let s = h1 * 60 + (m1 || 0);
+    let e = h2 * 60 + (m2 || 0);
+    if (e <= s) e += 24 * 60;
+    return e - s;
+  };
+
   const normalized = {
     id: session.id,
     movieId: session.movieId ?? null, // This will be enriched
     nameMovie: session.nameMovie ?? '',
     date: session.date ?? session.dateSeance ?? '',
     time: session.time ?? session.hourStart ?? '',
+    hourStart: session.hourStart ?? session.time ?? null,
+    hourEnd: session.hourEnd ?? null,
     room: session.room ?? session.salleId ?? '',
     capacity: session.capacity ?? session.numberPlace ?? 0,
     price: session.price ?? null,
-    booked: session.booked ?? (session.reservations?.length ?? 0)
+    booked: session.booked ?? (session.reservations?.length ?? 0),
+    duration: session.duration ?? computeDuration(session.hourStart ?? session.time, session.hourEnd) 
   };
 
   // If movieId is not already present, try to find it from movies

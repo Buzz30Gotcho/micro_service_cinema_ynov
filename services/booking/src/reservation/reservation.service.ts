@@ -11,11 +11,12 @@ export class ReservationService {
     private readonly reservationRepository: Repository<Reservation>,
   ) { }
 
-  async findAll(): Promise<Reservation[]> {
-    return this.reservationRepository.find({ relations: ['seance'] });
+  async findAll(): Promise<any[]> {
+    const reservations = await this.reservationRepository.find({ relations: ['seance'] });
+    return reservations.map(r => this.toClientShape(r));
   }
 
-  async findOne(id: string): Promise<Reservation> {
+  async findOne(id: string): Promise<any> {
     const reservation = await this.reservationRepository.findOne({
       where: { id },
       relations: ['seance'],
@@ -23,11 +24,11 @@ export class ReservationService {
     if (!reservation) {
       throw new NotFoundException(`Reservation with ID ${id} not found`);
     }
-    return reservation;
+    return this.toClientShape(reservation);
   }
 
 
-  async findAllByEmail(email: string): Promise<Reservation[]> {
+  async findAllByEmail(email: string): Promise<any[]> {
     const reservations = await this.reservationRepository.find({
       where: { email },
       relations: ['seance'],
@@ -37,7 +38,37 @@ export class ReservationService {
       throw new NotFoundException(`No reservations found for ${email}`);
     }
 
-    return reservations;
+    return reservations.map(r => this.toClientShape(r));
+  }
+
+  private toClientShape(reservation: Reservation) {
+    const seance = reservation.seance || null;
+
+    const clientSeance = seance
+      ? {
+          movieId: (seance as any).movieId || null,
+          room: seance.salleId || null,
+          dateTime: seance.dateSeance && seance.hourStart ? `${seance.dateSeance}T${seance.hourStart}` : seance.dateSeance || null,
+          posterPath: (seance as any).posterPath || null,
+          price: seance.price !== undefined && seance.price !== null ? Number(seance.price) : null,
+          id: seance.id,
+          nameMovie: seance.nameMovie,
+          numberPlace: seance.numberPlace,
+          hourStart: seance.hourStart,
+          hourEnd: seance.hourEnd,
+          dateSeance: seance.dateSeance,
+          salleId: seance.salleId,
+        }
+      : null;
+
+    return {
+      id: reservation.id,
+      name: reservation.name,
+      email: reservation.email,
+      seatNumber: reservation.seatNumber,
+      seanceId: reservation.seanceId,
+      seance: clientSeance,
+    };
   }
 
 

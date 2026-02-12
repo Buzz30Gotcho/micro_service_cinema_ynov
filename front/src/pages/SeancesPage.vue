@@ -104,15 +104,24 @@ function formatDateISO(date) {
   return date.toISOString().split('T')[0];
 }
 
-const today = new Date();
-const tomorrow = new Date(today);
-tomorrow.setDate(tomorrow.getDate() + 1);
+function generateDates(n) {
+  const arr = [];
+  const now = new Date();
+  for (let i = 0; i < n; i++) {
+    const d = new Date(now);
+    d.setDate(now.getDate() + i);
+    const value = formatDateISO(d);
+    let dayLabel = d.toLocaleDateString('fr-FR', { weekday: 'long' });
+    dayLabel = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
+    if (i === 0) dayLabel = "Aujourd'hui";
+    else if (i === 1) dayLabel = 'Demain';
+    arr.push({ day: dayLabel, value });
+  }
+  return arr;
+}
 
-const dates = ref([
-  { day: 'Aujourd\'hui', value: formatDateISO(today) },
-  { day: 'Demain', value: formatDateISO(tomorrow) },
-]);
-const selectedDate = ref(formatDateISO(today));
+const dates = ref(generateDates(7));
+const selectedDate = ref(formatDateISO(new Date()));
 
 // --- Computed Properties for Display ---
 
@@ -124,20 +133,55 @@ const moviesForSelectedDate = computed(() => {
   // 1. Filter sessions for the selected date
   const todaysSessions = sessions.value.filter(session => session.date === selectedDate.value);
 
-  // 2. Group sessions by movieId
+  // 2. Group sessions by movieId or by nameMovie when movieId is absent
   const sessionsByMovie = todaysSessions.reduce((acc, session) => {
-    if (!acc[session.movieId]) {
-      acc[session.movieId] = [];
+    const key = session.movieId ?? session.nameMovie ?? 'unknown';
+    if (!acc[key]) {
+      acc[key] = [];
     }
-    acc[session.movieId].push(session);
+    acc[key].push(session);
     return acc;
   }, {});
 
-  // 3. Map and enrich with movie details
-  return Object.keys(sessionsByMovie).map(movieId => {
-    const movie = movies.value.find(m => String(m.id) === movieId);
-    return movie ? { ...movie, sessions: sessionsByMovie[movieId] } : null;
-  }).filter(Boolean); // Filter out nulls if a movie isn't found
+  // 3. Map and enrich with movie details (create pseudo-movie when missing)
+  function durationFromSession(s) {
+    // try session.duration, otherwise compute from hourStart/hourEnd
+    if (s.duration) return s.duration;
+    if (!s.hourStart || !s.hourEnd) return null;
+    const [h1, m1] = s.hourStart.split(':').map(Number);
+    const [h2, m2] = s.hourEnd.split(':').map(Number);
+    let start = h1 * 60 + (m1 || 0);
+    let end = h2 * 60 + (m2 || 0);
+    // if end < start assume overnight and add 24h
+    if (end <= start) end += 24 * 60;
+    return end - start;
+  }
+
+  return Object.keys(sessionsByMovie).map(key => {
+    // If key is a movieId (UUID-like) try to match movie by id, otherwise by title
+    let movie = movies.value.find(m => String(m.id) === key);
+    if (!movie) {
+      movie = movies.value.find(m => m.title === key);
+    }
+
+    // If movie still not found, make a lightweight 'movie' from first session
+    if (!movie) {
+      const s = sessionsByMovie[key][0];
+      return {
+        id: `session-${key}`,
+        title: s.nameMovie || 'Film inconnu',
+        genre: s.genre || null,
+        // fallback duration computed from session times
+        duration: s.duration || durationFromSession(s) || null,
+        rating: s.rating || null,
+        description: s.description || null,
+        poster: s.posterPath || 'https://via.placeholder.com/300x450.png?text=Poster',
+        sessions: sessionsByMovie[key],
+      };
+    }
+
+    return { ...movie, sessions: sessionsByMovie[key] };
+  }).filter(Boolean); // Filter out nulls if something is wrong
 });
 
 const selectedDateFormatted = computed(() => {
@@ -152,6 +196,21 @@ onMounted(async () => {
     sessionsStore.fetchAllSessions(),
     movies.value.length === 0 ? moviesStore.fetchMovies() : Promise.resolve()
   ]);
+
+  // If there are sessions, default the selected date to the earliest session date
+  if (sessions.value.length > 0) {
+    const uniqueDates = Array.from(new Set(sessions.value.map(s => s.date))).filter(Boolean).sort();
+    if (uniqueDates.length > 0) {
+      // If earliest session date is not in our dates list, prepend it
+      const earliest = uniqueDates[0];
+      const exists = dates.value.find(d => d.value === earliest);
+      if (!exists) {
+        // Add at front with a readable label
+        dates.value.unshift({ day: new Date(earliest).toLocaleDateString('fr-FR', { weekday: 'long' }), value: earliest });
+      }
+      selectedDate.value = earliest;
+    }
+  }
 })
 
 // --- Navigation ---
