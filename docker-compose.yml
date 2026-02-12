@@ -76,6 +76,7 @@ services:
       DB_NAME: booking_db
       DB_USER: booking_user
       DB_PASSWORD: booking_pass
+      SECRET_KEY: "8t-Bk_TGKGZ-RC0X5RvG6wvG2Pd13vHIS4LHJEi01rDcYjcrUrCVFpQH9sHi5aW7E9xQvr_BJaXZqD6H6TBhTw"
     volumes:
       - ./services/booking:/usr/src/app
       - booking_node_modules:/usr/src/app/node_modules

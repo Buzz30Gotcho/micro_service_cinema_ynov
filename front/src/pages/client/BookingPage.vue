@@ -120,7 +120,7 @@
                 :disabled="selectedSeats.size === 0"
                 class="px-8 py-3 bg-primary-accent text-light-text font-bold rounded-lg hover:bg-primary-hover shadow-lg shadow-primary-accent/20 transition-all disabled:bg-dark-card disabled:cursor-not-allowed"
                 >
-                Confirmer ({{ (selectedSession.price * selectedSeats.size).toFixed(2) }} €)
+                Confirmer ({{ ((parseFloat(selectedSession?.price) || 12.50) * selectedSeats.size).toFixed(2) }} €)
                 </button>
             </div>
           </div>
@@ -161,7 +161,11 @@ const selectedSeats = ref(new Set())
 
 const availableSessions = computed(() => {
   if (!selectedMovie.value || !allSessions.value) return [];
-  return allSessions.value.filter(session => session.movieId === String(selectedMovie.value.id));
+  return allSessions.value.filter(session => 
+    // Comparer soit par movieId (flexible sur le type), soit par nameMovie
+    session.movieId == selectedMovie.value.id || 
+    (session.nameMovie && session.nameMovie.toLowerCase() === selectedMovie.value.title.toLowerCase())
+  );
 });
 
 onMounted(async () => {
@@ -234,12 +238,16 @@ const confirmBooking = async () => {
   const bookingPromises = []
   const failedBookings = []
 
+  // Récupérer le prix de la séance ou utiliser un prix par défaut
+  const seatPrice = parseFloat(selectedSession.value?.price) || 12.50
+
   for (const seatCode of selectedSeats.value) {
     const bookingPayload = {
       name: `${authStore.currentUser.firstName} ${authStore.currentUser.lastName}`,
       email: authStore.currentUser.email,
       seanceId: selectedSession.value.id,
       seatNumber: seatCode,
+      price: seatPrice,
     }
     bookingPromises.push(
       bookingsStore.createBooking(bookingPayload).catch(error => {

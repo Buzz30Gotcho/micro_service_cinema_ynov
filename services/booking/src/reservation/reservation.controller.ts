@@ -22,12 +22,15 @@ export class ReservationController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'))
   async findOne(@Param('id') id: string): Promise<Reservation> {
     return this.reservationService.findOne(id);
   }
 
   @Post()
-  async create(@Body() reservationDto: ReservationDto): Promise<Reservation> {
+  @UseGuards(AuthGuard('jwt'))
+  async create(@Body() reservationDto: ReservationDto, @Request() req): Promise<Reservation> {
+    // Le JWT garantit que l'utilisateur est authentifié
     return this.reservationService.create(reservationDto);
   }
 

@@ -12,14 +12,11 @@ def forgot_password():
     if not email:
         return jsonify({"error": "Email requis"}), 400
 
-    # Check if user exists
     users_col = current_app.db.users
     user = User.get_by_email(users_col, email)
     if not user:
         return jsonify({"error": "Aucun compte associé à cet email"}), 404
 
-    # Mock sending email (or generate token)
-    # Ideally, we would generate a token, save it to DB, and send email.
     return (
         jsonify(
             {
@@ -41,11 +38,7 @@ def reset_password():
     if not token or not new_password:
         return jsonify({"error": "Token et nouveau mot de passe requis"}), 400
 
-    # Mock token verification
     if token != "mock-reset-token":
         return jsonify({"error": "Token invalide ou expiré"}), 400
 
-    # Update password
-    # Which user? The token should carry user info.
-    # Since mocked, we can't update.
     return jsonify({"message": "Mot de passe réinitialisé (simulation)"}), 200

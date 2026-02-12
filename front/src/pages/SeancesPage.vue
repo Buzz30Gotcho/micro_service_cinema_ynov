@@ -50,7 +50,7 @@
               <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-text mb-4">
                 <span>{{ movie.genre }}</span>
                 <span>• {{ movie.duration }} min</span>
-                <span>• ⭐ {{ movie.rating }}</span>
+                <span class="inline-flex items-center gap-1">• <Star :size="14" /> {{ movie.rating }}</span>
               </div>
               <p class="text-light-text text-sm line-clamp-2">{{ movie.description }}</p>
             </div>
@@ -90,6 +90,7 @@ import { useSessionsStore } from '@/stores/sessions.store'
 import { useMoviesStore } from '@/stores/movies.store'
 import Header from '@/components/common/Header.vue'
 import Footer from '@/components/common/Footer.vue'
+import { Star } from 'lucide-vue-next'
 
 const router = useRouter()
 const sessionsStore = useSessionsStore()
@@ -104,41 +105,78 @@ function formatDateISO(date) {
   return date.toISOString().split('T')[0];
 }
 
-const today = new Date();
-const tomorrow = new Date(today);
-tomorrow.setDate(tomorrow.getDate() + 1);
+function generateDates(n) {
+  const arr = [];
+  const now = new Date();
+  for (let i = 0; i < n; i++) {
+    const d = new Date(now);
+    d.setDate(now.getDate() + i);
+    const value = formatDateISO(d);
+    let dayLabel = d.toLocaleDateString('fr-FR', { weekday: 'long' });
+    dayLabel = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
+    if (i === 0) dayLabel = "Aujourd'hui";
+    else if (i === 1) dayLabel = 'Demain';
+    arr.push({ day: dayLabel, value });
+  }
+  return arr;
+}
 
-const dates = ref([
-  { day: 'Aujourd\'hui', value: formatDateISO(today) },
-  { day: 'Demain', value: formatDateISO(tomorrow) },
-]);
-const selectedDate = ref(formatDateISO(today));
+const dates = ref(generateDates(7));
+const selectedDate = ref(formatDateISO(new Date()));
 
 // --- Computed Properties for Display ---
 
-const moviesForSelectedDate = computed(() => {
-  if (sessions.value.length === 0 || movies.value.length === 0) {
-    return [];
-  }
-
-  // 1. Filter sessions for the selected date
-  const todaysSessions = sessions.value.filter(session => session.date === selectedDate.value);
-
-  // 2. Group sessions by movieId
-  const sessionsByMovie = todaysSessions.reduce((acc, session) => {
-    if (!acc[session.movieId]) {
-      acc[session.movieId] = [];
+  const moviesForSelectedDate = computed(() => {
+    if (sessions.value.length === 0) {
+      return [];
     }
-    acc[session.movieId].push(session);
-    return acc;
-  }, {});
 
-  // 3. Map and enrich with movie details
-  return Object.keys(sessionsByMovie).map(movieId => {
-    const movie = movies.value.find(m => String(m.id) === movieId);
-    return movie ? { ...movie, sessions: sessionsByMovie[movieId] } : null;
-  }).filter(Boolean); // Filter out nulls if a movie isn't found
-});
+    const durationFromSession = (s) => {
+      if (s.duration) return s.duration;
+      if (!s.hourStart || !s.hourEnd) return null;
+      const [h1, m1] = String(s.hourStart).split(':').map(Number);
+      const [h2, m2] = String(s.hourEnd).split(':').map(Number);
+      let start = h1 * 60 + (m1 || 0);
+      let end = h2 * 60 + (m2 || 0);
+      if (end <= start) end += 24 * 60;
+      return end - start;
+    };
+
+    // 1. Filter sessions for the selected date
+    const todaysSessions = sessions.value.filter(session => session.date === selectedDate.value);
+
+    const sessionsByMovie = todaysSessions.reduce((acc, session) => {
+      const key = session.movieId ?? session.nameMovie ?? 'unknown';
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(session);
+      return acc;
+    }, {});
+
+    return Object.keys(sessionsByMovie).map(key => {
+      let movie = movies.value.find(m => String(m.id) === key);
+      if (!movie) {
+        movie = movies.value.find(m => m.title === key);
+      }
+
+      if (!movie) {
+        const s = sessionsByMovie[key][0];
+        return {
+          id: `session-${key}`,
+          title: s.nameMovie || 'Film inconnu',
+          genre: s.genre || null,
+          duration: s.duration || durationFromSession(s) || null,
+          rating: s.rating || null,
+          description: s.description || null,
+          poster: s.posterPath || 'https://via.placeholder.com/300x450.png?text=Poster',
+          sessions: sessionsByMovie[key],
+        };
+      }
+
+      return { ...movie, sessions: sessionsByMovie[key] };
+    }).filter(Boolean);
+  });
 
 const selectedDateFormatted = computed(() => {
     const date = dates.value.find(d => d.value === selectedDate.value);
@@ -152,6 +190,21 @@ onMounted(async () => {
     sessionsStore.fetchAllSessions(),
     movies.value.length === 0 ? moviesStore.fetchMovies() : Promise.resolve()
   ]);
+
+  // If there are sessions, default the selected date to the earliest session date
+  if (sessions.value.length > 0) {
+    const uniqueDates = Array.from(new Set(sessions.value.map(s => s.date))).filter(Boolean).sort();
+    if (uniqueDates.length > 0) {
+      // If earliest session date is not in our dates list, prepend it
+      const earliest = uniqueDates[0];
+      const exists = dates.value.find(d => d.value === earliest);
+      if (!exists) {
+        // Add at front with a readable label
+        dates.value.unshift({ day: new Date(earliest).toLocaleDateString('fr-FR', { weekday: 'long' }), value: earliest });
+      }
+      selectedDate.value = earliest;
+    }
+  }
 })
 
 // --- Navigation ---

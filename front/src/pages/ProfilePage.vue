@@ -48,14 +48,14 @@
             <h3 class="font-semibold mb-4">Statistiques</h3>
             <div class="space-y-3 text-sm">
               <div class="flex items-center gap-3">
-                <span class="text-2xl">🎬</span>
+                <Film :size="20" class="text-slate-200" />
                 <div>
                   <div class="font-semibold">{{ pastBookings.length }}</div>
                   <div class="text-slate-400 text-xs">Séances passées</div>
                 </div>
               </div>
               <div class="flex items-center gap-3">
-                <span class="text-2xl">🎟️</span>
+                <Star :size="20" class="text-yellow-400" />
                 <div>
                   <div class="font-semibold">{{ upcomingBookings.length }}</div>
                   <div class="text-slate-400 text-xs">Réservations à venir</div>
@@ -104,7 +104,7 @@
             >
               <div class="flex gap-6">
                 <div class="flex-1">
-                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId) }}</h3>
+                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId, booking.seance) }}</h3>
                   
                   <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
@@ -131,7 +131,10 @@
                         @click="downloadTicket(booking)"
                         class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-semibold transition"
                       >
-                        📥 Télécharger
+                        <span class="inline-flex items-center gap-2">
+                          <Download :size="16" />
+                          Télécharger
+                        </span>
                       </button>
                       <button
                         @click="cancelBooking(booking)"
@@ -146,7 +149,9 @@
             </div>
 
             <div v-if="upcomingBookings.length === 0" class="text-center py-12 text-slate-400">
-              <div class="text-6xl mb-4">🎬</div>
+              <div class="flex justify-center mb-4">
+                <Film :size="40" class="text-slate-500" />
+              </div>
               <p>Aucune réservation à venir</p>
               <router-link to="/seances" class="inline-block mt-4 text-blue-400 hover:underline">
                 Parcourir les séances →
@@ -163,7 +168,7 @@
             >
               <div class="flex gap-6">
                 <div class="flex-1">
-                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId) }}</h3>
+                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId, booking.seance) }}</h3>
                   
                   <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
@@ -187,7 +192,9 @@
               </div>
             </div>
              <div v-if="pastBookings.length === 0" class="text-center py-12 text-slate-400">
-              <div class="text-6xl mb-4">📜</div>
+              <div class="flex justify-center mb-4">
+                <ScrollText :size="40" class="text-slate-500" />
+              </div>
               <p>Aucune réservation passée</p>
             </div>
           </div>
@@ -272,6 +279,7 @@ import { storeToRefs } from 'pinia'
 import Header from '@/components/common/Header.vue'
 import Footer from '@/components/common/Footer.vue'
 import Toast from '@/components/common/Toast.vue'
+import { Download, Film, ScrollText, Star } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
 const bookingsStore = useBookingsStore()
@@ -340,11 +348,12 @@ const pastBookings = computed(() => {
   return bookings.value.filter(b => b.seance && new Date(b.seance.dateTime) < now);
 });
 
-// Helper function to get movie title from movieId
-const getMovieTitle = (movieId) => {
+const getMovieTitle = (movieId, seance) => {
+  if ((!movies.value || movies.value.length === 0) && seance?.nameMovie) return seance.nameMovie;
   if (!movies.value || movies.value.length === 0) return 'Chargement...';
   const movie = movies.value.find(m => String(m.id) === movieId);
-  return movie ? movie.title : 'Film inconnu';
+  if (movie) return movie.title;
+  return seance?.nameMovie || 'Film inconnu';
 };
 
 // Helper to format date and time
@@ -393,11 +402,11 @@ const saveProfile = async () => {
 
 // Actions
 const downloadTicket = (booking) => {
-  alert(`📥 Le téléchargement du billet pour ${getMovieTitle(booking.seance.movieId)} n'est pas encore implémenté.`)
+  alert(`Le téléchargement du billet pour ${getMovieTitle(booking.seance.movieId, booking.seance)} n'est pas encore implémenté.`)
 }
 
 const cancelBooking = async (booking) => {
-  if (confirm(`Voulez-vous vraiment annuler la réservation pour "${getMovieTitle(booking.seance?.movieId)}" ?`)) {
+  if (confirm(`Voulez-vous vraiment annuler la réservation pour "${getMovieTitle(booking.seance?.movieId, booking.seance)}" ?`)) {
     try {
       await bookingsStore.cancelBooking(booking.id);
       showToast('Succès', 'Réservation annulée avec succès.');

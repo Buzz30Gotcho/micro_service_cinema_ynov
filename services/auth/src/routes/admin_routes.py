@@ -4,7 +4,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from src.models.user_model import User
 from src.services.user_service import serialize_user
 from src.services.validation_service import (
-    validate_user_register,
+    validate_admin_register,
     validate_user_update_profile,
 )
 
@@ -58,8 +58,8 @@ def get_user_by_id(user_id):
 def admin_register_user():
     data = request.get_json() or {}
 
-    # Validation logic same as regular register
-    is_valid, error_response = validate_user_register(data)
+    # Validation logic
+    is_valid, error_response = validate_admin_register(data)
     if not is_valid:
         return jsonify(error_response), 400
 
@@ -68,9 +68,6 @@ def admin_register_user():
         return jsonify({"error": "Email déjà pris"}), 409
 
     try:
-        # Create user
-        # Note: User.create doesn't support 'role' argument in current model
-        # We might need to update the user immediately if 'role' is passed
         role = data.get("role", "client")
 
         new_user = User.create(
@@ -79,13 +76,8 @@ def admin_register_user():
             data["password"],
             data.get("first_name"),
             data.get("last_name"),
+            role=role,
         )
-
-        # Manually set role if provided (since create doesn't handle it yet)
-        if role:
-            users_col.update_one(
-                {"_id": ObjectId(new_user.id)}, {"$set": {"role": role}}
-            )
 
         return jsonify({"message": "Utilisateur créé", "id": new_user.id}), 201
     except Exception as e:
@@ -97,10 +89,6 @@ def admin_register_user():
 def admin_update_user(user_id):
     data = request.get_json() or {}
     users_col = current_app.db.users
-
-    # Allow updating any field for admin
-    # Just basic validation? Or use update profile validation?
-    # Admin might want to set role, which isn't in standard update profile schema
 
     updates = {
         k: v

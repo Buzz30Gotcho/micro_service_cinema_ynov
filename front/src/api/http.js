@@ -37,7 +37,7 @@ http.interceptors.response.use(
     const url = originalRequest?.url || "";
     const authStore = useAuthStore();
 
-    // ✅ CAS 1 : ERREUR LOGIN / REGISTER → on laisse passer
+    // CASE 1: login/register error -> pass through
     if (
       status === 401 &&
       (url.includes("auth/login") || url.includes("auth/register"))
@@ -45,12 +45,12 @@ http.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // ✅ CAS 2 : 401 mais token déjà en cours de rafraîchissement
+    // CASE 2: 401 but token refresh already in progress
     if (status === 401 && originalRequest._retry) {
       return Promise.reject(error);
     }
 
-    // ✅ CAS 3 : 401 et pas encore de rafraîchissement en cours
+    // CASE 3: 401 and no refresh in progress
     if (status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise(function (resolve, reject) {

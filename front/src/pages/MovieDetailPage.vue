@@ -35,7 +35,8 @@
             <p class="text-base text-slate-300 leading-relaxed">{{ movie.description }}</p>
             <div class="flex flex-wrap gap-4">
               <button @click="goToBooking" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded transition flex items-center gap-2">
-                <span>🎟️</span> Réserver des places
+                <Ticket :size="18" />
+                <span>Réserver des places</span>
               </button>
             </div>
           </div>
@@ -112,6 +113,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useMoviesStore } from '@/stores/movies.store'
 import { storeToRefs } from 'pinia'
 import Header from '@/components/common/Header.vue'
+import { Ticket } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()

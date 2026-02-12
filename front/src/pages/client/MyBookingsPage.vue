@@ -23,14 +23,14 @@
         >
           <!-- Movie Poster -->
           <div class="w-full md:w-32 aspect-[2/3] rounded-lg overflow-hidden flex-shrink-0">
-            <img :src="getMovieImage(booking.seance?.movieId)" class="w-full h-full object-cover">
+            <img :src="getMovieImage(booking.seance?.movieId, booking.seance)" class="w-full h-full object-cover">
           </div>
 
           <!-- Booking Details -->
           <div class="flex-1">
             <div class="flex justify-between items-start">
               <div>
-                <h3 class="text-xl font-bold text-light-text">{{ getMovieTitle(booking.seance?.movieId) }}</h3>
+                <h3 class="text-xl font-bold text-light-text">{{ getMovieTitle(booking.seance?.movieId, booking.seance) }}</h3>
                 <p class="text-muted-text text-sm mt-1">
                   {{ booking.seance?.salleId || 'Salle inconnue' }} &bull; {{ formatDateTime(booking.seance?.dateSeance) }}
                 </p>
@@ -116,16 +116,18 @@ onMounted(async () => {
   ])
 })
 
-const getMovieTitle = (movieId) => {
-  if (!movieId) return 'Film inconnu'
+const getMovieTitle = (movieId, seance) => {
+  if (!movieId) return seance?.nameMovie || 'Film inconnu'
   const movie = moviesStore.movies.find(m => String(m.id) === movieId)
-  return movie?.title || 'Titre non trouve'
+  return movie?.title || seance?.nameMovie || 'Titre non trouve'
 }
 
-const getMovieImage = (movieId) => {
-  if (!movieId) return 'https://via.placeholder.com/100x150'
-  const movie = moviesStore.movies.find(m => String(m.id) === movieId)
-  return movie?.image || 'https://via.placeholder.com/100x150'
+const getMovieImage = (movieId, seance) => {
+  if (movieId) {
+    const movie = moviesStore.movies.find(m => String(m.id) === movieId)
+    return movie?.image || 'https://via.placeholder.com/100x150'
+  }
+  return 'https://via.placeholder.com/100x150'
 }
 
 const formatDateTime = (dateTimeString) => {

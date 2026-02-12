@@ -4,8 +4,8 @@
 
       <!-- Logo -->
       <router-link to="/" class="flex items-center gap-3 cursor-pointer">
-        <div class="w-11 h-11 rounded-md bg-blue-600 flex items-center justify-center text-slate-950 font-bold">
-          🎬
+        <div class="w-11 h-11 rounded-md bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-center">
+          <img :src="logoUrl" alt="Central Cinema" class="w-8 h-8 object-contain" />
         </div>
         <span class="text-lg font-semibold tracking-wide">
           CENTRAL CINEMA
@@ -67,6 +67,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
+import logoUrl from '@/assets/logo.png'
 
 const router = useRouter()
 const authStore = useAuthStore()

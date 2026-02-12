@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { Seance, Reservation } from './entities';
 import { SeanceModule } from './seance/seance.module';
 import { ReservationModule } from './reservation/reservation.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ReservationModule } from './reservation/reservation.module';
     }),
     SeanceModule,
     ReservationModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

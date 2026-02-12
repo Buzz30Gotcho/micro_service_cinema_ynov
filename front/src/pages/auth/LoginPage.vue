@@ -5,10 +5,8 @@
     <div class="w-full max-w-md">
       <!-- Logo -->
       <div class="text-center mb-10">
-        <div
-          class="w-20 h-20 mx-auto rounded-lg bg-blue-600 flex items-center justify-center text-slate-950 text-4xl font-bold shadow-lg mb-4"
-        >
-          🎬
+        <div class="w-20 h-20 mx-auto rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shadow-lg mb-4">
+          <img :src="logoUrl" alt="Central Cinema" class="w-12 h-12 object-contain" />
         </div>
         <h1 class="text-3xl font-bold mb-1 text-slate-100">CENTRAL CINEMA</h1>
         <p class="text-slate-400 text-sm">Réservez en un click</p>
@@ -20,7 +18,12 @@
       >
         <!-- Header -->
         <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold mb-2 text-slate-100">Bienvenue 👋</h2>
+          <h2 class="text-2xl font-bold mb-2 text-slate-100">
+            <span class="inline-flex items-center gap-2">
+              <Sparkles :size="20" />
+              Bienvenue
+            </span>
+          </h2>
           <p class="text-slate-400 text-sm">
             Connectez-vous pour réserver vos places
           </p>
@@ -60,7 +63,8 @@
                 @click="showPassword = !showPassword"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-400 transition"
               >
-                {{ showPassword ? "👁️" : "👁️‍🗨️" }}
+                <EyeOff v-if="showPassword" :size="18" />
+                <Eye v-else :size="18" />
               </button>
             </div>
           </div>
@@ -75,11 +79,9 @@
           </div>
 
           <!-- Error -->
-          <div
-            v-if="error"
-            class="p-3 bg-red-900/20 border border-red-500/30 rounded text-red-400 text-sm flex items-center gap-2"
-          >
-            ⚠️ <span>{{ error }}</span>
+          <div v-if="error" class="p-3 bg-red-900/20 border border-red-500/30 rounded text-red-400 text-sm flex items-center gap-2">
+            <AlertTriangle :size="16" />
+            <span>{{ error }}</span>
           </div>
 
           <!-- Submit -->
@@ -88,8 +90,14 @@
             :disabled="loading"
             class="w-full py-3 bg-blue-600 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/50 disabled:bg-slate-700 disabled:cursor-not-allowed text-slate-950 font-bold rounded-lg transition transform hover:scale-105"
           >
-            <span v-if="!loading">🔐 Se connecter</span>
-            <span v-else>⏳ Connexion en cours...</span>
+            <span v-if="!loading" class="inline-flex items-center gap-2">
+              <LogIn :size="16" />
+              Se connecter
+            </span>
+            <span v-else class="inline-flex items-center gap-2">
+              <Loader2 :size="16" class="animate-spin" />
+              Connexion en cours...
+            </span>
           </button>
         </form>
 
@@ -133,9 +141,11 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth.store";
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store'
+import { AlertTriangle, Eye, EyeOff, Loader2, LogIn, Sparkles } from 'lucide-vue-next'
+import logoUrl from '@/assets/logo.png'
 
 const router = useRouter();
 const authStore = useAuthStore();

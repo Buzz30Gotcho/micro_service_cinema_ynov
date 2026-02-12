@@ -5,10 +5,8 @@
     <div class="w-full max-w-md">
       <!-- Logo -->
       <div class="text-center mb-10">
-        <div
-          class="w-20 h-20 mx-auto rounded-lg bg-blue-600 flex items-center justify-center text-slate-950 text-4xl font-bold shadow-lg mb-4"
-        >
-          🎬
+        <div class="w-20 h-20 mx-auto rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shadow-lg mb-4">
+          <img :src="logoUrl" alt="Central Cinema" class="w-12 h-12 object-contain" />
         </div>
         <h1 class="text-3xl font-bold mb-1 text-slate-100">CENTRAL CINEMA</h1>
         <p class="text-slate-400 text-sm">Réservez en un click</p>
@@ -21,7 +19,10 @@
         <!-- Header -->
         <div class="text-center mb-8">
           <h2 class="text-2xl font-bold mb-2 text-slate-100">
-            Créer un compte ✍️
+            <span class="inline-flex items-center gap-2">
+              <UserPlus :size="20" />
+              Créer un compte
+            </span>
           </h2>
           <p class="text-slate-400 text-sm">
             Rejoignez-nous et commencez à réserver vos places
@@ -92,7 +93,8 @@
                 @click="showPassword = !showPassword"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-400 transition"
               >
-                {{ showPassword ? "👁️" : "👁️‍🗨️" }}
+                <EyeOff v-if="showPassword" :size="18" />
+                <Eye v-else :size="18" />
               </button>
             </div>
           </div>
@@ -121,23 +123,20 @@
                 @click="showConfirmPassword = !showConfirmPassword"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-400 transition"
               >
-                {{ showConfirmPassword ? "👁️" : "👁️‍🗨️" }}
+                <EyeOff v-if="showConfirmPassword" :size="18" />
+                <Eye v-else :size="18" />
               </button>
             </div>
-            <p
-              v-if="formData.confirmPassword.length > 0"
-              class="text-xs mt-1"
-              :class="
-                formData.confirmPassword === formData.password
-                  ? 'text-green-400'
-                  : 'text-red-400'
-              "
-            >
-              {{
-                formData.confirmPassword === formData.password
-                  ? "✅ Les mots de passe correspondent"
-                  : "❌ Les mots de passe ne correspondent pas"
-              }}
+            <p v-if="formData.confirmPassword.length > 0" class="text-xs mt-1"
+               :class="formData.confirmPassword === formData.password ? 'text-green-400' : 'text-red-400'">
+              <span v-if="formData.confirmPassword === formData.password" class="inline-flex items-center gap-2">
+                <CheckCircle :size="14" />
+                Les mots de passe correspondent
+              </span>
+              <span v-else class="inline-flex items-center gap-2">
+                <XCircle :size="14" />
+                Les mots de passe ne correspondent pas
+              </span>
             </p>
           </div>
 
@@ -151,19 +150,15 @@
           </div>
 
           <!-- Error -->
-          <div
-            v-if="error"
-            class="p-3 bg-red-900/20 border border-red-500/30 rounded text-red-400 text-sm flex items-center gap-2"
-          >
-            ⚠️ <span>{{ error }}</span>
+          <div v-if="error" class="p-3 bg-red-900/20 border border-red-500/30 rounded text-red-400 text-sm flex items-center gap-2">
+            <AlertTriangle :size="16" />
+            <span>{{ error }}</span>
           </div>
 
           <!-- Success -->
-          <div
-            v-if="success"
-            class="p-3 bg-green-900/20 border border-green-500/30 rounded text-green-400 text-sm flex items-center gap-2"
-          >
-            ✅ <span>Compte créé avec succès ! Redirection...</span>
+          <div v-if="success" class="p-3 bg-green-900/20 border border-green-500/30 rounded text-green-400 text-sm flex items-center gap-2">
+            <CheckCircle :size="16" />
+            <span>Compte créé avec succès ! Redirection...</span>
           </div>
 
           <!-- Submit -->
@@ -174,8 +169,14 @@
             "
             class="w-full py-3 bg-blue-600 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/50 disabled:bg-slate-700 disabled:cursor-not-allowed text-slate-950 font-bold rounded-lg transition transform hover:scale-105"
           >
-            <span v-if="!loading">✍️ S'inscrire</span>
-            <span v-else>⏳ Inscription en cours...</span>
+            <span v-if="!loading" class="inline-flex items-center gap-2">
+              <UserPlus :size="16" />
+              S'inscrire
+            </span>
+            <span v-else class="inline-flex items-center gap-2">
+              <Loader2 :size="16" class="animate-spin" />
+              Inscription en cours...
+            </span>
           </button>
         </form>
 
@@ -202,9 +203,11 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth.store";
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store'
+import { AlertTriangle, CheckCircle, Eye, EyeOff, Loader2, UserPlus, XCircle } from 'lucide-vue-next'
+import logoUrl from '@/assets/logo.png'
 
 const router = useRouter();
 const authStore = useAuthStore();

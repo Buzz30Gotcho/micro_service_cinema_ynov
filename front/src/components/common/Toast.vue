@@ -16,8 +16,8 @@
         ]"
       >
         <div class="flex-shrink-0 text-xl">
-          <span v-if="type === 'success'">✅</span>
-          <span v-if="type === 'error'">❌</span>
+          <CheckCircle v-if="type === 'success'" :size="20" />
+          <XCircle v-if="type === 'error'" :size="20" />
         </div>
         <div class="flex-1">
           <p class="font-bold">{{ title }}</p>
@@ -33,6 +33,7 @@
 
 <script setup>
 import { onMounted, onUnmounted } from 'vue';
+import { CheckCircle, XCircle } from 'lucide-vue-next';
 
 const props = defineProps({
   visible: {
