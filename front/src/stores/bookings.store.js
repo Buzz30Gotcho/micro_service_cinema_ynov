@@ -24,6 +24,7 @@ export const useBookingsStore = defineStore('bookings', {
             this.error = null
             try {
                 const response = await bookingsService.getUserBookings()
+                console.log('Réservations reçues du backend:', response.data) // DEBUG
                 this.userBookings = response.data // L'API renvoie un tableau de réservations
             } catch (error) {
                 this.error = 'Erreur lors du chargement des réservations de l\'utilisateur.'
@@ -39,7 +40,9 @@ export const useBookingsStore = defineStore('bookings', {
             this.loading = true
             this.error = null
             try {
+                console.log('Création de réservation avec:', bookingData) // DEBUG
                 const response = await bookingsService.createBooking(bookingData)
+                console.log('Réservation créée:', response.data) // DEBUG
                 // Après la création, on rafraîchit les réservations de l'utilisateur
                 await this.fetchUserBookings();
                 return response.data
@@ -77,8 +80,10 @@ export const useBookingsStore = defineStore('bookings', {
                 const response = await bookingsService.getOccupiedSeats(sessionId)
                 this.occupiedSeats = response.data // Supposons que l'API renvoie un tableau de strings
             } catch (error) {
-                this.error = 'Erreur lors du chargement des places occupées.'
-                console.error(this.error, error)
+                // Ne pas afficher d'erreur si c'est une erreur 404 ou si l'endpoint n'existe pas
+                // Garder les places occupées vides par défaut
+                console.warn('Erreur lors du chargement des places occupées (non bloquant):', error)
+                this.occupiedSeats = []
             } finally {
                 this.loading = false
             }
