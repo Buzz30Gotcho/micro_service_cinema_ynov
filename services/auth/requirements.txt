@@ -6,3 +6,4 @@ flask_login
 datetime
 cryptography
 flask-cors
+PyJWT==2.9.0
