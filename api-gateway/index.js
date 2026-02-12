@@ -45,6 +45,11 @@ const services = [
     pathRewrite: { "^/movies": "/catalogue/movies" },
   },
   {
+    route: "/films",
+    target: process.env.CATALOG_URL || "http://127.0.0.1:4001",
+    pathRewrite: { "^/films": "/catalogue/movies" },
+  },
+  {
     route: "/sessions/health",
     target: process.env.BOOKING_URL || "http://127.0.0.1:4003",
     pathRewrite: { "^/sessions/health": "/health" },
@@ -56,6 +61,11 @@ const services = [
   {
     route: "/reservation",
     target: process.env.BOOKING_URL || "http://127.0.0.1:4003",
+  },
+  {
+    route: "/seance",
+    target: process.env.BOOKING_URL || "http://127.0.0.1:4003",
+    pathRewrite: { "^/seance": "/sessions" },
   },
   {
     route: "/admin",

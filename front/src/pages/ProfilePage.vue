@@ -395,7 +395,6 @@ const saveProfile = async () => {
     showToast('Succès', 'Votre profil a été mis à jour avec succès.');
   } catch (error) {
     const errorMessage = error.response?.data?.message || error.message || 'Veuillez réessayer.';
-    console.error('Failed to update profile:', error);
     showToast('Erreur', `La mise à jour du profil a échoué: ${errorMessage}`, 'error');
   }
 }

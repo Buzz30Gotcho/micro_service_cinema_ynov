@@ -18,7 +18,6 @@ export const useUsersStore = defineStore('users', {
                 this.users = response.data
             } catch (error) {
                 this.error = error.response?.data?.message || error.message || 'Une erreur inconnue est survenue.'
-                console.error('Erreur lors du chargement des utilisateurs:', error.response?.data || error.message, error)
             } finally {
                 this.loading = false
             }
@@ -34,7 +33,6 @@ export const useUsersStore = defineStore('users', {
                 await this.fetchUsers()
             } catch (error) {
                 this.error = error.response?.data?.message || error.message
-                console.error('Erreur lors de la création de l\'utilisateur:', error)
                 throw error // Propage l'erreur pour la gérer dans le composant (ex: afficher un message)
             } finally {
                 this.loading = false
@@ -56,7 +54,6 @@ export const useUsersStore = defineStore('users', {
                 return response.data
             } catch (error) {
                 this.error = error.response?.data?.message || error.message
-                console.error('Erreur lors de la mise à jour de lutilisateur: ', error)
                 throw error
             } finally {
                 this.loading = false
@@ -72,7 +69,6 @@ export const useUsersStore = defineStore('users', {
                 this.users = this.users.filter(u => u.id !== id)
             } catch (error) {
                 this.error = error.response?.data?.message || error.message
-                console.error('Erreur lors de la suppression de lutilisateur:', error)
                 throw error
             } finally {
                 this.loading = false

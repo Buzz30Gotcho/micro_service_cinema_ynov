@@ -91,15 +91,17 @@ def create_app(config_class=Config):
             if identity:
                 claims = get_jwt() or {}
                 email = claims.get("email")
-                # créer un nouveau token et l'envoyer dans l'en-tête de réponse
-                new_token = (
-                    create_access_token(
-                        identity=identity, additional_claims={"email": email}
+                # ne pas écraser le token s'il a déjà été défini par la route (ex: /login ou /me)
+                if "X-Access-Token" not in response.headers:
+                    # créer un nouveau token et l'envoyer dans l'en-tête de réponse
+                    new_token = (
+                        create_access_token(
+                            identity=identity, additional_claims={"email": email}
+                        )
+                        if email
+                        else None
                     )
-                    if email
-                    else None
-                )
-                response.headers["X-Access-Token"] = new_token
+                    response.headers["X-Access-Token"] = new_token
         except Exception:
             # token absent, invalide ou erreur context JWT -> on ne fait rien
             pass

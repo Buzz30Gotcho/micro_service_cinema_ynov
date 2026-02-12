@@ -2,16 +2,32 @@ import { defineStore } from 'pinia'
 import sessionsService from '@/api/sessions.service'
 import { useMoviesStore } from '@/stores/movies.store'
 
+const computeDuration = (start, end) => {
+  if (!start || !end) return null
+  const [h1, m1] = String(start).split(':').map(Number)
+  const [h2, m2] = String(end).split(':').map(Number)
+  let s = h1 * 60 + (m1 || 0)
+  let e = h2 * 60 + (m2 || 0)
+  if (e <= s) e += 24 * 60
+  return e - s
+}
+
+const countReservedSeats = (reservations = []) => {
+  return reservations.reduce((sum, reservation) => {
+    const seats = (reservation?.seatNumber || '')
+      .split(',')
+      .map((seat) => seat.trim())
+      .filter(Boolean)
+    return sum + (seats.length > 0 ? seats.length : 1)
+  }, 0)
+}
+
 const normalizeSession = (session, movies) => {
-  const computeDuration = (start, end) => {
-    if (!start || !end) return null;
-    const [h1, m1] = String(start).split(':').map(Number);
-    const [h2, m2] = String(end).split(':').map(Number);
-    let s = h1 * 60 + (m1 || 0);
-    let e = h2 * 60 + (m2 || 0);
-    if (e <= s) e += 24 * 60;
-    return e - s;
-  };
+  const reservations = session.reservations ?? []
+  const capacity = Number(session.capacity ?? session.numberPlace ?? 0)
+  const bookedSeats = Number.isFinite(session.booked)
+    ? Number(session.booked)
+    : countReservedSeats(reservations)
 
   const normalized = {
     id: session.id,
@@ -22,16 +38,17 @@ const normalizeSession = (session, movies) => {
     hourStart: session.hourStart ?? session.time ?? null,
     hourEnd: session.hourEnd ?? null,
     room: session.room ?? session.salleId ?? '',
-    capacity: session.capacity ?? session.numberPlace ?? 0,
+    capacity,
     price: session.price ?? null,
-    booked: session.booked ?? (session.reservations?.length ?? 0),
+    booked: bookedSeats,
+    availableSeats: Math.max(capacity - bookedSeats, 0),
     duration: session.duration ?? computeDuration(session.hourStart ?? session.time, session.hourEnd),
-    reservations: session.reservations ?? [],
+    reservations,
   }
 
-  // If movieId is not already set, try to find it from the movies catalog
+  // Fill movieId from title when backend only returns nameMovie
   if (!normalized.movieId && normalized.nameMovie && movies) {
-    const movie = movies.find(m => m.title === normalized.nameMovie)
+    const movie = movies.find((m) => m.title === normalized.nameMovie)
     if (movie) {
       normalized.movieId = String(movie.id)
     }
@@ -62,9 +79,9 @@ export const useSessionsStore = defineStore('sessions', {
       else if (dateLabel === 'Demain') targetDate = formatDate(tomorrow)
       else targetDate = dateLabel
 
-      const filtered = state.sessions.filter(s => {
-        if (!s.date) return false
-        const sessionDate = s.date.split('T')[0]
+      const filtered = state.sessions.filter((session) => {
+        if (!session.date) return false
+        const sessionDate = session.date.split('T')[0]
         return sessionDate === targetDate
       })
 
@@ -79,7 +96,8 @@ export const useSessionsStore = defineStore('sessions', {
       return Object.values(groups)
     },
 
-    getSessionById: (state) => (id) => state.sessions.find(session => session.id === id),
+    getSessionById: (state) => (id) =>
+      state.sessions.find((session) => session.id == id || session.id === String(id)),
   },
 
   actions: {
@@ -90,14 +108,13 @@ export const useSessionsStore = defineStore('sessions', {
         const response = await sessionsService.getAllSessions()
         const rawSessions = response.data || []
 
-        // Fetch movies to enrich session data with movieId
         const moviesStore = useMoviesStore()
         if (moviesStore.movies.length === 0) {
           await moviesStore.fetchMovies()
         }
         const movies = moviesStore.movies
 
-        this.sessions = rawSessions.map(session => normalizeSession(session, movies))
+        this.sessions = rawSessions.map((session) => normalizeSession(session, movies))
       } catch (e) {
         this.error = 'Erreur lors du chargement des seances.'
         console.error(e)
@@ -143,7 +160,7 @@ export const useSessionsStore = defineStore('sessions', {
       this.error = null
       try {
         await sessionsService.deleteSession(id)
-        this.sessions = this.sessions.filter(s => s.id !== id)
+        this.sessions = this.sessions.filter((session) => session.id !== id)
       } catch (e) {
         this.error = 'Erreur lors de la suppression de la seance.'
         console.error(e)
