@@ -9,8 +9,7 @@ const API_BASE_URL = "http://localhost:3030"; // URL de base de l'API gateway
 const http = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: false,
-})
-
+});
 
 // --- Intercepteur de REQUÊTE ---
 http.interceptors.request.use(
@@ -30,69 +29,29 @@ http.interceptors.request.use(
 // Gère le renouvellement du token et les erreurs 401
 
 http.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Check for new token in headers
+    const token = response.headers["x-access-token"];
+    if (token) {
+      localStorage.setItem("token", token);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`; // Update default header
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
     const status = error.response?.status;
-    const url = originalRequest?.url || "";
     const authStore = useAuthStore();
 
-    // CASE 1: login/register error -> pass through
-    if (
-      status === 401 &&
-      (url.includes("auth/login") || url.includes("auth/register"))
-    ) {
+    if (status === 401) {
+      // Token expired or invalid
+      console.warn("Session expirée ou invalide (401). Déconnexion...");
+      authStore.logout();
       return Promise.reject(error);
-    }
-
-    // CASE 2: 401 but token refresh already in progress
-    if (status === 401 && originalRequest._retry) {
-      return Promise.reject(error);
-    }
-
-    // CASE 3: 401 and no refresh in progress
-    if (status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise(function (resolve, reject) {
-          failedQueue.push({ resolve, reject, originalRequest });
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        // Supposons une route de rafraîchissement de token existante sur le backend
-        // Ou, si le backend n'a pas de route de rafraîchissement explicite,
-        // cette partie devrait être adaptée pour re-log l'utilisateur ou le déconnecter.
-        // Pour cet exemple, je vais simuler un appel à un endpoint de rafraîchissement.
-        // En l'absence d'un vrai endpoint, cela déclenchera un logout.
-        const refreshResponse = await axios.post(`${API_BASE_URL}/auth/refresh`); // Endpoint hypothétique
-
-        const newToken = refreshResponse.data.access_token;
-        localStorage.setItem("token", newToken);
-        axios.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
-
-        failedQueue.forEach((promise) => {
-          promise.originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-          promise.resolve(axios(promise.originalRequest));
-        });
-
-        failedQueue = [];
-        return axios(originalRequest);
-      } catch (refreshError) {
-        // Le rafraîchissement du token a échoué, déconnecter l'utilisateur
-        console.error("Échec du rafraîchissement du token:", refreshError);
-        authStore.logout(); // Appeler la fonction de déconnexion du store
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
     }
 
     return Promise.reject(error);
-  }
-)
-
+  },
+);
 
 export default http;
