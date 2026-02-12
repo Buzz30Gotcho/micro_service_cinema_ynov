@@ -76,7 +76,7 @@ services:
       DB_NAME: booking_db
       DB_USER: booking_user
       DB_PASSWORD: booking_pass
-      SECRET_KEY: "WccWLBLrDHoCg0qmFRNsuvISjPv1KKi18MpD6XiXREVvpURA2qnDX1WmRuCwHnA76UV7hiZgA3qU6ppK2yyV-A"
+      SECRET_KEY: "8t-Bk_TGKGZ-RC0X5RvG6wvG2Pd13vHIS4LHJEi01rDcYjcrUrCVFpQH9sHi5aW7E9xQvr_BJaXZqD6H6TBhTw"
     ports:
       - "4003:4003"
 

@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const { createProxyMiddleware } = require('http-proxy-middleware');
@@ -35,6 +35,9 @@ services.forEach(({ route, target }) => {
             onProxyReq: (proxyReq, req) => {
                 if (req.headers.cookie) {
                     proxyReq.setHeader('cookie', req.headers.cookie);
+                }
+                if (req.headers.authorization) {
+                    proxyReq.setHeader('Authorization', req.headers.authorization);
                 }
             }
         })
