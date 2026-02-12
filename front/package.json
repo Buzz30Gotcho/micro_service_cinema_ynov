@@ -15,7 +15,8 @@
     "pinia": "^3.0.4",
     "tailwindcss": "^3.4.1",
     "vue": "^3.5.25",
-    "axios": "^1.7.9"
+    "axios": "^1.7.9",
+    "lucide-vue-next": "^0.474.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",

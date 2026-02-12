@@ -4,8 +4,8 @@
 
       <!-- Logo -->
       <div class="text-center mb-10">
-        <div class="w-20 h-20 mx-auto rounded-lg bg-blue-600 flex items-center justify-center text-slate-950 text-4xl font-bold shadow-lg mb-4">
-          🎬
+        <div class="w-20 h-20 mx-auto rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shadow-lg mb-4">
+          <img :src="logoUrl" alt="Central Cinema" class="w-12 h-12 object-contain" />
         </div>
         <h1 class="text-3xl font-bold mb-1 text-slate-100">CENTRAL CINEMA</h1>
         <p class="text-slate-400 text-sm">Votre cinéma en ligne</p>
@@ -49,13 +49,15 @@
           </div>
 
           <!-- Success Message -->
-          <div v-if="success" class="p-3 bg-green-900/20 border border-green-500/30 rounded text-green-400 text-sm">
-            ✅ Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.
+          <div v-if="success" class="p-3 bg-green-900/20 border border-green-500/30 rounded text-green-400 text-sm flex items-center gap-2">
+            <CheckCircle :size="16" />
+            <span>Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.</span>
           </div>
 
           <!-- Error Message -->
-          <div v-if="error" class="p-3 bg-red-900/20 border border-red-500/30 rounded text-red-400 text-sm">
-            ⚠️ {{ error }}
+          <div v-if="error" class="p-3 bg-red-900/20 border border-red-500/30 rounded text-red-400 text-sm flex items-center gap-2">
+            <AlertTriangle :size="16" />
+            <span>{{ error }}</span>
           </div>
 
           <!-- Submit -->
@@ -65,7 +67,10 @@
             class="w-full py-3 bg-blue-600 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/50 disabled:bg-slate-700 disabled:cursor-not-allowed text-slate-950 font-bold rounded-lg transition transform hover:scale-105"
           >
             <span v-if="!loading">Réinitialiser le mot de passe</span>
-            <span v-else>⏳ Enregistrement...</span>
+            <span v-else class="inline-flex items-center gap-2">
+              <Loader2 :size="16" class="animate-spin" />
+              Enregistrement...
+            </span>
           </button>
 
         </form>
@@ -80,6 +85,8 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
+import { AlertTriangle, CheckCircle, Loader2 } from 'lucide-vue-next'
+import logoUrl from '@/assets/logo.png'
 
 const route = useRoute()
 const router = useRouter()

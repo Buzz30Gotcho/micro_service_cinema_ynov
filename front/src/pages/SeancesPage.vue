@@ -50,7 +50,7 @@
               <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-text mb-4">
                 <span>{{ movie.genre }}</span>
                 <span>• {{ movie.duration }} min</span>
-                <span>• ⭐ {{ movie.rating }}</span>
+                <span class="inline-flex items-center gap-1">• <Star :size="14" /> {{ movie.rating }}</span>
               </div>
               <p class="text-light-text text-sm line-clamp-2">{{ movie.description }}</p>
             </div>
@@ -90,6 +90,7 @@ import { useSessionsStore } from '@/stores/sessions.store'
 import { useMoviesStore } from '@/stores/movies.store'
 import Header from '@/components/common/Header.vue'
 import Footer from '@/components/common/Footer.vue'
+import { Star } from 'lucide-vue-next'
 
 const router = useRouter()
 const sessionsStore = useSessionsStore()

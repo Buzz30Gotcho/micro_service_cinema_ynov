@@ -52,14 +52,14 @@
             <h3 class="font-semibold mb-4">Statistiques</h3>
             <div class="space-y-3 text-sm">
               <div class="flex items-center gap-3">
-                <span class="text-2xl">🎬</span>
+                <Film :size="20" class="text-slate-200" />
                 <div>
                   <div class="font-semibold">{{ user.moviesWatched }}</div>
                   <div class="text-slate-400 text-xs">Films vus</div>
                 </div>
               </div>
               <div class="flex items-center gap-3">
-                <span class="text-2xl">⭐</span>
+                <Star :size="20" class="text-yellow-400" />
                 <div>
                   <div class="font-semibold">{{ user.favoriteGenre }}</div>
                   <div class="text-slate-400 text-xs">Genre préféré</div>
@@ -135,7 +135,10 @@
                         @click="downloadTicket(booking)"
                         class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-semibold transition"
                       >
-                        📥 Télécharger
+                        <span class="inline-flex items-center gap-2">
+                          <Download :size="16" />
+                          Télécharger
+                        </span>
                       </button>
                       <button
                         @click="cancelBooking(booking)"
@@ -150,7 +153,9 @@
             </div>
 
             <div v-if="upcomingBookings.length === 0" class="text-center py-12 text-slate-400">
-              <div class="text-6xl mb-4">🎬</div>
+              <div class="flex justify-center mb-4">
+                <Film :size="40" class="text-slate-500" />
+              </div>
               <p>Aucune réservation à venir</p>
               <router-link to="/seances" class="inline-block mt-4 text-blue-400 hover:underline">
                 Parcourir les séances →
@@ -191,7 +196,9 @@
               </div>
             </div>
              <div v-if="pastBookings.length === 0" class="text-center py-12 text-slate-400">
-              <div class="text-6xl mb-4">📜</div>
+              <div class="flex justify-center mb-4">
+                <ScrollText :size="40" class="text-slate-500" />
+              </div>
               <p>Aucune réservation passée</p>
             </div>
           </div>
@@ -276,6 +283,7 @@ import { storeToRefs } from 'pinia'
 import Header from '@/components/common/Header.vue'
 import Footer from '@/components/common/Footer.vue'
 import Toast from '@/components/common/Toast.vue'
+import { Download, Film, ScrollText, Star } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
 const bookingsStore = useBookingsStore()
@@ -403,7 +411,7 @@ const saveProfile = async () => {
 
 // Actions
 const downloadTicket = (booking) => {
-  alert(`📥 Le téléchargement du billet pour ${getMovieTitle(booking.seance.movieId, booking.seance)} n'est pas encore implémenté.`)
+  alert(`Le téléchargement du billet pour ${getMovieTitle(booking.seance.movieId, booking.seance)} n'est pas encore implémenté.`)
 }
 
 const cancelBooking = async (booking) => {
