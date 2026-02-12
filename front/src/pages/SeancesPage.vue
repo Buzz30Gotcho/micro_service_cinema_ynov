@@ -40,7 +40,7 @@
           <!-- Movie header -->
           <div class="flex flex-col sm:flex-row gap-6 p-6">
                       <img 
-                        :src="movie.poster" 
+                        :src="movie.image" 
                         :alt="movie.title"
                         class="w-full sm:w-32 h-48 sm:h-auto object-cover rounded-lg cursor-pointer"
                         @click="goToMovieDetail(movie.id)"

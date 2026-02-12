@@ -125,8 +125,7 @@ const getMovieTitle = (movieId) => {
 const getMovieImage = (movieId) => {
   if (!movieId) return 'https://via.placeholder.com/100x150'
   const movie = moviesStore.movies.find(m => String(m.id) === movieId)
-  const posterPath = movie?.posterPath?.startsWith('http') ? movie.posterPath : `/${movie?.posterPath}`
-  return movie?.posterPath ? posterPath : 'https://via.placeholder.com/100x150'
+  return movie?.image || 'https://via.placeholder.com/100x150'
 }
 
 const formatDateTime = (dateTimeString) => {

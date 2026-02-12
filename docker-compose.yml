@@ -67,6 +67,8 @@ services:
     container_name: ms-cinema-booking
     depends_on:
       - postgres
+    env_file:
+      - ./services/auth/.env
     environment:
       APP_PORT: "4003"
       DB_HOST: postgres
