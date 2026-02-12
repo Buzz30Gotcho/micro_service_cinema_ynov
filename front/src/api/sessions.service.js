@@ -3,6 +3,9 @@ import http from './http'
 
 // Ce service communique avec le microservice des sessions/réservations
 export const sessionsService = {
+    // === SÉANCES PUBLIQUES ===
+    getAllSessions: () => http.get('/sessions'),
+
     // === ADMINISTRATION DES SÉANCES ===
 
     // Récupérer toutes les séances

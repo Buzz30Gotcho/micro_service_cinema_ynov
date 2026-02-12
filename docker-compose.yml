@@ -105,8 +105,8 @@ services:
       - "3030:3030"
     environment:
       - AUTH_URL=http://auth_api:4002
-      - CATALOG_URL=http://ms-cinema-catalog:4001
-      - BOOKING_URL=http://ms-cinema-booking:4003
+      - CATALOG_URL=http://catalog:4001
+      - BOOKING_URL=http://booking:4003
     depends_on:
       - auth_api
       - catalog

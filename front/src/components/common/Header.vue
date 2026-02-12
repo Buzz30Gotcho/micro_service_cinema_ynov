@@ -17,6 +17,7 @@
         <router-link to="/films" class="hover:text-white transition">Films</router-link>
         <router-link to="/seances" class="hover:text-white transition">Séances</router-link>
         <router-link to="/tarifs" class="hover:text-white transition">Tarifs</router-link>
+        <router-link v-if="authStore.isAuthenticated" to="/client/my-bookings" class="hover:text-white transition">Mes réservations</router-link>
         <router-link v-if="authStore.isAdmin" to="/admin/dashboard" class="hover:text-white transition">Administration</router-link>
       </nav>
 
@@ -31,8 +32,8 @@
               {{ initials }}
             </div>
             <div class="leading-tight">
-              <p class="text-slate-100 font-semibold truncate max-w-[160px]">{{ authStore.currentUser?.name || 'Utilisateur' }}</p>
-              <p class="text-slate-400 text-xs truncate max-w-[160px]">{{ authStore.currentUser?.email }}</p>
+              <p class="text-slate-100 font-semibold truncate max-w-[160px]">{{ authStore.currentUser?.name }}</p>
+
             </div>
           </router-link>
           <button

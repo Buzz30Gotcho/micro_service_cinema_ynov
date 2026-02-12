@@ -20,7 +20,7 @@
               </div>
               <div>
                 <h2 class="text-xl font-bold">{{ user.name }}</h2>
-                <p class="text-sm text-slate-400">{{ user.email }}</p>
+
               </div>
             </div>
 
@@ -71,8 +71,14 @@
 
         <!-- Main content -->
         <div class="lg:col-span-2 space-y-6">
+          <!-- Loading State -->
+          <div v-if="bookingsLoading" class="text-center py-12 text-slate-400">
+            <i class="fa-solid fa-spinner animate-spin text-2xl"></i>
+            <p>Chargement des réservations...</p>
+          </div>
+
           <!-- Tabs -->
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-1 flex text-sm font-medium">
+          <div v-else class="bg-slate-900 border border-slate-800 rounded-xl p-1 flex text-sm font-medium">
             <button
               @click="activeTab = 'upcoming'"
               :class="[
@@ -94,43 +100,36 @@
           </div>
 
           <!-- Upcoming bookings -->
-          <div v-if="activeTab === 'upcoming'" class="space-y-4">
+          <div v-if="!bookingsLoading && activeTab === 'upcoming'" class="space-y-4">
             <div
               v-for="booking in upcomingBookings"
               :key="booking.id"
               class="bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-blue-500/50 transition"
             >
               <div class="flex gap-6">
-                <div
-                  class="w-24 h-32 bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg flex items-center justify-center font-black text-white text-center text-sm p-2"
-                >
-                  {{ booking.movieTitle }}
-                </div>
-
                 <div class="flex-1">
-                  <h3 class="text-xl font-bold mb-2">{{ booking.movieTitle }}</h3>
+                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId) }}</h3>
                   
                   <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
                       <span class="text-slate-400">Date</span>
-                      <div class="font-semibold">{{ booking.date }}</div>
+                      <div class="font-semibold">{{ formatDateTime(booking.seance.dateTime).date }}</div>
                     </div>
                     <div>
                       <span class="text-slate-400">Heure</span>
-                      <div class="font-semibold">{{ booking.time }}</div>
+                      <div class="font-semibold">{{ formatDateTime(booking.seance.dateTime).time }}</div>
                     </div>
                     <div>
                       <span class="text-slate-400">Salle</span>
-                      <div class="font-semibold">Salle {{ booking.room }}</div>
+                      <div class="font-semibold">Salle {{ booking.seance.room }}</div>
                     </div>
                     <div>
-                      <span class="text-slate-400">Places</span>
-                      <div class="font-semibold">{{ booking.seats }} place(s)</div>
+                      <span class="text-slate-400">Place</span>
+                      <div class="font-semibold">{{ booking.seatNumber }}</div>
                     </div>
                   </div>
 
-                  <div class="flex items-center justify-between">
-                    <div class="text-2xl font-bold text-blue-400">{{ booking.total }} €</div>
+                  <div class="flex items-center justify-end">
                     <div class="flex gap-2">
                       <button
                         @click="downloadTicket(booking)"
@@ -160,51 +159,40 @@
           </div>
 
           <!-- Past bookings -->
-          <div v-if="activeTab === 'past'" class="space-y-4">
+          <div v-if="!bookingsLoading && activeTab === 'past'" class="space-y-4">
             <div
               v-for="booking in pastBookings"
               :key="booking.id"
               class="bg-slate-900 border border-slate-800 rounded-xl p-6 opacity-75"
             >
               <div class="flex gap-6">
-                <div
-                  class="w-24 h-32 bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg flex items-center justify-center font-black text-white text-center text-sm p-2"
-                >
-                  {{ booking.movieTitle }}
-                </div>
-
                 <div class="flex-1">
-                  <h3 class="text-xl font-bold mb-2">{{ booking.movieTitle }}</h3>
+                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId) }}</h3>
                   
                   <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
                       <span class="text-slate-400">Date</span>
-                      <div class="font-semibold">{{ booking.date }}</div>
+                      <div class="font-semibold">{{ formatDateTime(booking.seance.dateTime).date }}</div>
                     </div>
                     <div>
                       <span class="text-slate-400">Heure</span>
-                      <div class="font-semibold">{{ booking.time }}</div>
+                      <div class="font-semibold">{{ formatDateTime(booking.seance.dateTime).time }}</div>
                     </div>
                     <div>
                       <span class="text-slate-400">Salle</span>
-                      <div class="font-semibold">Salle {{ booking.room }}</div>
+                      <div class="font-semibold">Salle {{ booking.seance.room }}</div>
                     </div>
                     <div>
-                      <span class="text-slate-400">Places</span>
-                      <div class="font-semibold">{{ booking.seats }} place(s)</div>
+                      <span class="text-slate-400">Place</span>
+                      <div class="font-semibold">{{ booking.seatNumber }}</div>
                     </div>
-                  </div>
-
-                  <div class="flex items-center justify-between">
-                    <div class="text-2xl font-bold text-slate-500">{{ booking.total }} €</div>
-                    <button
-                      class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-semibold transition"
-                    >
-                      ⭐ Noter le film
-                    </button>
                   </div>
                 </div>
               </div>
+            </div>
+             <div v-if="pastBookings.length === 0" class="text-center py-12 text-slate-400">
+              <div class="text-6xl mb-4">📜</div>
+              <p>Aucune réservation passée</p>
             </div>
           </div>
         </div>
@@ -280,13 +268,31 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
+import { useBookingsStore } from '@/stores/bookings.store'
+import { useMoviesStore } from '@/stores/movies.store'
+import { storeToRefs } from 'pinia'
 import Header from '@/components/common/Header.vue'
 import Footer from '@/components/common/Footer.vue'
 import Toast from '@/components/common/Toast.vue'
 
 const authStore = useAuthStore()
+const bookingsStore = useBookingsStore()
+const moviesStore = useMoviesStore()
+
+// Reactive state from stores
+const { userBookings: bookings, loading: bookingsLoading, error: bookingsError } = storeToRefs(bookingsStore)
+const { movies, loading: moviesLoading } = storeToRefs(moviesStore)
+
+// Fetch data on component mount
+onMounted(() => {
+  bookingsStore.fetchUserBookings();
+  if (movies.value.length === 0) {
+    moviesStore.fetchMovies();
+  }
+});
+
 
 // Toast state
 const toast = ref({
@@ -312,7 +318,7 @@ const user = ref({
   favoriteGenre: authStore.currentUser?.favoriteGenre || 'Science-Fiction',
 });
 
-// Keep the local user ref in sync with the store in case it's changed elsewhere
+// Keep the local user ref in sync with the store
 watch(() => authStore.currentUser, (newUser) => {
   if (newUser) {
     user.value.firstName = newUser.firstName;
@@ -332,22 +338,33 @@ const userInitials = computed(() => {
 // Tabs
 const activeTab = ref('upcoming')
 
-// Mock bookings data
-const bookings = ref([
-  { id: 1, movieTitle: 'Hyperdrive', date: '21 Janvier 2026', time: '21:00', room: 5, seats: 2, total: '25.00', status: 'upcoming' },
-  { id: 2, movieTitle: 'Nocturne', date: '23 Janvier 2026', time: '19:30', room: 3, seats: 3, total: '37.50', status: 'upcoming' },
-  { id: 3, movieTitle: 'Lumières de la Ville', date: '15 Janvier 2026', time: '20:45', room: 3, seats: 2, total: '25.00', status: 'past' },
-  { id: 4, movieTitle: 'Océan Bleu', date: '10 Janvier 2026', time: '15:30', room: 4, seats: 1, total: '12.50', status: 'past' },
-  { id: 5, movieTitle: 'Atlas', date: '5 Janvier 2026', time: '18:00', room: 2, seats: 4, total: '50.00', status: 'past' }
-])
-
+// Computed properties for filtering real bookings
 const upcomingBookings = computed(() => {
-  return bookings.value.filter(b => b.status === 'upcoming')
-})
+  const now = new Date();
+  return bookings.value.filter(b => b.seance && new Date(b.seance.dateTime) >= now);
+});
 
 const pastBookings = computed(() => {
-  return bookings.value.filter(b => b.status === 'past')
-})
+  const now = new Date();
+  return bookings.value.filter(b => b.seance && new Date(b.seance.dateTime) < now);
+});
+
+// Helper function to get movie title from movieId
+const getMovieTitle = (movieId) => {
+  if (!movies.value || movies.value.length === 0) return 'Chargement...';
+  const movie = movies.value.find(m => String(m.id) === movieId);
+  return movie ? movie.title : 'Film inconnu';
+};
+
+// Helper to format date and time
+const formatDateTime = (dateTimeString) => {
+  if (!dateTimeString) return { date: 'N/A', time: 'N/A' };
+  const dateObj = new Date(dateTimeString);
+  return {
+    date: dateObj.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }),
+    time: dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+  };
+};
 
 // Edit profile
 const showEditModal = ref(false)
@@ -374,9 +391,6 @@ const saveProfile = async () => {
       last_name: editForm.value.lastName,
     };
     await authStore.updateUser(userData);
-
-    // After successful update, the store's `currentUser` is updated.
-    // The watch above will catch the change and update our local `user` ref.
     showEditModal.value = false;
     showToast('Succès', 'Votre profil a été mis à jour avec succès.');
   } catch (error) {
@@ -388,13 +402,17 @@ const saveProfile = async () => {
 
 // Actions
 const downloadTicket = (booking) => {
-  alert(`📥 Téléchargement du billet pour ${booking.movieTitle}`)
+  alert(`📥 Le téléchargement du billet pour ${getMovieTitle(booking.seance.movieId)} n'est pas encore implémenté.`)
 }
 
-const cancelBooking = (booking) => {
-  if (confirm(`Voulez-vous vraiment annuler la réservation pour "${booking.movieTitle}" ?`)) {
-    bookings.value = bookings.value.filter(b => b.id !== booking.id)
-    alert('✅ Réservation annulée avec succès')
+const cancelBooking = async (booking) => {
+  if (confirm(`Voulez-vous vraiment annuler la réservation pour "${getMovieTitle(booking.seance.movieId)}" ?`)) {
+    try {
+      await bookingsStore.cancelBooking(booking.id);
+      showToast('Succès', 'Réservation annulée avec succès.');
+    } catch (error) {
+      showToast('Erreur', 'L\'annulation de la réservation a échoué.', 'error');
+    }
   }
 }
 </script>

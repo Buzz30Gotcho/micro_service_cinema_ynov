@@ -90,12 +90,7 @@
           </p>
         </div>
 
-        <!-- Demo Credentials -->
-        <div class="mt-6 p-4 bg-slate-800/50 border border-slate-700 rounded-lg text-xs text-slate-400">
-          <p class="font-semibold mb-2 text-slate-300">🧪 Identifiants de démonstration :</p>
-          <p><strong class="text-blue-400">Admin:</strong> admin@test.com / password</p>
-          <p><strong class="text-blue-400">Client:</strong> user@test.com / password</p>
-        </div>
+
 
       </div>
 

@@ -5,8 +5,9 @@ const API_BASE_URL = "http://localhost:3030"; // URL de base de l'API gateway
 
 const http = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true,
-});
+  withCredentials: false,
+})
+
 
 // --- Intercepteur de REQUÊTE ---
 http.interceptors.request.use(
@@ -44,18 +45,35 @@ http.interceptors.response.use(
     }
 
     // ✅ CAS 2 : TOKEN EXPIRÉ SUR UNE ROUTE PROTÉGÉE
+    // et n'est pas déjà une requête de rafraîchissement
+    // ✅ CAS 2 : TOKEN EXPIRÉ SUR UNE ROUTE PROTÉGÉE
+    // ✅ CAS 2 : TOKEN EXPIRÉ SUR UNE ROUTE PROTÉGÉE
     if (status === 401 && !originalRequest._retry) {
-      // Éviter la boucle infinie : si on est déjà en train de se déconnecter, on arrête
-      if (url.includes("auth/logout")) {
-        return Promise.reject(error);
+<<<<<<< HEAD
+      if (isRefreshing) {
+        return new Promise(function (resolve, reject) {
+          failedQueue.push({ resolve, reject })
+        })
+          .then(token => {
+            return http(originalRequest)
+          })
+          .catch(err => {
+            return Promise.reject(err)
+          })
+=======
+            // Éviter la boucle infinie : si on est déjà en train de se déconnecter, on arrête
+            if (url.includes('auth/logout')) {
+                return Promise.reject(error)
+>>>>>>> 1cf8e5bd31db6f9506d832b1176ca9ac1e16ec52
       }
 
-      originalRequest._retry = true;
-      await authStore.logout();
-      return Promise.reject(error);
+      originalRequest._retry = true
+      await authStore.logout()
+      return Promise.reject(error)
     }
-    return Promise.reject(error);
-  },
-);
+    return Promise.reject(error)
+  }
+)
+
 
 export default http;

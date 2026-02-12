@@ -1,18 +1,15 @@
 import { defineStore } from 'pinia'
-// import bookingsService from '@/api/bookings.service'
-
-// --- MOCK DATA ---
-// Les réservations de l'utilisateur seront stockées ici en mémoire.
-const mockUserBookings = [];
-// --- FIN MOCK DATA ---
+import bookingsService from '@/api/bookings.service'
 
 export const useBookingsStore = defineStore('bookings', {
     state: () => ({
         bookings: [], // Pourrait être utilisé par un admin
-        userBookings: mockUserBookings,
+        userBookings: [],
         selectedBooking: null,
         loading: false,
-        error: null
+        error: null,
+        occupiedSeats: [], // Nouvelle propriété pour stocker les places occupées
+
     }),
 
     getters: {
@@ -21,39 +18,33 @@ export const useBookingsStore = defineStore('bookings', {
     },
 
     actions: {
-        // Simule la récupération des réservations de l'utilisateur connecté
+        // Récupère les réservations de l'utilisateur connecté via le service backend
         async fetchUserBookings() {
             this.loading = true
             this.error = null
             try {
-                await new Promise(resolve => setTimeout(resolve, 300))
-                // Les données sont déjà dans le state, donc on ne fait rien de plus.
-                // Dans un vrai cas, on affecterait la réponse de l'API ici.
-                this.userBookings = mockUserBookings;
+                const response = await bookingsService.getUserBookings()
+                this.userBookings = response.data // L'API renvoie un tableau de réservations
             } catch (error) {
-                this.error = 'Erreur simulée lors du chargement des réservations.'
+                this.error = 'Erreur lors du chargement des réservations de l\'utilisateur.'
+                this.userBookings = [] // En cas d'erreur (ex: 404), vider la liste
                 console.error(this.error, error)
             } finally {
                 this.loading = false
             }
         },
 
-        // Simule la création d'une nouvelle réservation
+        // Crée une nouvelle réservation via le service backend
         async createBooking(bookingData) {
             this.loading = true
             this.error = null
             try {
-                await new Promise(resolve => setTimeout(resolve, 500))
-                const newBooking = {
-                    id: Date.now(), // ID unique simple pour le mock
-                    ...bookingData,
-                    bookingDate: new Date().toISOString()
-                }
-                mockUserBookings.unshift(newBooking) // Ajoute au début de la liste
-                this.userBookings = mockUserBookings
-                return newBooking
+                const response = await bookingsService.createBooking(bookingData)
+                // Après la création, on rafraîchit les réservations de l'utilisateur
+                await this.fetchUserBookings();
+                return response.data
             } catch (error) {
-                this.error = 'Erreur simulée lors de la création de la réservation.'
+                this.error = 'Erreur lors de la création de la réservation.'
                 console.error(this.error, error)
                 throw error
             } finally {
@@ -61,21 +52,33 @@ export const useBookingsStore = defineStore('bookings', {
             }
         },
 
-        // Simule l'annulation d'une réservation
+        // Annule une réservation
         async cancelBooking(id) {
             this.loading = true
             this.error = null
             try {
-                await new Promise(resolve => setTimeout(resolve, 500))
-                const index = mockUserBookings.findIndex(b => b.id === id)
-                if (index > -1) {
-                    mockUserBookings.splice(index, 1)
-                    this.userBookings = mockUserBookings;
-                }
+                await bookingsService.cancelBooking(id)
+                // Après l'annulation, on rafraîchit la liste des réservations
+                await this.fetchUserBookings()
             } catch (error) {
-                this.error = 'Erreur simulée lors de l\'annulation.'
+                this.error = 'Erreur lors de l\'annulation de la réservation.'
                 console.error(this.error, error)
                 throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        // Nouvelle action pour récupérer les places occupées pour une séance
+        async fetchOccupiedSeats(sessionId) {
+            this.loading = true
+            this.error = null
+            try {
+                const response = await bookingsService.getOccupiedSeats(sessionId)
+                this.occupiedSeats = response.data // Supposons que l'API renvoie un tableau de strings
+            } catch (error) {
+                this.error = 'Erreur lors du chargement des places occupées.'
+                console.error(this.error, error)
             } finally {
                 this.loading = false
             }

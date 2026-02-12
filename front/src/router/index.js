@@ -79,6 +79,12 @@ const routes = [
         meta: { requiresAuth: false }
     },
     {
+        path: '/reserver/:sessionId',
+        name: 'Reservation',
+        component: ClientBookingPage,
+        meta: { requiresAuth: true }
+    },
+    {
         path: '/profil',
         name: 'Profile',
         component: ProfilePage,

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Seance } from '../entities/seance.entity';
+import { Reservation } from '../entities/reservation.entity'; // Import Reservation entity
 import { SeanceDto } from '../dto/seance.dto';
 
 @Injectable()
@@ -9,6 +10,8 @@ export class SeanceService {
   constructor(
     @InjectRepository(Seance)
     private readonly seanceRepository: Repository<Seance>,
+    @InjectRepository(Reservation) // Inject Reservation Repository
+    private readonly reservationRepository: Repository<Reservation>, // To fetch specific reservation details if needed, or simply rely on Seance.reservations
   ) {}
 
   async findAll(): Promise<Seance[]> {
@@ -42,5 +45,25 @@ export class SeanceService {
     if (result.affected === 0) {
       throw new NotFoundException(`Seance with ID ${id} not found`);
     }
+  }
+
+  async findOccupiedSeats(seanceId: string): Promise<string[]> {
+    const seance = await this.seanceRepository.findOne({
+      where: { id: seanceId },
+      relations: ['reservations'], // Assurez-vous que les réservations sont chargées
+    });
+
+    if (!seance) {
+      throw new NotFoundException(`Seance with ID ${seanceId} not found`);
+    }
+
+    const occupiedSeats: string[] = [];
+    seance.reservations.forEach(reservation => {
+      if (reservation.seatNumber) {
+        occupiedSeats.push(reservation.seatNumber);
+      }
+    });
+
+    return [...new Set(occupiedSeats)]; // Retourne les places uniques
   }
 }

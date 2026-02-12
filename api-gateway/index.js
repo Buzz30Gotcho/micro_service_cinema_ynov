@@ -12,6 +12,7 @@ app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true
 }));
+
 app.options('*', cors({
     origin: 'http://localhost:5173',
     credentials: true
@@ -20,7 +21,7 @@ app.options('*', cors({
 // --- Proxy vers microservices
 const services = [
     { route: '/auth', target: process.env.AUTH_URL || 'http://127.0.0.1:4002' },
-    { route: '/catalogue', target: process.env.CATALOG_URL || 'http://127.0.0.1:4001' },
+    { route: ['/films', '/movies'], target: process.env.CATALOG_URL || 'http://127.0.0.1:4001' },
     { route: '/sessions', target: process.env.BOOKING_URL || 'http://127.0.0.1:4003' },
 ];
 

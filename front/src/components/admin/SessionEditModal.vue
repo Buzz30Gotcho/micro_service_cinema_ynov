@@ -20,22 +20,26 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold mb-1 text-slate-300">Date</label>
-              <input v-model="form.date" type="date" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
+              <input v-model="form.dateSeance" type="date" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
             </div>
             <div>
               <label class="block text-sm font-semibold mb-1 text-slate-300">Horaire (HH:MM)</label>
-              <input v-model="form.time" type="time" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
+              <input v-model="form.hourStart" type="time" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
             </div>
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="block text-sm font-semibold mb-1 text-slate-300">Salle</label>
-              <input v-model="form.room" type="text" placeholder="Ex: Salle 1" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
+              <label class="block text-sm font-semibold mb-1 text-slate-300">ID de la Salle</label>
+              <input v-model="form.salleId" type="text" placeholder="Ex: SALLE_01" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
             </div>
             <div>
               <label class="block text-sm font-semibold mb-1 text-slate-300">Capacité</label>
-              <input v-model="form.capacity" type="number" min="0" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
+              <input v-model="form.numberPlace" type="number" min="0" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1 text-slate-300">Prix (€)</label>
+              <input v-model="form.price" type="number" min="0" step="0.01" required class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
             </div>
           </div>
 
@@ -88,14 +92,20 @@ watch(() => props.modelValue, (newValue) => {
   error.value = '';
   if (newValue) {
     if (isEditing.value) {
-      form.value = { ...props.session };
+      // For editing, we map the entity to the form model
+      form.value = { 
+        ...props.session,
+        movieId: props.session.movieId // Assuming the entity has movieId
+      };
     } else {
+      // For creating, we initialize with backend-aligned keys
       form.value = {
         movieId: null,
-        date: new Date().toISOString().split('T')[0],
-        time: '14:00',
-        room: '',
-        capacity: 100
+        dateSeance: new Date().toISOString().split('T')[0],
+        hourStart: '14:00',
+        salleId: '',
+        numberPlace: 100,
+        price: 9.99
       };
     }
   }
@@ -108,15 +118,35 @@ function closeModal() {
 async function submitForm() {
   loading.value = true;
   error.value = '';
+  
+  // Find the selected movie to get its title
+  const selectedMovie = moviesStore.movies.find(m => m.id === form.value.movieId);
+  if (!selectedMovie) {
+    error.value = 'Veuillez sélectionner un film valide.';
+    loading.value = false;
+    return;
+  }
+
+  // Construct the payload that matches the backend DTO
+  const payload = {
+    nameMovie: selectedMovie.title,
+    numberPlace: form.value.numberPlace,
+    hourStart: form.value.hourStart,
+    dateSeance: form.value.dateSeance,
+    salleId: form.value.salleId,
+    price: form.value.price,
+  };
+
   try {
     if (isEditing.value) {
-      await sessionsStore.updateSession(form.value.id, form.value);
+      // Note: The update payload might need adjustments similar to create
+      await sessionsStore.updateSession(form.value.id, payload);
     } else {
-      await sessionsStore.createSession(form.value);
+      await sessionsStore.createSession(payload);
     }
     closeModal();
   } catch (err) {
-    error.value = err.message || 'Une erreur est survenue.';
+    error.value = err.response?.data?.message || err.message || 'Une erreur est survenue.';
   } finally {
     loading.value = false;
   }

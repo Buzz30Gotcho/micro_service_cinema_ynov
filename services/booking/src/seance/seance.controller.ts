@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Delete, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, Param, Put } from '@nestjs/common';
 import { SeanceDto } from '../dto/seance.dto';
 import { SeanceService } from './seance.service';
 import { Seance } from '../entities/seance.entity';
 
-@Controller('seance')
+@Controller('sessions')
 export class SeanceController {
   constructor(private readonly seanceService: SeanceService) {}
 
@@ -17,9 +17,19 @@ export class SeanceController {
     return this.seanceService.findOne(id);
   }
 
+  @Get(':id/occupied-seats')
+  async findOccupiedSeats(@Param('id') id: string): Promise<string[]> {
+    return this.seanceService.findOccupiedSeats(id);
+  }
+
   @Post()
   async create(@Body() seanceDto: SeanceDto): Promise<Seance> {
     return this.seanceService.create(seanceDto);
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() seanceDto: Partial<SeanceDto>): Promise<Seance> {
+    return this.seanceService.update(id, seanceDto);
   }
 
   @Delete(':id')

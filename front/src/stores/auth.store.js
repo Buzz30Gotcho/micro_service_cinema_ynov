@@ -52,7 +52,11 @@ export const useAuthStore = defineStore("auth", {
         const response = await authService.register(userData);
         return response.data;
       } catch (error) {
-        this.error = error.response?.data?.message || error.message;
+        if (error.response?.status === 409) {
+          this.error = 'Cet email est déjà utilisé.';
+        } else {
+          this.error = error.response?.data?.message || error.message;
+        }
         throw error;
       } finally {
         this.loading = false;
@@ -128,6 +132,7 @@ export const useAuthStore = defineStore("auth", {
         this.user = null;
         this.isAuthenticated = false;
         this.isAdmin = false;
+        localStorage.removeItem("token"); // Clear token on fetchProfile failure
         throw error;
       } finally {
         this.loading = false;
@@ -218,6 +223,14 @@ export const useAuthStore = defineStore("auth", {
 
     // INITIALIZEAUTH: Always tries to fetch the user profile now
     async initializeAuth() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.log("Initialisation échouée: Aucun token trouvé.");
+        this.user = null;
+        this.isAuthenticated = false;
+        this.isAdmin = false;
+        return;
+      }
       try {
         await this.fetchProfile();
       } catch (error) {

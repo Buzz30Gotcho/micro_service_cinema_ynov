@@ -4,10 +4,10 @@ import http from './http'
 // Microservice Movies: Gestion du catalogue de films
 export const moviesService = {
     // Récupérer tous les films
-    getMovies: () => http.get('/movies'),
+    getMovies: () => http.get('/films'),
 
     // Récupérer un film spécifique
-    getMovieById: (id) => http.get(`/movies/${id}`),
+    getMovieById: (id) => http.get(`/films/${id}`),
 
     // Créer un nouveau film (Admin)
     createMovie: (movieData) => http.post('/movies', movieData),
@@ -16,7 +16,7 @@ export const moviesService = {
     updateMovie: (id, movieData) => http.put(`/movies/${id}`, movieData),
 
     // Supprimer un film (Admin)
-    deleteMovie: (id) => http.delete('/movies/${id}'),
+    deleteMovie: (id) => http.delete(`/movies/${id}`),
 
     // Obtenir les statistiques des films
     getMovieStats: () => http.get('/movies/stats/all')

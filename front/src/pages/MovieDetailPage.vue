@@ -1,14 +1,7 @@
 <template>
   <div class="bg-slate-950 text-slate-100 min-h-screen">
     
-    <!-- Bouton Retour -->
-    <div class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur border-b border-slate-800">
-      <div class="flex items-center justify-between px-6 md:px-12 py-3">
-        <button @click="goBack" class="px-4 py-2 rounded-md border border-slate-700 hover:border-blue-500 hover:text-blue-400 transition">
-          ← Retour aux films
-        </button>
-      </div>
-    </div>
+    <Header />
 
     <!-- Loading and Error States -->
     <div v-if="loading" class="text-center py-24 text-slate-400">Chargement du film...</div>
@@ -20,10 +13,10 @@
     <!-- Main Content -->
     <div v-if="movie && !loading">
       <!-- Hero Section -->
-      <section class="relative h-[50vh] overflow-hidden">
+      <section class="relative h-[30vh] overflow-hidden">
         <div class="absolute inset-0">
           <div class="w-full h-full bg-cover bg-center opacity-30" 
-              :style="{ backgroundImage: `url('${movie.image}')` }">
+              :style="{ backgroundImage: `url('${movie.poster}')` }">
           </div>
           <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent"></div>
           <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
@@ -98,7 +91,7 @@
           <h2 class="text-2xl font-semibold mb-4">Films similaires</h2>
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             <div v-for="similar in similarMovies" :key="similar.id" @click="goToMovie(similar.id)" class="group cursor-pointer">
-              <div class="relative aspect-[2/3] rounded overflow-hidden bg-cover bg-center" :style="{ backgroundImage: `url('${similar.image}')` }">
+              <div class="relative aspect-[2/3] rounded overflow-hidden bg-cover bg-center" :style="{ backgroundImage: `url('${similar.poster}')` }">
                 <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2 md:p-3">
                   <h3 class="font-semibold text-sm mb-1">{{ similar.title }}</h3>
                   <p class="text-xs text-slate-300">{{ similar.genre }}</p>
@@ -118,6 +111,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMoviesStore } from '@/stores/movies.store'
 import { storeToRefs } from 'pinia'
+import Header from '@/components/common/Header.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -160,7 +154,6 @@ const similarMovies = computed(() => {
 })
 
 // Navigation functions
-const goBack = () => router.go(-1)
 const goToBooking = () => {
   if (movie.value) {
     router.push(`/client/booking?movieId=${movie.value.id}`)
