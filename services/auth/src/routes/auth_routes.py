@@ -71,8 +71,9 @@ def login():
             pass
 
         # Génère un JWT
-        access_token = create_access_token(identity=user.id,
-                                           additional_claims={"email": user.email})
+        access_token = create_access_token(
+            identity=user.id, additional_claims={"email": user.email, "role": user.role}
+        )
         return (
             jsonify({"message": "Connecté avec succès", "access_token": access_token}),
             200,
@@ -109,7 +110,10 @@ def me():
         return jsonify({"error": "Utilisateur non trouvé"}), 404
 
     # 1. Génération du nouveau token ici
-    new_access_token = create_access_token(identity=identity)
+    role = user_doc.get("role", "user")
+    new_access_token = create_access_token(
+        identity=identity, additional_claims={"role": role}
+    )
 
     # 2. Décodage du nouveau token pour obtenir sa date d'expiration
     decoded_token = decode_token(new_access_token)
@@ -212,16 +216,16 @@ def get_all_users():
     """
     current_user_id = get_jwt_identity()
     users_col = current_app.db.users
-    
+
     # Verify if the current user is an admin
     admin_user = users_col.find_one({"_id": ObjectId(current_user_id)})
-    if not admin_user or admin_user.get("role") != "admin":
+    if not admin_user or admin_user.get("role") not in ["admin"]:
         return jsonify({"error": "Accès administrateur requis"}), 403
 
     # Fetch all users
     all_users_cursor = users_col.find({})
-    
+
     # Serialize each user in the list
     serialized_users = [serialize_user(user) for user in all_users_cursor]
-    
+
     return jsonify(serialized_users), 200

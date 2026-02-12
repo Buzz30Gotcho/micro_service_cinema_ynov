@@ -68,9 +68,6 @@ def admin_register_user():
         return jsonify({"error": "Email déjà pris"}), 409
 
     try:
-        # Create user
-        # Note: User.create doesn't support 'role' argument in current model
-        # We might need to update the user immediately if 'role' is passed
         role = data.get("role", "client")
 
         new_user = User.create(
@@ -79,13 +76,8 @@ def admin_register_user():
             data["password"],
             data.get("first_name"),
             data.get("last_name"),
+            role=role,
         )
-
-        # Manually set role if provided (since create doesn't handle it yet)
-        if role:
-            users_col.update_one(
-                {"_id": ObjectId(new_user.id)}, {"$set": {"role": role}}
-            )
 
         return jsonify({"message": "Utilisateur créé", "id": new_user.id}), 201
     except Exception as e:
@@ -97,10 +89,6 @@ def admin_register_user():
 def admin_update_user(user_id):
     data = request.get_json() or {}
     users_col = current_app.db.users
-
-    # Allow updating any field for admin
-    # Just basic validation? Or use update profile validation?
-    # Admin might want to set role, which isn't in standard update profile schema
 
     updates = {
         k: v
