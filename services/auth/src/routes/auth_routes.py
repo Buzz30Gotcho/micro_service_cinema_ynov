@@ -110,7 +110,7 @@ def me():
         return jsonify({"error": "Utilisateur non trouvé"}), 404
 
     # 1. Génération du nouveau token ici
-    role = user_doc.get("role", "user")
+    role = user_doc.get("role", "client")
     new_access_token = create_access_token(
         identity=identity, additional_claims={"role": role}
     )

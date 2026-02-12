@@ -5,6 +5,11 @@ USER_SCHEMA_REGISTER = {
     "optional": ["first_name", "last_name", "role"],
 }
 
+USER_SCHEMA_ADMIN_REGISTER = {
+    "required": ["email", "password"],
+    "optional": ["first_name", "last_name", "role", "password_confirm"],
+}
+
 USER_SCHEMA_LOGIN = {
     "required": ["email", "password"],
     "optional": [],
@@ -85,7 +90,7 @@ def validate_payload(payload: dict, schema: Dict[str, List[str]]) -> Tuple[bool,
 
 def validate_user_register(payload: dict) -> Tuple[bool, Dict]:
     """Valide un payload pour l'enregistrement d'un nouvel utilisateur."""
-    is_valid,error = validate_payload(payload, USER_SCHEMA_REGISTER)
+    is_valid, error = validate_payload(payload, USER_SCHEMA_REGISTER)
     if not is_valid:
         return False, error
     # verifier que password et password_confirm sont identiques
@@ -104,3 +109,20 @@ def validate_user_login(payload: dict) -> Tuple[bool, Dict]:
 def validate_user_update_profile(payload: dict) -> Tuple[bool, Dict]:
     """Valide un payload pour la mise à jour du profil utilisateur."""
     return validate_payload(payload, USER_SCHEMA_UPDATE_PROFILE)
+
+
+def validate_admin_register(payload: dict) -> Tuple[bool, Dict]:
+    """Valide un payload pour l'enregistrement admin d'un nouvel utilisateur."""
+    is_valid, error = validate_payload(payload, USER_SCHEMA_ADMIN_REGISTER)
+    if not is_valid:
+        return False, error
+
+    # Si password_confirm est fourni, on vérifie la correspondance
+    if "password_confirm" in payload:
+        if payload.get("password") != payload.get("password_confirm"):
+            return False, {"error": "Les mots de passe ne correspondent pas."}
+
+    if len(payload.get("password", "")) < 3:
+        return False, {"error": "Le mot de passe doit contenir au moins 3 caractères."}
+
+    return True, {}

@@ -4,7 +4,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from src.models.user_model import User
 from src.services.user_service import serialize_user
 from src.services.validation_service import (
-    validate_user_register,
+    validate_admin_register,
     validate_user_update_profile,
 )
 
@@ -58,8 +58,8 @@ def get_user_by_id(user_id):
 def admin_register_user():
     data = request.get_json() or {}
 
-    # Validation logic same as regular register
-    is_valid, error_response = validate_user_register(data)
+    # Validation logic
+    is_valid, error_response = validate_admin_register(data)
     if not is_valid:
         return jsonify(error_response), 400
 

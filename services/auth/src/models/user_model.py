@@ -17,7 +17,7 @@ class User(UserMixin):
         self.password_hash = user_data.get("password")
         self.first_name = user_data.get("first_name")
         self.last_name = user_data.get("last_name")
-        self.role = user_data.get("role", "user")
+        self.role = user_data.get("role", "client")
 
     @staticmethod
     def get_by_id(collection, user_id):
@@ -44,7 +44,7 @@ class User(UserMixin):
 
     @staticmethod
     def create(
-        collection, email, password, first_name=None, last_name=None, role="user"
+        collection, email, password, first_name=None, last_name=None, role="client"
     ):
         """
         Crée un nouvel utilisateur.
