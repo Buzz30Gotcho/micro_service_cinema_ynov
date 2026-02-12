@@ -2,31 +2,22 @@
 import http from './http'
 
 // Ce service communique avec le microservice booking (NestJS) via l'API gateway
-// Le gateway proxy /sessions → booking:4003
-// Le booking service expose /seance et /reservation
+// Le gateway proxy /sessions -> booking:4003 (pas de reecriture, matches @Controller('sessions'))
 export const sessionsService = {
-    // === ADMINISTRATION DES SÉANCES ===
+    // Recuperer toutes les seances
+    getAllSessions: () => http.get('/sessions'),
 
-    // Récupérer toutes les séances
-    adminGetSessions: () => http.get('/sessions/seance'),
+    // Recuperer une seance specifique par son ID
+    getSessionById: (id) => http.get(`/sessions/${id}`),
 
-    // Récupérer une séance spécifique par son ID
-    adminGetSessionById: (id) => http.get(`/sessions/seance/${id}`),
+    // Creer une nouvelle seance
+    createSession: (sessionData) => http.post('/sessions', sessionData),
 
-    // Créer une nouvelle séance
-    createSession: (sessionData) => http.post('/sessions/seance', sessionData),
+    // Mettre a jour une seance
+    updateSession: (id, sessionData) => http.put(`/sessions/${id}`, sessionData),
 
-    // Mettre à jour une séance
-    updateSession: (id, sessionData) => http.put(`/sessions/seance/${id}`, sessionData),
-
-    // Supprimer une séance
-    deleteSession: (id) => http.delete(`/sessions/seance/${id}`),
-
-    // === RÉSERVATIONS ===
-    getReservations: () => http.get('/sessions/reservation'),
-    getReservationById: (id) => http.get(`/sessions/reservation/${id}`),
-    createReservation: (data) => http.post('/sessions/reservation', data),
-    deleteReservation: (id) => http.delete(`/sessions/reservation/${id}`),
+    // Supprimer une seance
+    deleteSession: (id) => http.delete(`/sessions/${id}`),
 
     // Health check
     health: () => http.get('/sessions/hello'),

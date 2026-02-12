@@ -39,15 +39,14 @@
         >
           <!-- Movie header -->
           <div class="flex flex-col sm:flex-row gap-6 p-6">
-            <img 
-              :src="movie.image" 
-              :alt="movie.title"
-              class="w-full sm:w-32 h-48 sm:h-auto object-cover rounded-lg cursor-pointer"
-              @click="goToMovie(movie.id)"
-            />
-
+                      <img 
+                        :src="movie.poster" 
+                        :alt="movie.title"
+                        class="w-full sm:w-32 h-48 sm:h-auto object-cover rounded-lg cursor-pointer"
+                        @click="goToMovieDetail(movie.id)"
+                      />
             <div class="flex-1">
-              <h2 @click="goToMovie(movie.id)" class="text-2xl font-heading font-bold mb-2 cursor-pointer hover:text-primary-accent transition text-light-text">{{ movie.title }}</h2>
+              <h2 @click="goToMovieDetail(movie.id)" class="text-2xl font-heading font-bold mb-2 cursor-pointer hover:text-primary-accent transition text-light-text">{{ movie.title }}</h2>
               <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-text mb-4">
                 <span>{{ movie.genre }}</span>
                 <span>• {{ movie.duration }} min</span>
@@ -64,7 +63,7 @@
               <button
                 v-for="session in movie.sessions"
                 :key="session.id"
-                @click="goToMovie(movie.id)"
+                @click="goToSessionBooking(session.id)"
                 class="p-4 rounded-lg border-2 transition-all bg-dark-card border-dark-border hover:border-primary-accent hover:bg-dark-card/70 cursor-pointer"
               >
                 <div class="text-xl font-bold mb-1 text-light-text">{{ session.time }}</div>
@@ -96,28 +95,49 @@ const router = useRouter()
 const sessionsStore = useSessionsStore()
 const moviesStore = useMoviesStore()
 
-// Reactive state from the store
-const { loading, error } = storeToRefs(sessionsStore)
+// Reactive state from the stores
+const { sessions, loading, error } = storeToRefs(sessionsStore)
 const { movies } = storeToRefs(moviesStore)
 
-// Computed property for sessions grouped by movie and date
-const groupedSessions = computed(() => {
-  return sessionsStore.sessionsByMovie(selectedDate.value);
-});
+// --- Date Logic ---
+function formatDateISO(date) {
+  return date.toISOString().split('T')[0];
+}
 
-// Date selection logic
+const today = new Date();
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1);
+
 const dates = ref([
-  { day: 'Aujourd\'hui', value: 'Aujourd\'hui' },
-  { day: 'Demain', value: 'Demain' },
-])
-const selectedDate = ref('Aujourd\'hui')
+  { day: 'Aujourd\'hui', value: formatDateISO(today) },
+  { day: 'Demain', value: formatDateISO(tomorrow) },
+]);
+const selectedDate = ref(formatDateISO(today));
 
-// Computed property to get movies for the selected date, enriched with movie details
+// --- Computed Properties for Display ---
+
 const moviesForSelectedDate = computed(() => {
-  return groupedSessions.value.map(sessionGroup => {
-    const movie = movies.value.find(m => m.id === sessionGroup.id);
-    return movie ? { ...movie, sessions: sessionGroup.sessions } : null;
-  }).filter(Boolean); // Filter out any nulls if a movie isn't found
+  if (sessions.value.length === 0 || movies.value.length === 0) {
+    return [];
+  }
+
+  // 1. Filter sessions for the selected date
+  const todaysSessions = sessions.value.filter(session => session.date === selectedDate.value);
+
+  // 2. Group sessions by movieId
+  const sessionsByMovie = todaysSessions.reduce((acc, session) => {
+    if (!acc[session.movieId]) {
+      acc[session.movieId] = [];
+    }
+    acc[session.movieId].push(session);
+    return acc;
+  }, {});
+
+  // 3. Map and enrich with movie details
+  return Object.keys(sessionsByMovie).map(movieId => {
+    const movie = movies.value.find(m => String(m.id) === movieId);
+    return movie ? { ...movie, sessions: sessionsByMovie[movieId] } : null;
+  }).filter(Boolean); // Filter out nulls if a movie isn't found
 });
 
 const selectedDateFormatted = computed(() => {
@@ -125,16 +145,22 @@ const selectedDateFormatted = computed(() => {
     return date ? date.day.toLowerCase() : '';
 });
 
-// Fetch data on component mount
-onMounted(() => {
-  sessionsStore.fetchAllSessions()
-  if (movies.value.length === 0) { // Fetch movies if not already loaded
-    moviesStore.fetchMovies();
-  }
+// --- Lifecycle ---
+
+onMounted(async () => {
+  await Promise.all([
+    sessionsStore.fetchAllSessions(),
+    movies.value.length === 0 ? moviesStore.fetchMovies() : Promise.resolve()
+  ]);
 })
 
-// Navigation
-const goToMovie = (movieId) => {
+// --- Navigation ---
+
+const goToSessionBooking = (sessionId) => {
+  router.push(`/reserver/${sessionId}`)
+}
+
+const goToMovieDetail = (movieId) => {
   router.push(`/film/${movieId}`)
 }
 </script>

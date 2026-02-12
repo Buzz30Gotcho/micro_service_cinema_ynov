@@ -37,7 +37,7 @@ export const useMoviesStore = defineStore('movies', {
                 this.selectedMovie = response.data
                 return response.data
             } catch (error) {
-                this.error = error.response?.data?.error || 'Film non trouvé'
+                this.error = error.response?.data?.error || 'Film non trouve.'
                 console.error('Erreur lors du chargement du film:', error)
             } finally {
                 this.loading = false
@@ -49,11 +49,10 @@ export const useMoviesStore = defineStore('movies', {
             this.error = null
             try {
                 const response = await moviesService.createMovie(movieData)
-                const newMovie = response.data
-                this.movies.unshift(newMovie)
-                return newMovie
+                await this.fetchMovies()
+                return response.data
             } catch (error) {
-                this.error = error.response?.data?.error || 'Erreur lors de la création du film.'
+                this.error = error.response?.data?.error || 'Erreur lors de la creation du film.'
                 console.error(this.error, error)
                 throw error
             } finally {
@@ -66,14 +65,10 @@ export const useMoviesStore = defineStore('movies', {
             this.error = null
             try {
                 const response = await moviesService.updateMovie(id, movieData)
-                const updated = response.data
-                const index = this.movies.findIndex(m => m.id == id)
-                if (index > -1) {
-                    this.movies[index] = updated
-                }
-                return updated
+                await this.fetchMovies()
+                return response.data
             } catch (error) {
-                this.error = error.response?.data?.error || 'Erreur lors de la mise à jour du film.'
+                this.error = error.response?.data?.error || 'Erreur lors de la mise a jour du film.'
                 console.error(this.error, error)
                 throw error
             } finally {
@@ -86,7 +81,7 @@ export const useMoviesStore = defineStore('movies', {
             this.error = null
             try {
                 await moviesService.deleteMovie(id)
-                this.movies = this.movies.filter(m => m.id != id)
+                await this.fetchMovies()
             } catch (error) {
                 this.error = error.response?.data?.error || 'Erreur lors de la suppression du film.'
                 console.error(this.error, error)
@@ -101,7 +96,7 @@ export const useMoviesStore = defineStore('movies', {
                 const response = await moviesService.getMovieStats()
                 return response.data
             } catch (error) {
-                console.error('Erreur lors de la récupération des stats:', error)
+                console.error('Erreur lors de la recuperation des stats:', error)
                 throw error
             }
         }

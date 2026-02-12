@@ -37,19 +37,15 @@
                 <th class="px-6 py-4">Film</th>
                 <th class="px-6 py-4">Salle</th>
                 <th class="px-6 py-4">Date & Horaire</th>
+                <th class="px-6 py-4">Prix</th>
                 <th class="px-6 py-4">Taux de Remplissage</th>
                 <th class="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-700">
               <tr v-for="session in sessionsStore.sessions" :key="session.id" class="hover:bg-slate-700/30 transition-colors group">
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-14 bg-slate-700 rounded overflow-hidden flex-shrink-0">
-                      <img :src="getMovieImage(session.movieId)" class="w-full h-full object-cover" :alt="getMovieTitle(session.movieId)">
-                    </div>
-                    <span class="font-medium text-white">{{ getMovieTitle(session.movieId) }}</span>
-                  </div>
+                <td class="px-6 py-4 font-medium text-white">
+                  {{ session.nameMovie }}
                 </td>
                 <td class="px-6 py-4">{{ session.room }}</td>
                 <td class="px-6 py-4">
@@ -57,6 +53,9 @@
                     <span class="font-medium text-slate-200">{{ formatDate(session.date) }}</span>
                     <span class="text-slate-400 text-xs">{{ session.time }}</span>
                   </div>
+                </td>
+                <td class="px-6 py-4">
+                  {{ session.price ? `${session.price} €` : 'N/A' }}
                 </td>
                 <td class="px-6 py-4">
                   <div class="w-full max-w-[100px] bg-slate-700 rounded-full h-1.5 mb-1">
@@ -67,17 +66,17 @@
                   </div>
                   <span class="text-xs text-slate-400">{{ session.booked || 0 }} / {{ session.capacity }}</span>
                 </td>
-                <td class="px-6 py-4 text-right">
-                  <button @click="openEditModal(session)" class="text-slate-400 hover:text-blue-400 px-2 py-1" title="Modifier">
-                    <i class="fa-solid fa-pencil"></i>
+                <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                  <button @click="openEditModal(session)" class="px-3 py-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-md transition-colors" title="Modifier">
+                    Modifier
                   </button>
-                  <button @click="confirmDelete(session.id)" class="text-slate-400 hover:text-red-400 px-2 py-1" title="Supprimer">
-                    <i class="fa-solid fa-trash"></i>
+                  <button @click="confirmDelete(session.id)" class="px-3 py-1 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-md transition-colors" title="Supprimer">
+                    Supprimer
                   </button>
                 </td>
               </tr>
                <tr v-if="sessionsStore.sessions.length === 0">
-                <td colspan="5" class="text-center py-8 text-slate-400">
+                <td colspan="6" class="text-center py-8 text-slate-400">
                     Aucune séance programmée.
                 </td>
             </tr>
@@ -95,10 +94,8 @@
 import { onMounted, ref } from 'vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import SessionEditModal from '@/components/admin/SessionEditModal.vue'
-import { useMoviesStore } from '@/stores/movies.store'
 import { useSessionsStore } from '@/stores/sessions.store'
 
-const moviesStore = useMoviesStore()
 const sessionsStore = useSessionsStore()
 
 const isModalOpen = ref(false)
@@ -126,23 +123,7 @@ const confirmDelete = async (sessionId) => {
 
 onMounted(() => {
   sessionsStore.fetchAllSessions()
-  if (moviesStore.movies.length === 0) {
-    moviesStore.fetchMovies()
-  }
 })
-
-const getMovieTitle = (movieId) => {
-  // movieId is now the nameMovie string from the booking service
-  if (typeof movieId === 'string' && movieId.length > 5) return movieId
-  const movie = moviesStore.movies.find(m => m.id === movieId || m.id == movieId)
-  return movie?.title || movieId || '...'
-}
-
-const getMovieImage = (movieId) => {
-  // Try to find the movie by ID or by title (nameMovie)
-  const movie = moviesStore.movies.find(m => m.id === movieId || m.id == movieId || m.title === movieId)
-  return movie?.image || 'https://via.placeholder.com/50x70'
-}
 
 const getBookingPercentage = (session) => {
   if (!session.capacity || session.capacity === 0) return 0
@@ -150,6 +131,7 @@ const getBookingPercentage = (session) => {
 }
 
 const formatDate = (dateString) => {
+  if (!dateString) return 'Date invalide';
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   return new Date(dateString).toLocaleDateString('fr-FR', options);
 }

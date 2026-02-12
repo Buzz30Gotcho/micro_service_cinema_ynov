@@ -1,19 +1,25 @@
-// src/api/bookings.service.js
 import http from './http'
 
-// Microservice Bookings: Gestion des réservations via le booking service (NestJS)
+// Microservice Bookings: Gestion des reservations via le booking service (NestJS)
+// Gateway route: /reservation -> booking:4003 (no rewrite, matches @Controller('reservation'))
 export const bookingsService = {
-    // Récupérer toutes les réservations
-    getBookings: () => http.get('/sessions/reservation'),
+    // Recuperer toutes les reservations (Admin)
+    getBookings: () => http.get('/reservation'),
 
-    // Récupérer une réservation spécifique
-    getBookingById: (id) => http.get(`/sessions/reservation/${id}`),
+    // Recuperer les reservations de l'utilisateur connecte
+    getUserBookings: () => http.get('/reservation/my'),
 
-    // Créer une nouvelle réservation
-    createBooking: (bookingData) => http.post('/sessions/reservation', bookingData),
+    // Recuperer une reservation specifique
+    getBookingById: (id) => http.get(`/reservation/${id}`),
 
-    // Annuler une réservation
-    cancelBooking: (id) => http.delete(`/sessions/reservation/${id}`),
+    // Creer une nouvelle reservation
+    createBooking: (bookingData) => http.post('/reservation', bookingData),
+
+    // Annuler une reservation
+    cancelBooking: (id) => http.delete(`/reservation/${id}`),
+
+    // Recuperer les places occupees pour une seance (via sessions controller)
+    getOccupiedSeats: (sessionId) => http.get(`/sessions/${sessionId}/occupied-seats`)
 }
 
 export default bookingsService

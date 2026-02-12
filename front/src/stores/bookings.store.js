@@ -7,7 +7,8 @@ export const useBookingsStore = defineStore('bookings', {
         userBookings: [],
         selectedBooking: null,
         loading: false,
-        error: null
+        error: null,
+        occupiedSeats: [],
     }),
 
     getters: {
@@ -20,11 +21,11 @@ export const useBookingsStore = defineStore('bookings', {
             this.loading = true
             this.error = null
             try {
-                const response = await bookingsService.getBookings()
-                this.bookings = response.data || []
-                this.userBookings = this.bookings
+                const response = await bookingsService.getUserBookings()
+                this.userBookings = response.data || []
             } catch (error) {
-                this.error = 'Erreur lors du chargement des réservations.'
+                this.error = 'Erreur lors du chargement des reservations.'
+                this.userBookings = []
                 console.error(this.error, error)
             } finally {
                 this.loading = false
@@ -36,12 +37,10 @@ export const useBookingsStore = defineStore('bookings', {
             this.error = null
             try {
                 const response = await bookingsService.createBooking(bookingData)
-                const newBooking = response.data
-                this.bookings.unshift(newBooking)
-                this.userBookings = this.bookings
-                return newBooking
+                await this.fetchUserBookings()
+                return response.data
             } catch (error) {
-                this.error = error.response?.data?.message || 'Erreur lors de la création de la réservation.'
+                this.error = error.response?.data?.message || 'Erreur lors de la creation de la reservation.'
                 console.error(this.error, error)
                 throw error
             } finally {
@@ -54,12 +53,25 @@ export const useBookingsStore = defineStore('bookings', {
             this.error = null
             try {
                 await bookingsService.cancelBooking(id)
-                this.bookings = this.bookings.filter(b => b.id !== id)
-                this.userBookings = this.bookings
+                await this.fetchUserBookings()
             } catch (error) {
-                this.error = 'Erreur lors de l\'annulation.'
+                this.error = 'Erreur lors de l annulation de la reservation.'
                 console.error(this.error, error)
                 throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async fetchOccupiedSeats(sessionId) {
+            this.loading = true
+            this.error = null
+            try {
+                const response = await bookingsService.getOccupiedSeats(sessionId)
+                this.occupiedSeats = response.data || []
+            } catch (error) {
+                this.error = 'Erreur lors du chargement des places occupees.'
+                console.error(this.error, error)
             } finally {
                 this.loading = false
             }

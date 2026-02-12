@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const { createProxyMiddleware } = require("http-proxy-middleware");
@@ -47,7 +47,10 @@ const services = [
   {
     route: "/sessions",
     target: process.env.BOOKING_URL || "http://127.0.0.1:4003",
-    pathRewrite: { "^/sessions": "" },
+  },
+  {
+    route: "/reservation",
+    target: process.env.BOOKING_URL || "http://127.0.0.1:4003",
   },
   {
     route: "/admin",

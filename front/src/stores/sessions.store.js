@@ -1,5 +1,32 @@
 import { defineStore } from 'pinia'
 import sessionsService from '@/api/sessions.service'
+import { useMoviesStore } from '@/stores/movies.store'
+
+const normalizeSession = (session, movies) => {
+  const normalized = {
+    id: session.id,
+    movieId: session.movieId ?? null,
+    nameMovie: session.nameMovie ?? '',
+    date: session.date ?? session.dateSeance ?? '',
+    time: session.time ?? session.hourStart ?? '',
+    room: session.room ?? session.salleId ?? '',
+    capacity: session.capacity ?? session.numberPlace ?? 0,
+    price: session.price ?? null,
+    booked: session.booked ?? (session.reservations?.length ?? 0),
+    hourEnd: session.hourEnd ?? null,
+    reservations: session.reservations ?? [],
+  }
+
+  // If movieId is not already set, try to find it from the movies catalog
+  if (!normalized.movieId && normalized.nameMovie && movies) {
+    const movie = movies.find(m => m.title === normalized.nameMovie)
+    if (movie) {
+      normalized.movieId = String(movie.id)
+    }
+  }
+
+  return normalized
+}
 
 export const useSessionsStore = defineStore('sessions', {
   state: () => ({
@@ -12,26 +39,23 @@ export const useSessionsStore = defineStore('sessions', {
     getAllSessions: (state) => state.sessions,
 
     sessionsByMovie: (state) => (dateLabel) => {
-      // Filter sessions by date label, then group by movie
       const today = new Date()
       const tomorrow = new Date()
       tomorrow.setDate(today.getDate() + 1)
 
-      const formatDate = (d) => d.toISOString().split('T')[0] // YYYY-MM-DD
+      const formatDate = (d) => d.toISOString().split('T')[0]
 
       let targetDate = null
-      if (dateLabel === 'Aujourd\'hui') targetDate = formatDate(today)
+      if (dateLabel === "Aujourd'hui") targetDate = formatDate(today)
       else if (dateLabel === 'Demain') targetDate = formatDate(tomorrow)
-      else targetDate = dateLabel // already a date string
+      else targetDate = dateLabel
 
-      // Filter sessions matching the target date
       const filtered = state.sessions.filter(s => {
         if (!s.date) return false
-        const sessionDate = s.date.split('T')[0] // handle ISO or plain date
+        const sessionDate = s.date.split('T')[0]
         return sessionDate === targetDate
       })
 
-      // Group by movie
       const groups = {}
       for (const session of filtered) {
         const key = session.movieId || session.nameMovie || 'unknown'
@@ -51,24 +75,19 @@ export const useSessionsStore = defineStore('sessions', {
       this.loading = true
       this.error = null
       try {
-        const response = await sessionsService.adminGetSessions()
-        // Map the NestJS seance entity fields to what the front expects
-        this.sessions = (response.data || []).map(s => ({
-          id: s.id,
-          movieId: s.nameMovie,       // nameMovie = movie title or ID used as link
-          nameMovie: s.nameMovie,
-          date: s.dateSeance,
-          time: s.hourStart,
-          hourEnd: s.hourEnd,
-          room: s.salleId || 'N/A',
-          capacity: s.numberPlace || 0,
-          availableSeats: (s.numberPlace || 0) - (s.reservations?.length || 0),
-          booked: s.reservations?.length || 0,
-          price: s.price,
-          reservations: s.reservations || [],
-        }))
+        const response = await sessionsService.getAllSessions()
+        const rawSessions = response.data || []
+
+        // Fetch movies to enrich session data with movieId
+        const moviesStore = useMoviesStore()
+        if (moviesStore.movies.length === 0) {
+          await moviesStore.fetchMovies()
+        }
+        const movies = moviesStore.movies
+
+        this.sessions = rawSessions.map(session => normalizeSession(session, movies))
       } catch (e) {
-        this.error = 'Erreur lors du chargement des séances.'
+        this.error = 'Erreur lors du chargement des seances.'
         console.error(e)
       } finally {
         this.loading = false
@@ -79,21 +98,11 @@ export const useSessionsStore = defineStore('sessions', {
       this.loading = true
       this.error = null
       try {
-        // Map front-end format to booking service DTO
-        const dto = {
-          nameMovie: sessionData.nameMovie || sessionData.movieId,
-          numberPlace: sessionData.capacity || sessionData.numberPlace,
-          hourStart: sessionData.time || sessionData.hourStart,
-          hourEnd: sessionData.hourEnd || null,
-          dateSeance: sessionData.date || sessionData.dateSeance,
-          salleId: sessionData.room || sessionData.salleId,
-          price: sessionData.price || null,
-        }
-        const response = await sessionsService.createSession(dto)
-        await this.fetchAllSessions() // refresh
+        const response = await sessionsService.createSession(sessionData)
+        await this.fetchAllSessions()
         return response.data
       } catch (e) {
-        this.error = 'Erreur lors de la création de la séance.'
+        this.error = 'Erreur lors de la creation de la seance.'
         console.error(e)
         throw e
       } finally {
@@ -105,20 +114,11 @@ export const useSessionsStore = defineStore('sessions', {
       this.loading = true
       this.error = null
       try {
-        const dto = {
-          nameMovie: sessionData.nameMovie || sessionData.movieId,
-          numberPlace: sessionData.capacity || sessionData.numberPlace,
-          hourStart: sessionData.time || sessionData.hourStart,
-          hourEnd: sessionData.hourEnd || null,
-          dateSeance: sessionData.date || sessionData.dateSeance,
-          salleId: sessionData.room || sessionData.salleId,
-          price: sessionData.price || null,
-        }
-        const response = await sessionsService.updateSession(id, dto)
-        await this.fetchAllSessions() // refresh
+        const response = await sessionsService.updateSession(id, sessionData)
+        await this.fetchAllSessions()
         return response.data
       } catch (e) {
-        this.error = 'Erreur lors de la mise à jour de la séance.'
+        this.error = 'Erreur lors de la mise a jour de la seance.'
         console.error(e)
         throw e
       } finally {
@@ -133,7 +133,7 @@ export const useSessionsStore = defineStore('sessions', {
         await sessionsService.deleteSession(id)
         this.sessions = this.sessions.filter(s => s.id !== id)
       } catch (e) {
-        this.error = 'Erreur lors de la suppression de la séance.'
+        this.error = 'Erreur lors de la suppression de la seance.'
         console.error(e)
         throw e
       } finally {

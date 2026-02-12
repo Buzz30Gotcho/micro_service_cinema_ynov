@@ -29,6 +29,7 @@ export default {
                 'info': '#17a2b8',    // Cyan for info
                 'warning': '#ffc107',  // Yellow for warning
                 'danger': '#dc3545',   // Red for errors
+                'danger-hover': '#C82333', // Darker red for hover state
 
                 // Legacy cinema colors (if still needed, otherwise remove)
                 cinema: {

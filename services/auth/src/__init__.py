@@ -6,6 +6,7 @@ from flask_jwt_extended import (
     create_access_token,
     get_jwt_identity,
     verify_jwt_in_request,
+    get_jwt,
 )
 from flask_login import LoginManager
 from pymongo import MongoClient
@@ -88,8 +89,10 @@ def create_app(config_class=Config):
 
             identity = get_jwt_identity()
             if identity:
+                claims = get_jwt() or {}
+                email = claims.get("email")
                 # créer un nouveau token et l'envoyer dans l'en-tête de réponse
-                new_token = create_access_token(identity=identity)
+                new_token = create_access_token(identity=identity,additional_claims={"email": email}) if email else None,
                 response.headers["X-Access-Token"] = new_token
         except Exception:
             # token absent, invalide ou erreur context JWT -> on ne fait rien

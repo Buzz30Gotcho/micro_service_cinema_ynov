@@ -9,7 +9,7 @@ export class ReservationService {
   constructor(
     @InjectRepository(Reservation)
     private readonly reservationRepository: Repository<Reservation>,
-  ) {}
+  ) { }
 
   async findAll(): Promise<Reservation[]> {
     return this.reservationRepository.find({ relations: ['seance'] });
@@ -25,6 +25,22 @@ export class ReservationService {
     }
     return reservation;
   }
+
+
+  async findAllByEmail(email: string): Promise<Reservation[]> {
+    const reservations = await this.reservationRepository.find({
+      where: { email },
+      relations: ['seance'],
+    });
+
+    if (!reservations || reservations.length === 0) {
+      throw new NotFoundException(`No reservations found for ${email}`);
+    }
+
+    return reservations;
+  }
+
+
 
   async create(reservationDto: ReservationDto): Promise<Reservation> {
     const reservation = this.reservationRepository.create(reservationDto);

@@ -69,7 +69,9 @@
               placeholder="vous@exemple.com"
               required
               class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+              :class="{ 'border-red-500': emailError }"
             />
+            <p v-if="emailError" class="text-red-400 text-xs mt-1">{{ emailError }}</p>
           </div>
 
           <!-- Password -->
@@ -200,7 +202,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -218,8 +220,22 @@ const formData = ref({
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const error = ref("");
+const emailError = ref("");
 const success = ref(false);
 const loading = ref(false);
+
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+watch(() => formData.value.email, (newEmail) => {
+  if (newEmail && !validateEmail(newEmail)) {
+    emailError.value = 'Veuillez entrer une adresse email valide.';
+  } else {
+    emailError.value = '';
+  }
+});
 
 const handleSubmit = async () => {
   error.value = "";
@@ -233,6 +249,11 @@ const handleSubmit = async () => {
 
   if (formData.value.password.length < 6) {
     error.value = "Le mot de passe doit contenir au moins 6 caractères";
+    return;
+  }
+
+  if (!validateEmail(formData.value.email)) {
+    error.value = "Veuillez entrer une adresse email valide.";
     return;
   }
 
