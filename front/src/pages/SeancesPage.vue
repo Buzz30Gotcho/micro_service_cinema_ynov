@@ -104,46 +104,77 @@ function formatDateISO(date) {
   return date.toISOString().split('T')[0];
 }
 
-const today = new Date();
-const tomorrow = new Date(today);
-tomorrow.setDate(tomorrow.getDate() + 1);
+function generateDates(n) {
+  const arr = [];
+  const now = new Date();
+  for (let i = 0; i < n; i++) {
+    const d = new Date(now);
+    d.setDate(now.getDate() + i);
+    const value = formatDateISO(d);
+    let dayLabel = d.toLocaleDateString('fr-FR', { weekday: 'long' });
+    dayLabel = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
+    if (i === 0) dayLabel = "Aujourd'hui";
+    else if (i === 1) dayLabel = 'Demain';
+    arr.push({ day: dayLabel, value });
+  }
+  return arr;
+}
 
-const dates = ref([
-  { day: 'Aujourd\'hui', value: formatDateISO(today) },
-]);
-const selectedDate = ref(formatDateISO(today));
+const dates = ref(generateDates(7));
+const selectedDate = ref(formatDateISO(new Date()));
 
 // --- Computed Properties for Display ---
 
   const moviesForSelectedDate = computed(() => {
-    console.log('--- Debugging moviesForSelectedDate ---');
-    console.log('1. All sessions from store:', sessions.value);
-    console.log('2. Selected Date:', selectedDate.value);
-
-    if (sessions.value.length === 0 || movies.value.length === 0) {
-      console.log('No sessions or movies available.');
+    if (sessions.value.length === 0) {
       return [];
     }
 
+    const durationFromSession = (s) => {
+      if (s.duration) return s.duration;
+      if (!s.hourStart || !s.hourEnd) return null;
+      const [h1, m1] = String(s.hourStart).split(':').map(Number);
+      const [h2, m2] = String(s.hourEnd).split(':').map(Number);
+      let start = h1 * 60 + (m1 || 0);
+      let end = h2 * 60 + (m2 || 0);
+      if (end <= start) end += 24 * 60;
+      return end - start;
+    };
+
     // 1. Filter sessions for the selected date
     const todaysSessions = sessions.value.filter(session => session.date === selectedDate.value);
-    console.log('3. Sessions filtered by selected date:', todaysSessions);
-    // 2. Group sessions by movieId
+
     const sessionsByMovie = todaysSessions.reduce((acc, session) => {
-      if (!acc[session.movieId]) {
-        acc[session.movieId] = [];
+      const key = session.movieId ?? session.nameMovie ?? 'unknown';
+      if (!acc[key]) {
+        acc[key] = [];
       }
-      acc[session.movieId].push(session);
+      acc[key].push(session);
       return acc;
     }, {});
 
-    // 3. Map and enrich with movie details
-    const finalMoviesForSelectedDate = Object.keys(sessionsByMovie).map(movieId => {
-      const movie = movies.value.find(m => String(m.id) === movieId);
-      return movie ? { ...movie, sessions: sessionsByMovie[movieId] } : null;
-    }).filter(Boolean); // Filter out nulls if a movie isn't found
-    console.log('4. Final moviesForSelectedDate:', finalMoviesForSelectedDate);
-    return finalMoviesForSelectedDate;
+    return Object.keys(sessionsByMovie).map(key => {
+      let movie = movies.value.find(m => String(m.id) === key);
+      if (!movie) {
+        movie = movies.value.find(m => m.title === key);
+      }
+
+      if (!movie) {
+        const s = sessionsByMovie[key][0];
+        return {
+          id: `session-${key}`,
+          title: s.nameMovie || 'Film inconnu',
+          genre: s.genre || null,
+          duration: s.duration || durationFromSession(s) || null,
+          rating: s.rating || null,
+          description: s.description || null,
+          poster: s.posterPath || 'https://via.placeholder.com/300x450.png?text=Poster',
+          sessions: sessionsByMovie[key],
+        };
+      }
+
+      return { ...movie, sessions: sessionsByMovie[key] };
+    }).filter(Boolean);
   });
 
 const selectedDateFormatted = computed(() => {

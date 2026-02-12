@@ -108,7 +108,7 @@
             >
               <div class="flex gap-6">
                 <div class="flex-1">
-                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId) }}</h3>
+                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId, booking.seance) }}</h3>
                   
                   <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
@@ -167,7 +167,7 @@
             >
               <div class="flex gap-6">
                 <div class="flex-1">
-                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId) }}</h3>
+                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId, booking.seance) }}</h3>
                   
                   <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
@@ -349,11 +349,12 @@ const pastBookings = computed(() => {
   return bookings.value.filter(b => b.seance && new Date(b.seance.dateTime) < now);
 });
 
-// Helper function to get movie title from movieId
-const getMovieTitle = (movieId) => {
+const getMovieTitle = (movieId, seance) => {
+  if ((!movies.value || movies.value.length === 0) && seance?.nameMovie) return seance.nameMovie;
   if (!movies.value || movies.value.length === 0) return 'Chargement...';
   const movie = movies.value.find(m => String(m.id) === movieId);
-  return movie ? movie.title : 'Film inconnu';
+  if (movie) return movie.title;
+  return seance?.nameMovie || 'Film inconnu';
 };
 
 // Helper to format date and time
@@ -402,11 +403,11 @@ const saveProfile = async () => {
 
 // Actions
 const downloadTicket = (booking) => {
-  alert(`📥 Le téléchargement du billet pour ${getMovieTitle(booking.seance.movieId)} n'est pas encore implémenté.`)
+  alert(`📥 Le téléchargement du billet pour ${getMovieTitle(booking.seance.movieId, booking.seance)} n'est pas encore implémenté.`)
 }
 
 const cancelBooking = async (booking) => {
-  if (confirm(`Voulez-vous vraiment annuler la réservation pour "${getMovieTitle(booking.seance.movieId)}" ?`)) {
+  if (confirm(`Voulez-vous vraiment annuler la réservation pour "${getMovieTitle(booking.seance.movieId, booking.seance)}" ?`)) {
     try {
       await bookingsStore.cancelBooking(booking.id);
       showToast('Succès', 'Réservation annulée avec succès.');
