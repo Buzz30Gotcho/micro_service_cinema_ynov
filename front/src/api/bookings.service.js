@@ -9,22 +9,22 @@ export const bookingsService = {
     getUserBookings: () => http.get('/reservation/my'),
 
     // Récupérer une réservation spécifique
-    getBookingById: (id) => http.get(`/bookings/${id}`),
+    getBookingById: (id) => http.get(`/reservation/${id}`),
 
     // Créer une nouvelle réservation
     createBooking: (bookingData) => http.post('/reservation', bookingData),
 
     // Mettre à jour une réservation
-    updateBooking: (id, bookingData) => http.put(`/bookings/${id}`, bookingData),
+    updateBooking: (id, bookingData) => http.put(`/reservation/${id}`, bookingData),
 
     // Annuler une réservation
-    cancelBooking: (id) => http.delete(`/bookings/${id}`),
+    cancelBooking: (id) => http.delete(`/reservation/${id}`),
 
     // Vérifier la disponibilité des places
     checkAvailability: (sessionId, seats) => http.post(`/bookings/check-availability`, { sessionId, seats }),
 
     // Récupérer les places occupées pour une séance
-    getOccupiedSeats: (sessionId) => http.get(`/seance/${sessionId}/occupied-seats`)
+    getOccupiedSeats: (sessionId) => http.get(`/sessions/${sessionId}/occupied-seats`)
 }
 
 export default bookingsService
