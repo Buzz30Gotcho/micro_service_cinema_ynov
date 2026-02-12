@@ -34,25 +34,25 @@ const routes = [
         path: '/login',
         name: 'Login',
         component: LoginPage,
-        meta: { requiresAuth: false }
+        meta: { requiresAuth: false, guestOnly: true }
     },
     {
         path: '/register',
         name: 'Register',
         component: RegisterPage,
-        meta: { requiresAuth: false }
+        meta: { requiresAuth: false, guestOnly: true }
     },
     {
         path: '/forgot-password',
         name: 'ForgotPassword',
         component: ForgotPasswordPage,
-        meta: { requiresAuth: false }
+        meta: { requiresAuth: false, guestOnly: true }
     },
     {
         path: '/reset/:token',
         name: 'ResetPassword',
         component: ResetPasswordPage,
-        meta: { requiresAuth: false }
+        meta: { requiresAuth: false, guestOnly: true }
     },
     {
         path: '/films',
@@ -149,6 +149,17 @@ router.beforeEach((to, from, next) => {
 
     const requiresAuth = to.meta.requiresAuth !== false
     const requiredRole = to.meta.requiredRole
+    const guestOnly = to.meta.guestOnly === true
+
+    // If already authenticated, keep user out of auth pages like /login
+    if (guestOnly && authStore.isAuthenticated) {
+        if (authStore.isAdmin) {
+            next('/admin/dashboard')
+            return
+        }
+        next('/')
+        return
+    }
 
     // Redirect to login if route requires auth and user is not authenticated
     if (requiresAuth && !authStore.isAuthenticated) {

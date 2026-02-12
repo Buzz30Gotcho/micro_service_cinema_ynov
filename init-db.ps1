@@ -1,4 +1,4 @@
-# Script d'initialisation et de seed des bases de données MS-Cinema
+# Script d'initialisation et de seed des bases de donnees MS-Cinema
 # Usage: .\init-db.ps1
 # ou:    .\init-db.ps1 -importJson "C:\path\to\seed-data.json"
 
@@ -6,7 +6,6 @@ param(
     [string]$importJson = ""
 )
 
-# Couleurs
 $Green = [System.ConsoleColor]::Green
 $Yellow = [System.ConsoleColor]::Yellow
 $Red = [System.ConsoleColor]::Red
@@ -17,7 +16,7 @@ function Write-Status {
 }
 
 function Wait-Service {
-    param([int]$port, [int]$maxWait = 30)
+    param([int]$port, [int]$maxWait = 45)
     $elapsed = 0
     while ($elapsed -lt $maxWait) {
         try {
@@ -37,218 +36,225 @@ function Wait-Service {
 Write-Status "=== INITIALISATION MS-CINEMA ===" $Yellow
 Write-Status ""
 
-# 1. Arrêter et relancer tous les containers
-Write-Status "Arrêt des containers existants..." $Yellow
+Write-Status "Arret des containers existants..." $Yellow
 docker compose down 2>&1 | Out-Null
 
 Write-Status "Lancement des containers..." $Yellow
 docker compose up -d 2>&1 | Out-Null
 
-Write-Status "Attente du démarrage des services..." $Yellow
+Write-Status "Attente du demarrage des services..." $Yellow
 Start-Sleep -Seconds 8
 
-# 2. Attendre que les services soient prêts
-Write-Status "Vérification de la disponibilité de Catalog (port 4001)..." $Yellow
+Write-Status "Verification de la disponibilite de Catalog (port 4001)..." $Yellow
 if (Wait-Service -port 4001) {
-    Write-Status "Catalog est prêt" $Green
+    Write-Status "Catalog est pret" $Green
 } else {
-    Write-Status "Catalog n'a pas répondu à temps" $Red
+    Write-Status "Catalog n'a pas repondu a temps" $Red
 }
 
-Write-Status "Vérification de la disponibilité de Booking (port 4003)..." $Yellow
+Write-Status "Verification de la disponibilite de Booking (port 4003)..." $Yellow
 if (Wait-Service -port 4003) {
-    Write-Status "Booking est prêt" $Green
+    Write-Status "Booking est pret" $Green
 } else {
-    Write-Status "Booking n'a pas répondu à temps" $Red
+    Write-Status "Booking n'a pas repondu a temps" $Red
 }
 
 Write-Status ""
-Write-Status "Population des bases de données..." $Yellow
+Write-Status "Purge logique des donnees Catalog/Booking..." $Yellow
+docker exec ms-cinema-postgres psql -U postgres -d catalog_db -c 'DO $$ BEGIN IF to_regclass(''public.movies'') IS NOT NULL THEN TRUNCATE TABLE movies RESTART IDENTITY CASCADE; END IF; END $$;' 2>&1 | Out-Null
+docker exec ms-cinema-postgres psql -U postgres -d booking_db -c 'DO $$ BEGIN IF to_regclass(''public.reservations'') IS NOT NULL THEN TRUNCATE TABLE reservations RESTART IDENTITY CASCADE; END IF; IF to_regclass(''public.seances'') IS NOT NULL THEN TRUNCATE TABLE seances RESTART IDENTITY CASCADE; END IF; END $$;' 2>&1 | Out-Null
+
+Write-Status ""
+Write-Status "Population des bases de donnees..." $Yellow
 Write-Status ""
 
-# 3. Seed des movies
 $today = (Get-Date).ToString("yyyy-MM-dd")
 $tomorrow = (Get-Date).AddDays(1).ToString("yyyy-MM-dd")
 
 $movieObjects = @()
 $movieObjects += [PSCustomObject]@{
-    title = "Lumières de la Ville"
-    genre = "Comédie Dramatique"
-    duration = 138
-    rating = 4.7
-    year = 2025
-    ageRating = "12+"
-    image = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80"
-    description = "Dans une métropole futuriste, un artiste marginal découvre un complot."
-    director = "Sophie Martin"
-    synopsis = "Un voyage épique à travers la ville."
-}
-
-$movieObjects += [PSCustomObject]@{
-    title = "Océan Bleu"
-    genre = "Documentaire"
-    duration = 102
-    rating = 4.3
-    year = 2024
-    image = "https://images.unsplash.com/photo-1509343256512-d77a5cb3791b?w=800&q=80"
-    description = "Explorez les profondeurs inconnues des abysses."
-    director = "Jean Dupont"
-}
-
-$movieObjects += [PSCustomObject]@{
-    title = "Nocturne"
-    genre = "Thriller"
-    duration = 116
-    rating = 4.1
-    year = 2025
-    image = "https://images.unsplash.com/photo-1505432197924-c36723205007?w=800&q=80"
-    description = "Un détective hanté par son passé."
-    director = "Marc Levy"
-}
-
-$movieObjects += [PSCustomObject]@{
-    title = "Atlas"
-    genre = "Aventure"
-    duration = 129
-    rating = 4.5
-    year = 2024
-    image = "https://images.unsplash.com/photo-1511203348235-99893a036329?w=800&q=80"
-    description = "Une exploratrice part à la recherche d une cité perdue."
-    director = "Lara Croft"
-}
-
-$movieObjects += [PSCustomObject]@{
-    title = "Hyperdrive"
+    title = "Dune: Part Two"
     genre = "Science-Fiction"
-    duration = 138
-    rating = 4.6
-    year = 2025
-    image = "https://images.unsplash.com/photo-1610296669228-602fa827fc1f?w=800&q=80"
-    description = "L équipage d un vaisseau spatial doit survivre."
-    director = "James Cameron"
+    duration = 166
+    rating = 4.7
+    year = 2024
+    ageRating = "12+"
+    image = "https://upload.wikimedia.org/wikipedia/en/5/52/Dune_Part_Two_poster.jpeg"
+    description = "Paul Atreides s'unit aux Fremen pour affronter les Harkonnen."
+    director = "Denis Villeneuve"
+    synopsis = "Suite epique de Dune avec la guerre pour Arrakis."
 }
 
 $movieObjects += [PSCustomObject]@{
-    title = "Renaissance"
-    genre = "Historique"
-    duration = 145
-    rating = 4.2
-    year = 2024
-    image = "https://images.unsplash.com/photo-1533109721025-d1ae7ee7c452?w=800&q=80"
-    description = "La Florence du XVe siècle et deux artistes rivaux."
-    director = "Ridley Scott"
+    title = "Oppenheimer"
+    genre = "Biopic / Drame"
+    duration = 180
+    rating = 4.6
+    year = 2023
+    ageRating = "12+"
+    image = "https://upload.wikimedia.org/wikipedia/en/4/4a/Oppenheimer_%28film%29.jpg"
+    description = "Portrait de J. Robert Oppenheimer pendant le projet Manhattan."
+    director = "Christopher Nolan"
+    synopsis = "Le parcours du physicien derriere la bombe atomique."
 }
 
-Write-Status "Création des movies..." $Yellow
+$movieObjects += [PSCustomObject]@{
+    title = "Parasite"
+    genre = "Thriller / Drame"
+    duration = 132
+    rating = 4.6
+    year = 2019
+    ageRating = "16+"
+    image = "https://upload.wikimedia.org/wikipedia/en/5/53/Parasite_%282019_film%29.png"
+    description = "Une famille precaire infiltre peu a peu une famille riche."
+    director = "Bong Joon-ho"
+    synopsis = "Satire sociale coreenne oscarisee."
+}
+
+$movieObjects += [PSCustomObject]@{
+    title = "The Dark Knight"
+    genre = "Action / Crime"
+    duration = 152
+    rating = 4.8
+    year = 2008
+    ageRating = "12+"
+    image = "https://upload.wikimedia.org/wikipedia/en/1/1c/The_Dark_Knight_%282008_film%29.jpg"
+    description = "Batman affronte le Joker qui plonge Gotham dans le chaos."
+    director = "Christopher Nolan"
+    synopsis = "Un classique moderne du film de super-heros."
+}
+
+$movieObjects += [PSCustomObject]@{
+    title = "The Godfather"
+    genre = "Crime / Drame"
+    duration = 175
+    rating = 4.9
+    year = 1972
+    ageRating = "16+"
+    image = "https://upload.wikimedia.org/wikipedia/en/1/1c/Godfather_ver1.jpg"
+    description = "Le pouvoir et les conflits de la famille Corleone."
+    director = "Francis Ford Coppola"
+    synopsis = "Reference absolue du cinema de mafia."
+}
+
+$movieObjects += [PSCustomObject]@{
+    title = "Casablanca"
+    genre = "Romance / Drame"
+    duration = 102
+    rating = 4.5
+    year = 1942
+    ageRating = "TP"
+    image = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/CasablancaPoster-Gold.jpg/330px-CasablancaPoster-Gold.jpg"
+    description = "Dans le Maroc de la guerre, Rick retrouve son amour passe."
+    director = "Michael Curtiz"
+    synopsis = "Un grand classique du cinema hollywoodien."
+}
+
+Write-Status "Creation des movies..." $Yellow
 foreach ($movie in $movieObjects) {
     try {
         $json = $movie | ConvertTo-Json
-        $response = Invoke-WebRequest -Uri http://localhost:3030/catalogue/movies -Method POST -ContentType "application/json" -Body $json -UseBasicParsing -ErrorAction Stop
+        Invoke-WebRequest -Uri http://localhost:3030/catalogue/movies -Method POST -ContentType "application/json" -Body $json -UseBasicParsing -ErrorAction Stop | Out-Null
         Write-Host "  OK: $($movie.title)" -ForegroundColor $Green
     } catch {
         Write-Host "  ERREUR: $($movie.title) - $($_.Exception.Message)" -ForegroundColor $Red
     }
 }
 
-# 4. Seed des sessions
 Write-Status ""
-Write-Status "Création des sessions..." $Yellow
+Write-Status "Creation des sessions..." $Yellow
 
 $sessionObjects = @()
 $sessionObjects += [PSCustomObject]@{
-    nameMovie = "Lumières de la Ville"
+    nameMovie = "Dune: Part Two"
     numberPlace = 120
     hourStart = "20:00"
-    hourEnd = "22:18"
+    hourEnd = "22:46"
     dateSeance = $today
     salleId = "Salle 1"
-    price = 12.50
+    price = 14.50
 }
 
 $sessionObjects += [PSCustomObject]@{
-    nameMovie = "Nocturne"
+    nameMovie = "Oppenheimer"
     numberPlace = 80
     hourStart = "14:30"
-    hourEnd = "16:26"
+    hourEnd = "17:30"
     dateSeance = $today
     salleId = "Salle 2"
-    price = 10.00
+    price = 13.50
 }
 
 $sessionObjects += [PSCustomObject]@{
-    nameMovie = "Atlas"
+    nameMovie = "The Dark Knight"
     numberPlace = 150
     hourStart = "18:00"
-    hourEnd = "20:09"
+    hourEnd = "20:32"
     dateSeance = $today
     salleId = "Salle 3"
-    price = 12.50
+    price = 12.00
 }
 
 $sessionObjects += [PSCustomObject]@{
-    nameMovie = "Hyperdrive"
+    nameMovie = "Casablanca"
     numberPlace = 200
     hourStart = "21:00"
-    hourEnd = "23:18"
+    hourEnd = "22:42"
     dateSeance = $tomorrow
     salleId = "Salle 1"
-    price = 14.00
+    price = 9.50
 }
 
 foreach ($session in $sessionObjects) {
     try {
         $json = $session | ConvertTo-Json
-        $response = Invoke-WebRequest -Uri http://localhost:3030/sessions/seance -Method POST -ContentType "application/json" -Body $json -UseBasicParsing -ErrorAction Stop
+        Invoke-WebRequest -Uri http://localhost:3030/sessions -Method POST -ContentType "application/json" -Body $json -UseBasicParsing -ErrorAction Stop | Out-Null
         Write-Host "  OK: $($session.nameMovie) - $($session.dateSeance)" -ForegroundColor $Green
     } catch {
         Write-Host "  ERREUR: $($session.nameMovie) - $($_.Exception.Message)" -ForegroundColor $Red
     }
 }
 
-# 5. Import JSON custom si fourni
 if ($importJson -and (Test-Path $importJson)) {
     Write-Status ""
     Write-Status "Import depuis fichier JSON: $importJson" $Yellow
-    
+
     try {
         $data = Get-Content $importJson | ConvertFrom-Json
-        
-        # Import movies depuis JSON
+
         if ($data.movies -and $data.movies.Count -gt 0) {
             Write-Status "Import des movies depuis JSON..." $Yellow
             foreach ($movie in $data.movies) {
                 try {
                     $json = $movie | ConvertTo-Json
-                    $response = Invoke-WebRequest -Uri http://localhost:3030/catalogue/movies -Method POST -ContentType "application/json" -Body $json -UseBasicParsing -ErrorAction Stop
+                    Invoke-WebRequest -Uri http://localhost:3030/catalogue/movies -Method POST -ContentType "application/json" -Body $json -UseBasicParsing -ErrorAction Stop | Out-Null
                     Write-Host "  OK: $($movie.title)" -ForegroundColor $Green
                 } catch {
                     Write-Host "  ERREUR: $($movie.title) - $($_.Exception.Message)" -ForegroundColor $Red
                 }
             }
         }
-        
-        # Import sessions depuis JSON
+
         if ($data.sessions -and $data.sessions.Count -gt 0) {
-            Write-Status "Import des séances depuis JSON..." $Yellow
+            Write-Status "Import des seances depuis JSON..." $Yellow
             foreach ($session in $data.sessions) {
                 try {
                     $json = $session | ConvertTo-Json
-                    $response = Invoke-WebRequest -Uri http://localhost:3030/sessions/seance -Method POST -ContentType "application/json" -Body $json -UseBasicParsing -ErrorAction Stop
+                    Invoke-WebRequest -Uri http://localhost:3030/sessions -Method POST -ContentType "application/json" -Body $json -UseBasicParsing -ErrorAction Stop | Out-Null
                     Write-Host "  OK: $($session.nameMovie)" -ForegroundColor $Green
                 } catch {
                     Write-Host "  ERREUR: $($session.nameMovie) - $($_.Exception.Message)" -ForegroundColor $Red
                 }
             }
         }
-        
+
     } catch {
         Write-Status "ERREUR lecture JSON: $($_.Exception.Message)" $Red
     }
 }
 
-# 6. Afficher les infos d'accès
 Write-Status ""
-Write-Status "=== INITIALISATION COMPLÈTE ===" $Green
+Write-Status "=== INITIALISATION COMPLETE ===" $Green
 Write-Status ""
 Write-Status "Frontal: http://localhost:5173" $Green
 Write-Status "Admin: http://localhost:5173/admin" $Green
