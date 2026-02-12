@@ -206,26 +206,3 @@ def update_me():
             401,
         )
     return jsonify({"message": "Profil mis à jour", "user": serialized}), 200
-
-
-@auth_bp.route("/admin/users", methods=["GET"])
-@jwt_required()
-def get_all_users():
-    """
-    Admin route to get all users.
-    """
-    current_user_id = get_jwt_identity()
-    users_col = current_app.db.users
-
-    # Verify if the current user is an admin
-    admin_user = users_col.find_one({"_id": ObjectId(current_user_id)})
-    if not admin_user or admin_user.get("role") not in ["admin"]:
-        return jsonify({"error": "Accès administrateur requis"}), 403
-
-    # Fetch all users
-    all_users_cursor = users_col.find({})
-
-    # Serialize each user in the list
-    serialized_users = [serialize_user(user) for user in all_users_cursor]
-
-    return jsonify(serialized_users), 200
