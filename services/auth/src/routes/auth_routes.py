@@ -17,6 +17,7 @@ from src.services.validation_service import (
 from src.services.user_service import serialize_user, update_last_login
 from src.services.auth_utils import revoke_token
 from datetime import datetime
+import datetime as dt
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -70,12 +71,21 @@ def login():
         except Exception:
             pass
 
-        # Génère un JWT
+        # Génère un JWT (access_token et refresh_token)
         access_token = create_access_token(
             identity=user.id, additional_claims={"email": user.email, "role": user.role}
         )
+        refresh_token = create_access_token(
+            identity=user.id,
+            additional_claims={"email": user.email, "role": user.role},
+            expires_delta=current_app.config['JWT_REFRESH_TOKEN_EXPIRES']
+        )
         return (
-            jsonify({"message": "Connecté avec succès", "access_token": access_token}),
+            jsonify({
+                "message": "Connecté avec succès",
+                "access_token": access_token,
+                "refresh_token": refresh_token
+            }),
             200,
         )
 
@@ -97,6 +107,34 @@ def logout():
         pass
 
     return jsonify({"message": "Token révoqué. Supprimez le token côté client."}), 200
+
+
+@auth_bp.route("/refresh", methods=["POST"])
+@jwt_required(refresh=False)
+def refresh():
+    """Route pour rafraîchir l'access token avec le refresh token"""
+    try:
+        identity = get_jwt_identity()
+        users_col = current_app.db.users
+        user_doc = users_col.find_one({"_id": ObjectId(identity)})
+        
+        if not user_doc:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+        
+        # Récupérer le rôle de l'utilisateur
+        role = user_doc.get("role", "client")
+        email = user_doc.get("email")
+        
+        # Créer un nouveau access token
+        new_access_token = create_access_token(
+            identity=identity,
+            additional_claims={"email": email, "role": role}
+        )
+        
+        return jsonify({"access_token": new_access_token}), 200
+        
+    except Exception as e:
+        return jsonify({"error": "Token invalide ou expiré", "detail": str(e)}), 401
 
 
 @auth_bp.route("/me", methods=["GET"])

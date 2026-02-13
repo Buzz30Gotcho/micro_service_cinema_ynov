@@ -144,8 +144,18 @@ const router = createRouter({
 })
 
 // Navigation guards for authentication and authorization
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore()
+
+    // Si un token existe mais que l'utilisateur n'est pas authentifié, réessayer d'initialiser
+    const token = localStorage.getItem('token')
+    if (token && !authStore.isAuthenticated && !authStore.loading) {
+        try {
+            await authStore.initializeAuth()
+        } catch (error) {
+            console.error('Erreur lors de l\'initialisation:', error)
+        }
+    }
 
     const requiresAuth = to.meta.requiresAuth !== false
     const requiredRole = to.meta.requiredRole

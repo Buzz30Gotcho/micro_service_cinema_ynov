@@ -4,10 +4,10 @@ import http from './http'
 // Microservice Movies: Gestion du catalogue de films
 export const moviesService = {
     // Récupérer tous les films
-    getMovies: () => http.get('/films'),
+    getMovies: () => http.get('/movies'),
 
     // Récupérer un film spécifique
-    getMovieById: (id) => http.get(`/films/${id}`),
+    getMovieById: (id) => http.get(`/movies/${id}`),
 
     // Créer un nouveau film (Admin)
     createMovie: (movieData) => http.post('/movies', movieData),

@@ -27,6 +27,9 @@ export const useAuthStore = defineStore("auth", {
         if (response.data.access_token) {
           localStorage.setItem("token", response.data.access_token);
         }
+        if (response.data.refresh_token) {
+          localStorage.setItem("refresh_token", response.data.refresh_token);
+        }
         await this.fetchProfile();
       } catch (error) {
         this.error =
@@ -38,6 +41,7 @@ export const useAuthStore = defineStore("auth", {
         this.isAuthenticated = false;
         this.isAdmin = false;
         localStorage.removeItem("token");
+        localStorage.removeItem("refresh_token");
 
         throw error;
       } finally {
@@ -75,6 +79,7 @@ export const useAuthStore = defineStore("auth", {
         this.isAdmin = false;
         this.loading = false;
         localStorage.removeItem("token");
+        localStorage.removeItem("refresh_token");
         if (router) {
           router.push("/login");
         }

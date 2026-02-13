@@ -24,6 +24,13 @@ export const authService = {
     // Déconnexion
     logout: () => http.post('auth/logout'),
 
+    // Rafraîchir le token
+    refreshToken: (refreshToken) => http.post('auth/refresh', {}, {
+        headers: {
+            'Authorization': `Bearer ${refreshToken}`
+        }
+    }),
+
     // Récupérer le profil de l'utilisateur connecté
     getProfile: () => http.get('auth/me'),
 

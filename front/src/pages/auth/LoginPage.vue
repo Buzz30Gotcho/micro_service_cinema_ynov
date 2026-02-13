@@ -37,6 +37,7 @@
               type="email"
               placeholder="vous@exemple.com"
               required
+              autocomplete="email"
               class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
             />
           </div>
@@ -50,6 +51,7 @@
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="••••••••"
                 required
+                autocomplete="current-password"
                 class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition pr-12"
               />
               <button

@@ -67,7 +67,9 @@ def create_app(config_class=Config):
 
     # 3. Setup JWT
     app.config.setdefault("JWT_SECRET_KEY", app.config.get("SECRET_KEY"))
-    app.config.setdefault("JWT_ACCESS_TOKEN_EXPIRES", timedelta(minutes=60))
+    # Utiliser les durées définies dans Config
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(seconds=app.config.get("JWT_ACCESS_TOKEN_EXPIRES", 1800))
+    app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(seconds=app.config.get("JWT_REFRESH_TOKEN_EXPIRES", 604800))
 
     jwt = JWTManager()
     jwt.init_app(app)
