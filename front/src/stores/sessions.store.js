@@ -25,7 +25,7 @@ const normalizeSession = (session, movies) => {
     capacity: session.capacity ?? session.numberPlace ?? 0,
     price: session.price ?? null,
     booked: session.booked ?? (session.reservations?.length ?? 0),
-    duration: session.duration ?? computeDuration(session.hourStart ?? session.time, session.hourEnd) 
+    duration: session.duration ?? computeDuration(session.hourStart ?? session.time, session.hourEnd)
   };
 
   // If movieId is not already present, try to find it from movies
@@ -61,7 +61,9 @@ export const useSessionsStore = defineStore('sessions', {
         moviesMap.get(session.movieId).sessions.push(session);
       });
       return Array.from(moviesMap.values());
-}, getSessionById: (state) => (id) => { return state.sessions.find(session => session.id == id || session.id === String(id)); }, }, actions: { async fetchAllSessions() {
+    }, getSessionById: (state) => (id) => { return state.sessions.find(session => session.id == id || session.id === String(id)); },
+  }, actions: {
+    async fetchAllSessions() {
       this.loading = true
       this.error = null
       try {
@@ -71,13 +73,42 @@ export const useSessionsStore = defineStore('sessions', {
         // Fetch movies to enrich session data
         const moviesStore = useMoviesStore();
         if (moviesStore.movies.length === 0) {
-            await moviesStore.fetchMovies();
+          await moviesStore.fetchMovies();
         }
         const movies = moviesStore.movies;
 
         this.sessions = rawSessions.map(session => normalizeSession(session, movies));
       } catch (e) {
         this.error = 'Erreur lors du chargement des séances.'
+      } finally {
+        this.loading = false
+      }
+    },
+    async fetchSessionById(id) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await sessionsService.adminGetSessionById(id)
+        const rawSession = response.data
+
+        const moviesStore = useMoviesStore()
+        if (moviesStore.movies.length === 0) {
+          await moviesStore.fetchMovies()
+        }
+        const movies = moviesStore.movies
+
+        const normalized = normalizeSession(rawSession, movies)
+        const existingIndex = this.sessions.findIndex(session => session.id == normalized.id)
+        if (existingIndex >= 0) {
+          this.sessions.splice(existingIndex, 1, normalized)
+        } else {
+          this.sessions.push(normalized)
+        }
+
+        return normalized
+      } catch (e) {
+        this.error = 'Erreur lors du chargement de la séance.'
+        throw e
       } finally {
         this.loading = false
       }

@@ -12,7 +12,7 @@
       <!-- NEW Global Header for all views -->
       <header class="hidden md:flex justify-between items-center p-4 md:px-8 bg-cinema-darkAlt border-b border-slate-700">
         <div class="flex items-center gap-4">
-            <h1 class="text-xl font-bold text-slate-100">Bonjour, <span class="text-cinema-accentLight">{{ authStore.currentUser?.first_name || 'utilisateur' }}</span>!</h1>
+            <h1 class="text-xl font-bold text-slate-100">Bonjour, <span class="text-cinema-accentLight">{{ authStore.currentUser?.firstName || authStore.currentUser?.username || 'utilisateur' }}</span>!</h1>
         </div>
         <button @click="logout" class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors px-3 py-2 rounded-md border border-transparent hover:border-red-400" title="Déconnexion">
             <i class="fa-solid fa-right-from-bracket text-lg"></i>

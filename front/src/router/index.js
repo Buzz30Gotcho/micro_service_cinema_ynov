@@ -22,6 +22,8 @@ import AdminUsersPage from '@/pages/admin/UsersPage.vue'
 // Client Pages
 import ClientBookingPage from '@/pages/client/BookingPage.vue'
 import ClientMyBookingsPage from '@/pages/client/MyBookingsPage.vue'
+import PaymentPage from '@/pages/client/PaymentPage.vue'
+import PaymentSuccessPage from '@/pages/client/PaymentSuccessPage.vue'
 
 const routes = [
     {
@@ -49,7 +51,7 @@ const routes = [
         meta: { requiresAuth: false }
     },
     {
-        path: '/reset/:token',
+        path: '/reset-password/:token',
         name: 'ResetPassword',
         component: ResetPasswordPage,
         meta: { requiresAuth: false }
@@ -134,6 +136,18 @@ const routes = [
         path: '/client/my-bookings',
         name: 'ClientMyBookings',
         component: ClientMyBookingsPage,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/payment',
+        name: 'Payment',
+        component: PaymentPage,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/payment/success',
+        name: 'PaymentSuccess',
+        component: PaymentSuccessPage,
         meta: { requiresAuth: true }
     }
 ]

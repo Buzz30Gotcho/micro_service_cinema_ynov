@@ -20,16 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/../src/index.php';
 
-// --- Init DB on startup ---
-try {
-    initDatabase();
-} catch (Exception $e) {
-    // DB might not be ready yet on first request — that's ok, we'll retry per-route
-}
-
 $method = $_SERVER['REQUEST_METHOD'];
-$uri    = $_SERVER['REQUEST_URI'];
-$path   = parse_url($uri, PHP_URL_PATH);
+$uri = $_SERVER['REQUEST_URI'];
+$path = parse_url($uri, PHP_URL_PATH);
 
 // Strip optional gateway prefix
 $path = preg_replace('#^/catalogue#', '', $path) ?: '/';
@@ -53,7 +46,8 @@ if ($method === 'GET' && $path === '/health') {
 if ($method === 'GET' && ($path === '/movies' || $path === '/films')) {
     try {
         $pdo = getDbConnection();
-        $stmt = $pdo->query('SELECT * FROM movies ORDER BY id DESC');
+        seedFilmsIfEmpty($pdo);
+        $stmt = $pdo->query('SELECT * FROM films ORDER BY id DESC');
         $rows = $stmt->fetchAll();
         jsonResponse(array_map('rowToCamel', $rows));
     } catch (Exception $e) {
@@ -65,13 +59,13 @@ if ($method === 'GET' && ($path === '/movies' || $path === '/films')) {
 if ($method === 'GET' && $path === '/movies/stats/all') {
     try {
         $pdo = getDbConnection();
-        $total = $pdo->query('SELECT COUNT(*) AS c FROM movies')->fetch()['c'];
-        $avg   = $pdo->query('SELECT COALESCE(AVG(rating),0) AS a FROM movies')->fetch()['a'];
-        $genres = $pdo->query("SELECT genre, COUNT(*) AS count FROM movies WHERE genre IS NOT NULL GROUP BY genre ORDER BY count DESC")->fetchAll();
+        $total = $pdo->query('SELECT COUNT(*) AS c FROM films')->fetch()['c'];
+        $avg = $pdo->query('SELECT COALESCE(AVG(rating),0) AS a FROM films')->fetch()['a'];
+        $genres = $pdo->query("SELECT genre, COUNT(*) AS count FROM films WHERE genre IS NOT NULL GROUP BY genre ORDER BY count DESC")->fetchAll();
         jsonResponse([
-            'totalMovies'   => (int) $total,
+            'totalMovies' => (int) $total,
             'averageRating' => round((float) $avg, 2),
-            'genres'        => $genres,
+            'genres' => $genres,
         ]);
     } catch (Exception $e) {
         jsonResponse(['error' => $e->getMessage()], 500);
@@ -83,7 +77,7 @@ if ($method === 'GET' && preg_match('#^/(movies|films)/(\d+)$#', $path, $m)) {
     $id = (int) $m[2];
     try {
         $pdo = getDbConnection();
-        $stmt = $pdo->prepare('SELECT * FROM movies WHERE id = :id');
+        $stmt = $pdo->prepare('SELECT * FROM films WHERE id = :id');
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();
         if (!$row) {
@@ -128,26 +122,26 @@ if ($method === 'POST' && $path === '/movies') {
     try {
         $pdo = getDbConnection();
         $stmt = $pdo->prepare("
-            INSERT INTO movies (title, genre, duration, rating, year, age_rating, image, description, synopsis, director, writer, producer, studio, release_date, budget)
+            INSERT INTO films (title, genre, duration, rating, year, age_rating, image, description, synopsis, director, writer, producer, studio, release_date, budget)
             VALUES (:title, :genre, :duration, :rating, :year, :age_rating, :image, :description, :synopsis, :director, :writer, :producer, :studio, :release_date, :budget)
             RETURNING *
         ");
         $stmt->execute([
-            'title'        => $body['title'],
-            'genre'        => $body['genre'] ?? null,
-            'duration'     => isset($body['duration']) ? (int) $body['duration'] : null,
-            'rating'       => isset($body['rating']) ? (float) $body['rating'] : null,
-            'year'         => isset($body['year']) ? (int) $body['year'] : null,
-            'age_rating'   => $body['ageRating'] ?? $body['age_rating'] ?? null,
-            'image'        => $body['image'] ?? null,
-            'description'  => $body['description'] ?? null,
-            'synopsis'     => $body['synopsis'] ?? null,
-            'director'     => $body['director'] ?? null,
-            'writer'       => $body['writer'] ?? null,
-            'producer'     => $body['producer'] ?? null,
-            'studio'       => $body['studio'] ?? null,
+            'title' => $body['title'],
+            'genre' => $body['genre'] ?? null,
+            'duration' => isset($body['duration']) ? (int) $body['duration'] : null,
+            'rating' => isset($body['rating']) ? (float) $body['rating'] : null,
+            'year' => isset($body['year']) ? (int) $body['year'] : null,
+            'age_rating' => $body['ageRating'] ?? $body['age_rating'] ?? null,
+            'image' => $body['image'] ?? null,
+            'description' => $body['description'] ?? null,
+            'synopsis' => $body['synopsis'] ?? null,
+            'director' => $body['director'] ?? null,
+            'writer' => $body['writer'] ?? null,
+            'producer' => $body['producer'] ?? null,
+            'studio' => $body['studio'] ?? null,
             'release_date' => $body['releaseDate'] ?? $body['release_date'] ?? null,
-            'budget'       => $body['budget'] ?? null,
+            'budget' => $body['budget'] ?? null,
         ]);
         $row = $stmt->fetch();
         jsonResponse(rowToCamel($row), 201);
@@ -164,14 +158,14 @@ if ($method === 'PUT' && preg_match('#^/movies/(\d+)$#', $path, $m)) {
         $pdo = getDbConnection();
 
         // Check exists
-        $check = $pdo->prepare('SELECT id FROM movies WHERE id = :id');
+        $check = $pdo->prepare('SELECT id FROM films WHERE id = :id');
         $check->execute(['id' => $id]);
         if (!$check->fetch()) {
             jsonResponse(['error' => 'Film non trouvé'], 404);
         }
 
         $stmt = $pdo->prepare("
-            UPDATE movies SET
+            UPDATE films SET
                 title        = :title,
                 genre        = :genre,
                 duration     = :duration,
@@ -192,22 +186,22 @@ if ($method === 'PUT' && preg_match('#^/movies/(\d+)$#', $path, $m)) {
             RETURNING *
         ");
         $stmt->execute([
-            'id'           => $id,
-            'title'        => $body['title'] ?? '',
-            'genre'        => $body['genre'] ?? null,
-            'duration'     => isset($body['duration']) ? (int) $body['duration'] : null,
-            'rating'       => isset($body['rating']) ? (float) $body['rating'] : null,
-            'year'         => isset($body['year']) ? (int) $body['year'] : null,
-            'age_rating'   => $body['ageRating'] ?? $body['age_rating'] ?? null,
-            'image'        => $body['image'] ?? null,
-            'description'  => $body['description'] ?? null,
-            'synopsis'     => $body['synopsis'] ?? null,
-            'director'     => $body['director'] ?? null,
-            'writer'       => $body['writer'] ?? null,
-            'producer'     => $body['producer'] ?? null,
-            'studio'       => $body['studio'] ?? null,
+            'id' => $id,
+            'title' => $body['title'] ?? '',
+            'genre' => $body['genre'] ?? null,
+            'duration' => isset($body['duration']) ? (int) $body['duration'] : null,
+            'rating' => isset($body['rating']) ? (float) $body['rating'] : null,
+            'year' => isset($body['year']) ? (int) $body['year'] : null,
+            'age_rating' => $body['ageRating'] ?? $body['age_rating'] ?? null,
+            'image' => $body['image'] ?? null,
+            'description' => $body['description'] ?? null,
+            'synopsis' => $body['synopsis'] ?? null,
+            'director' => $body['director'] ?? null,
+            'writer' => $body['writer'] ?? null,
+            'producer' => $body['producer'] ?? null,
+            'studio' => $body['studio'] ?? null,
             'release_date' => $body['releaseDate'] ?? $body['release_date'] ?? null,
-            'budget'       => $body['budget'] ?? null,
+            'budget' => $body['budget'] ?? null,
         ]);
         $row = $stmt->fetch();
         jsonResponse(rowToCamel($row));
@@ -221,7 +215,7 @@ if ($method === 'DELETE' && preg_match('#^/movies/(\d+)$#', $path, $m)) {
     $id = (int) $m[1];
     try {
         $pdo = getDbConnection();
-        $stmt = $pdo->prepare('DELETE FROM movies WHERE id = :id');
+        $stmt = $pdo->prepare('DELETE FROM films WHERE id = :id');
         $stmt->execute(['id' => $id]);
         if ($stmt->rowCount() === 0) {
             jsonResponse(['error' => 'Film non trouvé'], 404);

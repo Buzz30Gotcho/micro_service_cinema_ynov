@@ -88,5 +88,22 @@ export const useBookingsStore = defineStore('bookings', {
                 this.loading = false
             }
         },
+
+        // Traiter un paiement via le serveur
+        async processPayment(paymentData) {
+            this.loading = true
+            this.error = null
+            try {
+                const response = await bookingsService.processPayment(paymentData)
+                console.log('Paiement traité:', response.data)
+                return response.data
+            } catch (error) {
+                this.error = 'Erreur lors du traitement du paiement.'
+                console.error(this.error, error)
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
     }
 })

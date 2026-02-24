@@ -80,16 +80,20 @@ services:
     ports:
       - "4003:4003"
 
-  admin:
-    build: ./services/admin
-    container_name: ms-cinema-admin
+  payment:
+    build: ./services/payment
+    container_name: ms-cinema-payment
+    depends_on:
+      - postgres
     environment:
-      APP_PORT: "4010"
-      ALLOWED_SERVICES: "catalog:ms-cinema-catalog,auth:ms-cinema-auth,booking:ms-cinema-booking,postgres:ms-cinema-postgres"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      APP_PORT: "4004"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: payment_db
+      DB_USER: payment_user
+      DB_PASSWORD: payment_pass
     ports:
-      - "4010:4010"
+      - "4004:4004"
 
   front:
     build: ./front
@@ -98,6 +102,9 @@ services:
       VITE_API_BASE: ""
     ports:
       - "5173:5173"
+    volumes:
+      - ./front/src:/app/src
+      - ./front/index.html:/app/index.html
 
   api-gateway:
     build: ./api-gateway
@@ -108,10 +115,12 @@ services:
       - AUTH_URL=http://auth_api:4002
       - CATALOG_URL=http://catalog:4001
       - BOOKING_URL=http://booking:4003
+      - PAYMENT_URL=http://payment:4004
     depends_on:
       - auth_api
       - catalog
       - booking
+      - payment
 
 volumes:
   pg_data:

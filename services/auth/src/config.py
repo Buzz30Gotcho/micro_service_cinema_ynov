@@ -29,3 +29,11 @@ class Config:
     # JWT Token Configuration
     JWT_ACCESS_TOKEN_EXPIRES = 30 * 60  # 30 minutes en secondes
     JWT_REFRESH_TOKEN_EXPIRES = 7 * 24 * 60 * 60  # 7 jours en secondes
+
+    # Email Configuration (SMTP)
+    SMTP_HOST = os.getenv("SMTP_HOST", "")
+    SMTP_PORT = os.getenv("SMTP_PORT", "587")
+    SMTP_USER = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+    FROM_EMAIL = os.getenv("FROM_EMAIL", "noreply@centralcinema.com")
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")

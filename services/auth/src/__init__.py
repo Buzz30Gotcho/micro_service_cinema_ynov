@@ -54,6 +54,22 @@ def create_app(config_class=Config):
     except Exception:
         pass
 
+    # Index pour les tokens de réinitialisation de mot de passe
+    try:
+        app.db.password_resets.create_index([("token", pymongo.ASCENDING)], unique=True)
+    except Exception:
+        pass
+    try:
+        # Supprimer automatiquement les tokens expirés
+        app.db.password_resets.create_index("expires_at", expireAfterSeconds=0)
+    except Exception:
+        pass
+    try:
+        # Index sur l'email pour recherche rapide
+        app.db.password_resets.create_index([("email", pymongo.ASCENDING)])
+    except Exception:
+        pass
+
     # 2. Setup Flask-Login
     login_manager.init_app(app)
 

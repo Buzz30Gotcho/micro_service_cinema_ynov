@@ -33,10 +33,6 @@
                 <span class="text-slate-400">Réservations</span>
                 <span class="font-semibold">{{ bookings.length }}</span>
               </div>
-              <div class="flex justify-between">
-                <span class="text-slate-400">Points fidélité</span>
-                <span class="font-semibold text-yellow-400">{{ user.points }} pts</span>
-              </div>
             </div>
 
             <button
@@ -45,27 +41,6 @@
             >
               Modifier le profil
             </button>
-          </div>
-
-          <!-- Quick stats -->
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-            <h3 class="font-semibold mb-4">Statistiques</h3>
-            <div class="space-y-3 text-sm">
-              <div class="flex items-center gap-3">
-                <Film :size="20" class="text-slate-200" />
-                <div>
-                  <div class="font-semibold">{{ user.moviesWatched }}</div>
-                  <div class="text-slate-400 text-xs">Films vus</div>
-                </div>
-              </div>
-              <div class="flex items-center gap-3">
-                <Star :size="20" class="text-yellow-400" />
-                <div>
-                  <div class="font-semibold">{{ user.favoriteGenre }}</div>
-                  <div class="text-slate-400 text-xs">Genre préféré</div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -108,7 +83,10 @@
             >
               <div class="flex gap-6">
                 <div class="flex-1">
-                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId, booking.seance) }}</h3>
+                  <div class="flex items-center gap-3 mb-2">
+                    <h3 class="text-xl font-bold">{{ getMovieTitle(booking.seance.movieId, booking.seance) }}</h3>
+                    <span v-if="booking.seance.price > 12" class="bg-primary-accent/20 text-primary-accent px-2 py-1 rounded text-xs font-semibold">⭐ Premium</span>
+                  </div>
                   
                   <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
@@ -131,15 +109,6 @@
 
                   <div class="flex items-center justify-end">
                     <div class="flex gap-2">
-                      <button
-                        @click="downloadTicket(booking)"
-                        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-semibold transition"
-                      >
-                        <span class="inline-flex items-center gap-2">
-                          <Download :size="16" />
-                          Télécharger
-                        </span>
-                      </button>
                       <button
                         @click="cancelBooking(booking)"
                         class="px-4 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 rounded-lg text-sm font-semibold transition"
@@ -172,7 +141,10 @@
             >
               <div class="flex gap-6">
                 <div class="flex-1">
-                  <h3 class="text-xl font-bold mb-2">{{ getMovieTitle(booking.seance.movieId, booking.seance) }}</h3>
+                  <div class="flex items-center gap-3 mb-2">
+                    <h3 class="text-xl font-bold">{{ getMovieTitle(booking.seance.movieId, booking.seance) }}</h3>
+                    <span v-if="booking.seance.price > 12" class="bg-primary-accent/20 text-primary-accent px-2 py-1 rounded text-xs font-semibold">⭐ Premium</span>
+                  </div>
                   
                   <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
@@ -406,11 +378,6 @@ const saveProfile = async () => {
     const errorMessage = error.response?.data?.message || error.message || 'Veuillez réessayer.';
     showToast('Erreur', `La mise à jour du profil a échoué: ${errorMessage}`, 'error');
   }
-}
-
-// Actions
-const downloadTicket = (booking) => {
-  alert(`Le téléchargement du billet pour ${getMovieTitle(booking.seance.movieId, booking.seance)} n'est pas encore implémenté.`)
 }
 
 const cancelBooking = async (booking) => {

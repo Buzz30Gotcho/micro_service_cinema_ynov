@@ -1,84 +1,144 @@
 <template>
-  <div class="bg-slate-950 text-slate-100 min-h-screen">
-    
+  <div class="min-h-screen bg-gradient-to-b from-dark-bg via-dark-card/20 to-dark-bg text-light-text">
     <Header />
 
-    <!-- Loading and Error States -->
-    <div v-if="loading" class="text-center py-24 text-slate-400">Chargement du film...</div>
-    <div v-if="error" class="text-center py-24 text-red-500">
-      <p>Erreur: {{ error }}</p>
-      <p v-if="!movie">Ce film n'a pas pu être chargé.</p>
+    <!-- Loading State -->
+    <div v-if="loading" class="text-center py-40 text-muted-text">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-accent"></div>
+      <p class="mt-4">Chargement du film...</p>
+    </div>
+
+    <!-- Error State -->
+    <div v-if="error && !movie" class="text-center py-40">
+      <p class="text-red-500 text-xl">{{ error }}</p>
     </div>
 
     <!-- Main Content -->
-    <div v-if="movie && !loading">
+    <div v-if="movie && !loading" class="overflow-hidden">
       <!-- Hero Section -->
-      <section class="relative h-[30vh] overflow-hidden">
-        <div class="absolute inset-0">
-          <div class="w-full h-full bg-cover bg-center opacity-30" 
-              :style="{ backgroundImage: `url('${movie.poster}')` }">
-          </div>
-          <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent"></div>
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
-        </div>
-
-        <div class="relative z-10 h-full px-6 md:px-12 py-8 flex items-center">
-          <div class="max-w-4xl space-y-4">
-            <h1 class="text-3xl md:text-5xl font-bold">{{ movie.title }}</h1>
-            <div class="flex flex-wrap items-center gap-2 text-sm text-slate-300">
-              <span class="text-green-500 font-semibold">{{ movie.rating }}★</span>
-              <span>{{ movie.year }}</span>
-              <span class="px-2 py-0.5 border border-slate-500 rounded">{{ movie.ageRating }}</span>
-              <span>{{ movie.duration }} min</span>
-              <span class="px-2 py-0.5 bg-slate-800 rounded">{{ movie.genre }}</span>
+      <section class="relative h-[60vh] flex items-end overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <!-- Content -->
+        <div class="relative z-10 w-full px-4 md:px-12 pb-8 md:pb-12">
+          <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-end">
+            <!-- Poster -->
+            <div class="hidden md:block md:col-span-1 transform hover:scale-105 transition-transform duration-300">
+              <div class="aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border border-primary-accent/20 backdrop-blur max-w-xs">
+                <img :src="movie.posterUrl || movie.image" :alt="movie.title" class="w-full h-full object-cover">
+              </div>
             </div>
-            <p class="text-base text-slate-300 leading-relaxed">{{ movie.description }}</p>
-            <div class="flex flex-wrap gap-4">
-              <button @click="goToBooking" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded transition flex items-center gap-2">
-                <Ticket :size="18" />
-                <span>Réserver des places</span>
+
+            <!-- Info -->
+            <div class="md:col-span-2 space-y-4 animate-fadeIn">
+              <!-- Title -->
+              <div>
+                <h1 class="text-3xl md:text-5xl font-bold tracking-tight text-white drop-shadow-lg">
+                  {{ movie.title }}
+                </h1>
+                <p class="text-muted-text mt-2 text-base md:text-lg">{{ movie.year }}</p>
+              </div>
+
+              <!-- Rating and Info Pills -->
+              <div class="flex flex-wrap gap-2">
+                <div class="flex items-center gap-2 bg-primary-accent/20 backdrop-blur px-3 py-1.5 rounded-full border border-primary-accent/40">
+                  <span class="text-lg">⭐</span>
+                  <span class="font-semibold">{{ movie.rating }}/5</span>
+                </div>
+                <div class="bg-dark-card/60 backdrop-blur px-3 py-1.5 rounded-full border border-dark-border text-sm">
+                  <span>⏱️ {{ movie.duration }} min</span>
+                </div>
+                <div class="bg-dark-card/60 backdrop-blur px-3 py-1.5 rounded-full border border-dark-border text-sm">
+                  <span>{{ movie.ageRating }}</span>
+                </div>
+                <div class="bg-primary-accent/10 backdrop-blur px-3 py-1.5 rounded-full border border-primary-accent/30 text-sm">
+                  <span>{{ movie.genre }}</span>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <p class="text-light-text/90 leading-relaxed max-w-2xl line-clamp-3">
+                {{ movie.description || movie.synopsis }}
+              </p>
+
+              <!-- CTA Buttons -->
+              <div class="flex flex-wrap gap-3 pt-4">
+                <button @click="goToBooking" 
+                  class="px-6 py-2.5 bg-primary-accent hover:bg-primary-hover text-dark-bg font-bold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-2 text-sm md:text-base">
+                  🎫 Réserver des places
+                </button>
+                <button class="px-6 py-2.5 bg-dark-card/60 hover:bg-dark-card text-light-text font-semibold rounded-lg border border-dark-border transition-all duration-300 backdrop-blur text-sm md:text-base">
+                  ❤️ Ajouter à la liste
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Details Section -->
+      <section class="px-4 md:px-12 py-16 md:py-24">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <!-- Main Content -->
+          <div class="lg:col-span-2 space-y-12">
+            <!-- Synopsis -->
+            <div class="bg-dark-card/40 backdrop-blur border border-dark-border rounded-2xl p-8 hover:bg-dark-card/60 transition-colors duration-300">
+              <h2 class="text-3xl font-bold text-primary-accent mb-6">Synopsis</h2>
+              <p class="text-light-text/80 text-lg leading-relaxed">
+                {{ movie.synopsis || movie.description }}
+              </p>
+            </div>
+
+            <!-- Details Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div v-if="movie.director" class="bg-dark-card/40 backdrop-blur border border-dark-border rounded-xl p-6 hover:bg-dark-card/60 transition-colors duration-300">
+                <h3 class="text-sm uppercase tracking-widest text-muted-text font-semibold mb-3">Réalisateur</h3>
+                <p class="text-xl font-semibold text-light-text">{{ movie.director }}</p>
+              </div>
+              <div v-if="movie.writer" class="bg-dark-card/40 backdrop-blur border border-dark-border rounded-xl p-6 hover:bg-dark-card/60 transition-colors duration-300">
+                <h3 class="text-sm uppercase tracking-widest text-muted-text font-semibold mb-3">Scénariste</h3>
+                <p class="text-xl font-semibold text-light-text">{{ movie.writer }}</p>
+              </div>
+              <div v-if="movie.producer" class="bg-dark-card/40 backdrop-blur border border-dark-border rounded-xl p-6 hover:bg-dark-card/60 transition-colors duration-300">
+                <h3 class="text-sm uppercase tracking-widest text-muted-text font-semibold mb-3">Producteur</h3>
+                <p class="text-xl font-semibold text-light-text">{{ movie.producer }}</p>
+              </div>
+              <div v-if="movie.studio" class="bg-dark-card/40 backdrop-blur border border-dark-border rounded-xl p-6 hover:bg-dark-card/60 transition-colors duration-300">
+                <h3 class="text-sm uppercase tracking-widest text-muted-text font-semibold mb-3">Studio</h3>
+                <p class="text-xl font-semibold text-light-text">{{ movie.studio }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="space-y-8">
+            <!-- Booking Card -->
+            <div class="bg-gradient-to-br from-primary-accent/20 to-primary-accent/5 backdrop-blur border border-primary-accent/30 rounded-2xl p-8 sticky top-24">
+              <h3 class="text-2xl font-bold mb-6 flex items-center gap-2">🎬 Réserver maintenant</h3>
+              <button @click="goToBooking" 
+                class="w-full px-6 py-4 bg-primary-accent hover:bg-primary-hover text-dark-bg font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                Voir les séances
               </button>
+              <p class="text-sm text-muted-text mt-4 text-center">Choisissez vos places et vos horaires</p>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- Détails du film -->
-      <section class="px-6 md:px-12 py-8 md:py-12">
-        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          <div class="lg:col-span-2 space-y-8">
-            <div>
-              <h2 class="text-2xl font-semibold mb-2">Synopsis</h2>
-              <p class="text-slate-300 leading-relaxed">{{ movie.synopsis }}</p>
-            </div>
-            <div v-if="movie.cast && movie.cast.length">
-              <h2 class="text-2xl font-semibold mb-2">Distribution</h2>
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                <div v-for="actor in movie.cast" :key="actor.name" class="text-center">
-                  <div class="w-20 h-20 mx-auto rounded-full bg-slate-800 mb-1"></div>
-                  <p class="text-sm font-medium">{{ actor.name }}</p>
-                  <p class="text-xs text-slate-400">{{ actor.role }}</p>
+            <!-- Info Card -->
+            <div class="bg-dark-card/40 backdrop-blur border border-dark-border rounded-2xl p-8">
+              <h3 class="text-xl font-bold mb-6">ℹ️ Infos pratiques</h3>
+              <div class="space-y-4 text-sm">
+                <div>
+                  <p class="text-muted-text uppercase tracking-wider text-xs font-semibold mb-1">Genre</p>
+                  <p class="text-light-text font-medium">{{ movie.genre }}</p>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-6">
-            <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 md:p-6">
-              <h3 class="text-xl font-semibold mb-2">Informations</h3>
-              <div class="space-y-2 text-sm">
-                <div v-if="movie.director"><span class="text-slate-400">Réalisateur:</span> <p class="text-slate-100">{{ movie.director }}</p></div>
-                <div v-if="movie.writer"><span class="text-slate-400">Scénariste:</span> <p class="text-slate-100">{{ movie.writer }}</p></div>
-                <div v-if="movie.releaseDate"><span class="text-slate-400">Date de sortie:</span> <p class="text-slate-100">{{ movie.releaseDate }}</p></div>
-              </div>
-            </div>
-            <div v-if="movie.sessions && movie.sessions.length" class="bg-slate-900 border border-slate-800 rounded-lg p-4 md:p-6">
-              <h3 class="text-xl font-semibold mb-2">Séances disponibles</h3>
-              <div class="space-y-2">
-                <div v-for="session in movie.sessions" :key="session.time" class="p-2 bg-slate-800 rounded hover:bg-slate-700 cursor-pointer transition">
-                  <p class="font-medium">{{ session.date }}</p>
-                  <p class="text-sm text-slate-400">{{ session.time }} • Salle {{ session.room }}</p>
-                  <p class="text-xs text-green-400 mt-1">{{ session.availableSeats }} places disponibles</p>
+                <div>
+                  <p class="text-muted-text uppercase tracking-wider text-xs font-semibold mb-1">Durée</p>
+                  <p class="text-light-text font-medium">{{ movie.duration }} minutes</p>
+                </div>
+                <div>
+                  <p class="text-muted-text uppercase tracking-wider text-xs font-semibold mb-1">Classification</p>
+                  <p class="text-light-text font-medium">{{ movie.ageRating }}</p>
+                </div>
+                <div>
+                  <p class="text-muted-text uppercase tracking-wider text-xs font-semibold mb-1">Année de sortie</p>
+                  <p class="text-light-text font-medium">{{ movie.year }}</p>
                 </div>
               </div>
             </div>
@@ -86,17 +146,20 @@
         </div>
       </section>
 
-      <!-- Films similaires -->
-      <section v-if="similarMovies.length" class="px-6 md:px-12 py-8 md:py-12 border-t border-slate-800">
-        <div class="max-w-6xl mx-auto">
-          <h2 class="text-2xl font-semibold mb-4">Films similaires</h2>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            <div v-for="similar in similarMovies" :key="similar.id" @click="goToMovie(similar.id)" class="group cursor-pointer">
-              <div class="relative aspect-[2/3] rounded overflow-hidden bg-cover bg-center" :style="{ backgroundImage: `url('${similar.poster}')` }">
-                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2 md:p-3">
-                  <h3 class="font-semibold text-sm mb-1">{{ similar.title }}</h3>
-                  <p class="text-xs text-slate-300">{{ similar.genre }}</p>
-                  <span class="text-xs text-green-400 mt-1">{{ similar.rating }}★</span>
+      <!-- Similar Movies -->
+      <section v-if="similarMovies.length" class="px-4 md:px-12 py-16 md:py-24 border-t border-dark-border">
+        <div class="max-w-7xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-12">Films similaires</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <div v-for="similar in similarMovies" :key="similar.id" 
+              @click="goToMovie(similar.id)"
+              class="group cursor-pointer transform hover:scale-110 transition-transform duration-300">
+              <div class="relative aspect-[2/3] rounded-xl overflow-hidden border border-dark-border/50 hover:border-primary-accent/50 transition-colors duration-300">
+                <img :src="similar.posterUrl || similar.image" :alt="similar.title" class="w-full h-full object-cover group-hover:brightness-75 transition-all duration-300">
+                <div class="absolute inset-0 bg-gradient-to-t from-dark-bg via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                  <h3 class="font-bold text-sm mb-1">{{ similar.title }}</h3>
+                  <p class="text-xs text-muted-text">{{ similar.genre }}</p>
+                  <span class="text-sm font-semibold text-primary-accent mt-2">⭐ {{ similar.rating }}</span>
                 </div>
               </div>
             </div>
@@ -113,7 +176,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useMoviesStore } from '@/stores/movies.store'
 import { storeToRefs } from 'pinia'
 import Header from '@/components/common/Header.vue'
-import { Ticket } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
@@ -166,3 +228,20 @@ const goToMovie = (id) => {
   window.scrollTo(0, 0)
 }
 </script>
+
+<style scoped>
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.6s ease-out;
+}
+</style>

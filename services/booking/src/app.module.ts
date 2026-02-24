@@ -17,7 +17,7 @@ import { AuthModule } from './auth/auth.module';
       password: process.env.DB_PASSWORD || "postgres",
       database: process.env.DB_NAME || "seance_db",
       entities: [Seance, Reservation],
-      synchronize: true,
+      synchronize: false, // Désactivé pour gérer le schéma via scripts SQL
     }),
     SeanceModule,
     ReservationModule,

@@ -23,6 +23,7 @@ const services = [
     { route: '/auth', target: process.env.AUTH_URL || 'http://127.0.0.1:4002' },
     { route: '/movies', target: process.env.CATALOG_URL || 'http://127.0.0.1:4001' },
     { route: '/sessions', target: process.env.BOOKING_URL || 'http://127.0.0.1:4003' },
+    { route: '/payments', target: process.env.PAYMENT_URL || 'http://127.0.0.1:4004' },
 ];
 
 services.forEach(({ route, target }) => {

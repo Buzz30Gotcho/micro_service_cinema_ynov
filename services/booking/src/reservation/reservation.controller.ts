@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request, Put } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport'; // Import AuthGuard
 import { ReservationDto } from '../dto/reservation.dto';
 import { ReservationService } from './reservation.service';
 import { Reservation } from '../entities/reservation.entity';
 
-@Controller('reservation')
+@Controller('sessions/reservation')
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) { }
 
@@ -31,7 +31,16 @@ export class ReservationController {
   @UseGuards(AuthGuard('jwt'))
   async create(@Body() reservationDto: ReservationDto, @Request() req): Promise<Reservation> {
     // Le JWT garantit que l'utilisateur est authentifié
+    if (!reservationDto.email && req?.user?.email) {
+      reservationDto.email = req.user.email;
+    }
     return this.reservationService.create(reservationDto);
+  }
+
+  @Put(':id')
+  @UseGuards(AuthGuard('jwt'))
+  async update(@Param('id') id: string, @Body() reservationDto: Partial<ReservationDto>): Promise<Reservation> {
+    return this.reservationService.update(id, reservationDto);
   }
 
   @Delete(':id')

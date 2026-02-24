@@ -5,9 +5,9 @@ from cryptography.fernet import Fernet
 
 def ensure_env_and_keys():
     env_path = ".env"
-    example_path = "exemple.env"
+    example_path = ".env.example"
 
-    # 1. Create .env from exemple.env if it doesn't exist
+    # 1. Create .env from .env.example if it doesn't exist
     if not os.path.exists(env_path):
         if os.path.exists(example_path):
             shutil.copy(example_path, env_path)

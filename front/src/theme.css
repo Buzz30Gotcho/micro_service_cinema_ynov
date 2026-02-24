@@ -1,0 +1,51 @@
+:root {
+    /* Mode sombre (par défaut) */
+    --bg-primary: #101010;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #0f172a;
+    --text-primary: #E0E0E0;
+    --text-secondary: #A0A0A0;
+    --border-color: #333333;
+    --header-bg: rgba(15, 23, 42, 0.8);
+    --card-bg: #1a1a1a;
+}
+
+html.light {
+    /* Mode clair */
+    --bg-primary: #F5F5F5;
+    --bg-secondary: #FFFFFF;
+    --bg-tertiary: #F9FAFB;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --border-color: #E5E7EB;
+    --header-bg: rgba(255, 255, 255, 0.8);
+    --card-bg: #FFFFFF;
+}
+
+/* Appliquer les variables CSS */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Variantes de Tailwind pour les couleurs CSS */
+.bg-dark-bg {
+    background-color: var(--bg-primary);
+}
+
+.bg-dark-card {
+    background-color: var(--bg-secondary);
+}
+
+.text-light-text {
+    color: var(--text-primary);
+}
+
+.text-muted-text {
+    color: var(--text-secondary);
+}
+
+.border-dark-border {
+    border-color: var(--border-color);
+}

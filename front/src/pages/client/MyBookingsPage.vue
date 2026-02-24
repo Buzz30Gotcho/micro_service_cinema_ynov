@@ -22,8 +22,13 @@
           class="bg-dark-card rounded-xl border border-dark-border p-6 flex flex-col md:flex-row gap-6 items-start"
         >
           <!-- Movie Poster -->
-          <div class="w-full md:w-32 aspect-[2/3] rounded-lg overflow-hidden flex-shrink-0">
-            <img :src="getMovieImage(booking.seance?.movieId, booking.seance)" class="w-full h-full object-cover">
+          <div class="w-full md:w-32 aspect-[2/3] rounded-lg overflow-hidden flex-shrink-0 bg-dark-bg border border-dark-border">
+            <img 
+              :src="getMovieImage(booking.seance?.movieId, booking.seance)" 
+              :alt="getMovieTitle(booking.seance?.movieId, booking.seance)"
+              class="w-full h-full object-cover"
+              @error="(e) => e.target.src = 'https://via.placeholder.com/100x150?text=Film'"
+            >
           </div>
 
           <!-- Booking Details -->
@@ -50,18 +55,12 @@
             </div>
 
             <!-- Actions -->
-            <div class="mt-4 flex gap-2">
-              <button 
-                @click="viewDetails(booking)"
-                class="px-4 py-2 bg-primary-accent hover:bg-primary-hover text-light-text text-sm rounded-lg transition-colors"
-              >
-                Détails
-              </button>
+            <div class="mt-4">
               <button 
                 @click="handleCancelBooking(booking.id)"
                 class="px-4 py-2 bg-danger hover:bg-danger-hover text-light-text text-sm rounded-lg transition-colors"
               >
-                Annuler
+                Annuler la réservation
               </button>
             </div>
           </div>
@@ -96,7 +95,7 @@
           Vous n'avez pas encore effectué de réservation.
         </p>
         <router-link 
-          to="/"
+          to="/films"
           class="mt-4 inline-block px-4 py-2 bg-primary-accent hover:bg-primary-hover text-light-text rounded-lg transition-colors"
         >
           Voir les films
@@ -135,12 +134,39 @@ const getMovieTitle = (movieId, seance) => {
 }
 
 const getMovieImage = (movieId, seance) => {
+    console.log('getMovieImage - movieId:', movieId, 'seance:', seance);
+    
     if (movieId) {
-      const movie = moviesStore.movies.find(m => m.id === movieId);
-      const posterPath = movie?.posterPath?.startsWith('http') ? movie.posterPath : `/${movie?.posterPath}`;
-      return movie?.posterPath ? posterPath : 'https://via.placeholder.com/100x150';
+      const movie = moviesStore.movies.find(m => m.id === movieId || m.id == movieId);
+      console.log('Film trouvé:', movie);
+      if (movie) {
+        const posterUrl = movie.posterUrl || movie.poster || movie.image;
+        console.log('posterUrl:', posterUrl);
+        if (posterUrl) {
+          return posterUrl.startsWith('http') ? posterUrl : `/${posterUrl}`;
+        }
+      }
     }
-    if (seance?.posterPath) return seance.posterPath.startsWith('http') ? seance.posterPath : `/${seance.posterPath}`;
+    
+    // Si seance a un nameMovie, essayer de trouver par nom
+    if (seance?.nameMovie && moviesStore.movies.length > 0) {
+      const movie = moviesStore.movies.find(m => 
+        m.title && m.title.toLowerCase() === seance.nameMovie.toLowerCase()
+      );
+      console.log('Film trouvé par nom:', movie);
+      if (movie) {
+        const posterUrl = movie.posterUrl || movie.poster || movie.image;
+        if (posterUrl) {
+          return posterUrl.startsWith('http') ? posterUrl : `/${posterUrl}`;
+        }
+      }
+    }
+    
+    if (seance?.posterPath) {
+      return seance.posterPath.startsWith('http') ? seance.posterPath : `/${seance.posterPath}`;
+    }
+    
+    console.log('Utilisation du placeholder');
     return 'https://via.placeholder.com/100x150';
 }
 
@@ -148,11 +174,6 @@ const formatDateTime = (dateTimeString) => {
   if (!dateTimeString) return 'Date inconnue'
   const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
   return new Date(dateTimeString).toLocaleDateString('fr-FR', options);
-}
-
-const viewDetails = (booking) => {
-  // TODO: Implement details view
-  alert('Détails de la réservation: ' + booking.id)
 }
 
 const handleCancelBooking = async (bookingId) => {

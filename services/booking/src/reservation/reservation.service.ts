@@ -35,7 +35,7 @@ export class ReservationService {
     });
 
     if (!reservations || reservations.length === 0) {
-      throw new NotFoundException(`No reservations found for ${email}`);
+      return [];
     }
 
     return reservations.map(r => this.toClientShape(r));
@@ -46,19 +46,19 @@ export class ReservationService {
 
     const clientSeance = seance
       ? {
-          movieId: (seance as any).movieId || null,
-          room: seance.salleId || null,
-          dateTime: seance.dateSeance && seance.hourStart ? `${seance.dateSeance}T${seance.hourStart}` : seance.dateSeance || null,
-          posterPath: (seance as any).posterPath || null,
-          price: seance.price !== undefined && seance.price !== null ? Number(seance.price) : null,
-          id: seance.id,
-          nameMovie: seance.nameMovie,
-          numberPlace: seance.numberPlace,
-          hourStart: seance.hourStart,
-          hourEnd: seance.hourEnd,
-          dateSeance: seance.dateSeance,
-          salleId: seance.salleId,
-        }
+        movieId: (seance as any).movieId || null,
+        room: seance.salleId || null,
+        dateTime: seance.dateSeance && seance.hourStart ? `${seance.dateSeance}T${seance.hourStart}` : seance.dateSeance || null,
+        posterPath: (seance as any).posterPath || null,
+        price: seance.price !== undefined && seance.price !== null ? Number(seance.price) : null,
+        id: seance.id,
+        nameMovie: seance.nameMovie,
+        numberPlace: seance.numberPlace,
+        hourStart: seance.hourStart,
+        hourEnd: seance.hourEnd,
+        dateSeance: seance.dateSeance,
+        salleId: seance.salleId,
+      }
       : null;
 
     return {

@@ -4,6 +4,14 @@
     
     <main class="flex-1 px-6 md:px-12 py-8">
       <div class="max-w-7xl mx-auto space-y-6">
+        <!-- Loading State -->
+        <div v-if="bookingStep === 0" class="flex items-center justify-center py-16">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-accent mx-auto mb-4"></div>
+            <p class="text-muted-text">Chargement...</p>
+          </div>
+        </div>
+
         <div v-if="bookingStep === 1 && !selectedSession">
           <div class="flex items-center gap-3 mb-6">
             <Film :size="28" class="text-primary-accent" />
@@ -56,8 +64,20 @@
                 <Calendar :size="24" class="text-primary-accent" />
                 <h3 class="text-xl font-bold text-light-text">Séances disponibles</h3>
               </div>
+              
+              <!-- Date Filter -->
+              <div class="bg-dark-card rounded-xl border border-dark-border p-4 mb-4">
+                <label class="text-sm text-muted-text mb-2 block">Choisir une date</label>
+                <input 
+                  type="date" 
+                  v-model="selectedDate"
+                  :min="minDate"
+                  class="w-full px-4 py-2 bg-dark-bg border border-dark-border rounded-lg text-light-text focus:outline-none focus:border-primary-accent transition-colors"
+                />
+              </div>
+              
               <div 
-                v-for="session in availableSessions" 
+                v-for="session in filteredSessions" 
                 :key="session.time"
                 class="bg-dark-card border border-dark-border rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-primary-accent/50 transition-colors"
               >
@@ -84,8 +104,8 @@
                 </button>
               </div>
 
-              <div v-if="!availableSessions || availableSessions.length === 0" class="text-muted-text italic p-4 text-center">
-                Aucune séance disponible pour ce film.
+              <div v-if="!filteredSessions || filteredSessions.length === 0" class="text-muted-text italic p-4 text-center">
+                Aucune séance disponible pour ce film {{ selectedDate ? 'à cette date' : '' }}.
               </div>
             </div>
           </div>
@@ -116,6 +136,9 @@
               <div class="flex items-center gap-2 text-muted-text">
                 <MapPin :size="16" class="text-primary-accent" />
                 <span>Salle {{ selectedSession?.room }}</span>
+              </div>
+              <div v-if="selectedSession?.price > 12" class="flex items-center gap-2 bg-primary-accent/20 text-primary-accent px-3 py-1 rounded-full text-xs font-semibold">
+                ⭐ Premium
               </div>
             </div>
 
@@ -227,7 +250,10 @@
             <MapPin :size="18" class="text-primary-accent mt-0.5" />
             <div class="flex-1">
               <div class="text-xs text-muted-text uppercase">Salle</div>
-              <div class="text-light-text font-semibold">Salle {{ selectedSession?.room }}</div>
+              <div class="text-light-text font-semibold">
+                Salle {{ selectedSession?.room }}
+                <span v-if="selectedSession?.price > 12" class="ml-2 bg-primary-accent/20 text-primary-accent px-2 py-0.5 rounded text-xs font-semibold">⭐ Premium</span>
+              </div>
             </div>
           </div>
           
@@ -257,12 +283,10 @@
           </button>
           <button 
             @click="confirmBooking"
-            :disabled="isBooking"
-            class="flex-1 px-6 py-3 bg-primary-accent text-light-text font-bold rounded-lg hover:bg-primary-hover transition-all shadow-lg shadow-primary-accent/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            class="flex-1 px-6 py-3 bg-primary-accent text-light-text font-bold rounded-lg hover:bg-primary-hover transition-all shadow-lg shadow-primary-accent/30 flex items-center justify-center gap-2"
           >
-            <Loader2 v-if="isBooking" :size="20" class="animate-spin" />
-            <CheckCircle v-else :size="20" />
-            {{ isBooking ? 'Réservation...' : 'Confirmer la réservation' }}
+            <CheckCircle :size="20" />
+            Procéder au paiement
           </button>
         </div>
       </div>
@@ -306,12 +330,18 @@ const sessionsStore = useSessionsStore()
 const { sessions: allSessions } = storeToRefs(sessionsStore)
 const { occupiedSeats } = storeToRefs(bookingsStore)
 
-const bookingStep = ref(1)
+const bookingStep = ref(0) // 0 = loading, 1 = select movie, 2 = select session, 3 = select seats
 const selectedMovie = ref(null)
 const selectedSession = ref(null)
 const selectedSeats = ref(new Set())
 const showConfirmationModal = ref(false)
 const isBooking = ref(false)
+const selectedDate = ref('')
+
+const minDate = computed(() => {
+  const today = new Date()
+  return today.toISOString().split('T')[0]
+})
 
 const availableSessions = computed(() => {
   if (!selectedMovie.value || !allSessions.value) {
@@ -333,6 +363,26 @@ const availableSessions = computed(() => {
   return filtered;
 });
 
+const filteredSessions = computed(() => {
+  if (!availableSessions.value) {
+    return [];
+  }
+  
+  if (!selectedDate.value) {
+    return availableSessions.value;
+  }
+  
+  return availableSessions.value.filter(session => {
+    if (!session.date) return false;
+    
+    // Convertir la date de session au format YYYY-MM-DD
+    const sessionDate = new Date(session.date);
+    const sessionDateStr = sessionDate.toISOString().split('T')[0];
+    
+    return sessionDateStr === selectedDate.value;
+  });
+});
+
 onMounted(async () => {
   
   try {
@@ -346,11 +396,18 @@ onMounted(async () => {
   await sessionsStore.fetchAllSessions()
 
   const movieIdFromUrl = route.query.movieId;
-  const sessionIdFromUrl = route.params.sessionId;
+  const sessionIdFromUrl = route.params.sessionId || route.query.sessionId;
 
   if (sessionIdFromUrl) {
-    const session = sessionsStore.getSessionById(sessionIdFromUrl);
-    
+    let session = sessionsStore.getSessionById(sessionIdFromUrl);
+    if (!session) {
+      try {
+        session = await sessionsStore.fetchSessionById(sessionIdFromUrl);
+      } catch (error) {
+        session = null;
+      }
+    }
+
     if (session) {
       selectedSession.value = session;
       
@@ -394,8 +451,11 @@ onMounted(async () => {
     if (movie) {
       selectedMovie.value = movie;
       bookingStep.value = 2;
+    } else {
+      bookingStep.value = 1;
     }
   } else {
+    bookingStep.value = 1;
   }
 });
 
@@ -440,50 +500,38 @@ const isOccupied = (row, seat) => {
   return occupied
 }
 
-const confirmBooking = async () => {
+const confirmBooking = () => {
   if (selectedSeats.value.size === 0 || !authStore.currentUser) {
     alert('Veuillez sélectionner au moins une place et être connecté.')
     showConfirmationModal.value = false
     return
   }
 
-  isBooking.value = true
-  const bookingPromises = []
-  const failedBookings = []
-
+  // Préparer les données de réservation pour le paiement
   const seatPrice = parseFloat(selectedSession.value?.price) || 12.50
-
-  for (const seatCode of selectedSeats.value) {
-    const bookingPayload = {
-      name: `${authStore.currentUser.firstName} ${authStore.currentUser.lastName}`,
-      email: authStore.currentUser.email,
-      seanceId: selectedSession.value.id,
-      seatNumber: seatCode,
-      price: seatPrice,
-    }
-    bookingPromises.push(
-      bookingsStore.createBooking(bookingPayload).catch(error => {
-        failedBookings.push(seatCode)
-      })
-    )
+  const bookingData = {
+    movieTitle: selectedMovie.value?.title || 'Film inconnu',
+    sessionDate: selectedSession.value?.date || 'Date inconnue',
+    sessionTime: selectedSession.value?.time || 'Heure inconnue',
+    room: selectedSession.value?.room || 'N/A',
+    seats: Array.from(selectedSeats.value),
+    pricePerSeat: seatPrice,
+    sessionId: selectedSession.value.id,
+    sessionType: (seatPrice > 12) ? 'premium' : 'standard',
+    userEmail: authStore.currentUser.email,
+    userName: `${authStore.currentUser.firstName} ${authStore.currentUser.lastName}`
   }
 
-  try {
-    await Promise.all(bookingPromises)
-    isBooking.value = false
-    showConfirmationModal.value = false
-    
-    if (failedBookings.length > 0) {
-      alert(`Certaines réservations ont échoué pour les places : ${failedBookings.join(', ')}. Veuillez réessayer.`)
-    } else {
-      alert('Réservation(s) effectuée(s) avec succès !')
-    }
-    router.push('/client/my-bookings')
-  } catch (error) {
-    isBooking.value = false
-    showConfirmationModal.value = false
-    alert('Une erreur inattendue est survenue lors de la finalisation des réservations.')
-  }
+  // Sauvegarder temporairement pour le retrouver après paiement
+  localStorage.setItem('pendingBooking', JSON.stringify(bookingData))
+
+  showConfirmationModal.value = false
+  
+  // Rediriger vers la page de paiement
+  router.push({
+    name: 'Payment',
+    state: { bookingData }
+  })
 }
 </script>
 

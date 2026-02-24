@@ -14,20 +14,24 @@
         </div>
 
         <!-- Content Overlay -->
-        <div class="relative z-10 max-w-4xl mx-auto text-center p-6 space-y-6">
-          <span class="text-xl md:text-2xl uppercase tracking-widest text-primary-accent font-semibold">
-              Bienvenue sur Central Cinéma
-            </span>
+        <div class="relative z-10 max-w-5xl mx-auto text-center p-6 space-y-4">
+          <div class="space-y-2">
+            <p class="text-base md:text-lg uppercase tracking-widest text-primary-accent font-semibold opacity-80">
+              Bienvenue au cinéma
+            </p>
+            <h1 class="text-9xl md:text-[140px] font-heading font-extrabold leading-none text-primary-accent drop-shadow-2xl animate-pulse" style="text-shadow: 0 0 20px rgba(var(--primary-accent-rgb), 0.5);">
+              CENTRAL
+            </h1>
+            <h2 class="text-7xl md:text-9xl font-heading font-bold leading-none text-light-text drop-shadow-lg">
+              CINEMA
+            </h2>
+          </div>
 
-          <h1 class="text-6xl md:text-8xl font-heading font-extrabold leading-none text-light-text drop-shadow-lg">
-            Votre portail vers le grand écran.
-          </h1>
-
-          <p class="text-xl md:text-2xl text-muted-text max-w-2xl mx-auto">
-            Explorez les derniers films, découvrez les horaires des séances, et réservez vos places en quelques clics. Préparez le popcorn !
+          <p class="text-lg md:text-xl text-muted-text max-w-2xl mx-auto mt-8">
+            Explorez nos derniers films, découvrez les horaires et réservez vos places
           </p>
 
-          <div class="flex justify-center gap-6 pt-4">
+          <div class="flex justify-center gap-6 pt-6">
             <router-link to="/films" class="px-8 py-3 bg-primary-accent hover:bg-primary-hover rounded-lg font-semibold transition-colors shadow-lg">
               Voir les films
             </router-link>
@@ -61,7 +65,7 @@
             >
               <div
                 class="absolute inset-0 w-full h-full"
-                :style="{ backgroundImage: `url('${movie.posterUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center' }"
+                :style="{ backgroundImage: `url('${movie.posterUrl}')`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }"
               ></div>
               <!-- Overlay for details on hover -->
               <div class="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -126,8 +130,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { moviesService } from '@/api/movies.service'
 import Header from '@/components/common/Header.vue'
 import Footer from '@/components/common/Footer.vue'
 
@@ -136,17 +141,35 @@ const goToMovie = (id) => router.push(`/film/${id}`)
 
 const featuredMovie = ref({
   id: 1,
-  title: 'Le Gardien des Étoiles',
-  overview: "Dans un futur lointain, une jeune pilote découvre une ancienne relique qui pourrait sauver l'humanité d'une menace cosmique imminente.",
+  title: 'Chargement...',
+  overview: "Découvrez les meilleurs films du moment.",
   backdropUrl: 'https://picsum.photos/seed/cinemabackdrop/1920/1080',
 });
 
-const popularMovies = ref([
-  { id: 1, title: 'Le Gardien des Étoiles', duration: 120, rating: 'PG-13', posterUrl: 'https://picsum.photos/seed/movie-1/400/600' },
-  { id: 2, title: 'Océan Bleu', duration: 102, rating: 'G', posterUrl: 'https://picsum.photos/seed/movie-2/400/600' },
-  { id: 3, title: 'Nocturne', duration: 116, rating: 'R', posterUrl: 'https://picsum.photos/seed/movie-3/400/600' },
-  { id: 4, title: 'Dernière Séance', duration: 98, rating: 'PG', posterUrl: 'https://picsum.photos/seed/movie-4/400/600' },
-  { id: 5, title: 'La Cité des Songes', duration: 145, rating: 'PG-13', posterUrl: 'https://picsum.photos/seed/movie-5/400/600' },
-  { id: 6, title: 'Écho du Temps', duration: 110, rating: 'PG', posterUrl: 'https://picsum.photos/seed/movie-6/400/600' },
-])
+const popularMovies = ref([])
+
+onMounted(async () => {
+  try {
+    const response = await moviesService.getMovies()
+    const movies = response.data || response
+    popularMovies.value = movies.slice(0, 6).map(movie => ({
+      id: movie.id,
+      title: movie.title,
+      duration: movie.duration,
+      rating: movie.ageRating,
+      posterUrl: movie.posterUrl || movie.image
+    }))
+    
+    if (popularMovies.value.length > 0) {
+      featuredMovie.value = {
+        id: popularMovies.value[0].id,
+        title: popularMovies.value[0].title,
+        overview: popularMovies.value[0].title,
+        backdropUrl: popularMovies.value[0].posterUrl,
+      }
+    }
+  } catch (error) {
+    console.error('Erreur chargement films:', error)
+  }
+})
 </script>

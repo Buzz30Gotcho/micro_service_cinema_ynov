@@ -59,17 +59,19 @@
           <!-- Sessions grid -->
           <div class="p-6 border-t border-dark-border bg-dark-bg">
             <h3 class="text-sm font-semibold text-muted-text uppercase mb-4">Horaires disponibles pour {{ selectedDateFormatted }}</h3>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              <button
+            <div v-if="movie.sessions && movie.sessions.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <router-link
                 v-for="session in movie.sessions"
                 :key="session.id"
-                @click="goToSessionBooking(session.id)"
-                class="p-4 rounded-lg border-2 transition-all bg-dark-card border-dark-border hover:border-primary-accent hover:bg-dark-card/70 cursor-pointer"
+                :to="{ path: '/client/booking', query: { sessionId: session.id, movieId: session.movieId ?? movie.id } }"
+                class="p-4 rounded-lg border-2 transition-all bg-dark-card border-dark-border hover:border-primary-accent hover:bg-dark-card/70 cursor-pointer block text-center"
               >
                 <div class="text-xl font-bold mb-1 text-light-text">{{ session.time }}</div>
                 <div class="text-xs text-muted-text">Salle {{ session.room }}</div>
-              </button>
+                <div v-if="session.price > 12" class="text-xs text-primary-accent mt-1 font-semibold">⭐ Premium</div>
+              </router-link>
             </div>
+            <div v-else class="text-center text-muted-text py-8">Aucune séance disponible pour cette date</div>
           </div>
         </div>
          <div v-if="moviesForSelectedDate.length === 0 && !loading" class="text-center text-muted-text py-16">
@@ -208,10 +210,6 @@ onMounted(async () => {
 })
 
 // --- Navigation ---
-
-const goToSessionBooking = (sessionId) => {
-  router.push(`/reserver/${sessionId}`)
-}
 
 const goToMovieDetail = (movieId) => {
   router.push(`/film/${movieId}`)
