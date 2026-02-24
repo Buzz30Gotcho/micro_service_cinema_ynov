@@ -1,20 +1,13 @@
-# ------------------------------
-# Étape 1 : développement
-# ------------------------------
-FROM node:20-alpine AS dev
-
+# 1. Build étape
+FROM node:20-alpine as build
 WORKDIR /app
-
-# Installer les dépendances
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
-
-# Copier tout le projet
+RUN npm install
 COPY . .
+RUN npm run build
 
-# Exposer le port pour dev
-EXPOSE 5173   
-# Vite dev server par défaut
-
-# Commande pour dev
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+# 2. Serve étape
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
