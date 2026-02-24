@@ -103,8 +103,7 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./front/src:/app/src
-      - ./front/index.html:/app/index.html
+      - ./front:/app
 
   api-gateway:
     build: ./api-gateway
