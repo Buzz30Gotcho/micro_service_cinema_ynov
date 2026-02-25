@@ -9,12 +9,20 @@ const PORT = 3030;
 // --- Logs et CORS
 app.use(morgan('dev'));
 app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true
+    origin: 'http://jgsw0c0ggggwsg4ss000skgc.72.62.179.60.sslip.io',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// local development
+// app.use(cors({
+//     origin: 'http://localhost:5173',
+//     credentials: true
+// }));
+
 app.options('*', cors({
-    origin: 'http://localhost:5173',
+    origin: 'http://jgsw0c0ggggwsg4ss000skgc.72.62.179.60.sslip.io',
     credentials: true
 }));
 

@@ -5,7 +5,8 @@ import router from "@/router"; // Importez l'instance du routeur
 let isRefreshing = false;
 let failedQueue = [];
 
-const API_BASE_URL = "http://localhost:3030"; // URL de base de l'API gateway
+const API_BASE_URL = import.meta.env.VITE_API_BASE;
+//"http://localhost:3030"; // URL de base de l'API gateway
 
 const http = axios.create({
   baseURL: API_BASE_URL,
