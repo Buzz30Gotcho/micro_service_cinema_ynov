@@ -320,14 +320,8 @@ function getPublicBaseUrl(): string
     if ($baseUrl) {
         return rtrim($baseUrl, '/');
     }
-
-    $scheme = $_SERVER['REQUEST_SCHEME'] ?? (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http');
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost:4001';
-
-    // Replace Docker service names with localhost for browser access
-    $host = preg_replace('/^catalog(:\d+)?/', 'localhost$1', $host);
-
-    return rtrim($scheme . '://' . $host, '/');
+    // Fallback: utilise le domaine du frontend si connu
+    return 'http://jgsw0c0ggggwsg4ss000skgc.72.62.179.60.sslip.io';
 }
 
 function slugify(string $value): string

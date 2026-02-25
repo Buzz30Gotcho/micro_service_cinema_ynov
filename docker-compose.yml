@@ -11,8 +11,6 @@ services:
       - ./services/auth/.env
     environment:
       - MONGO_HOST=auth_bdd
-    volumes:
-      - ./services/auth:/app
     depends_on:
       - auth_bdd
 
@@ -33,6 +31,8 @@ services:
       - ./services/auth/.env
     depends_on:
       - auth_bdd
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=auth_bdd
 
   postgres:
     image: postgres:16-alpine
