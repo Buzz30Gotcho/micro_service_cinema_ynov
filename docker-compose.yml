@@ -59,8 +59,8 @@ services:
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_NAME: catalog_db
-      DB_USER: catalog_user
-      DB_PASSWORD: catalog_pass
+      DB_USER: postgres
+      DB_PASSWORD: postgres
     ports:
       - "4001:4001"
 
