@@ -11,8 +11,6 @@ services:
       - ./services/auth/.env
     environment:
       - MONGO_HOST=auth_bdd
-    ports:
-      - "4002:4002"
     volumes:
       - ./services/auth:/app
     depends_on:
@@ -33,8 +31,6 @@ services:
     restart: always
     env_file:
       - ./services/auth/.env
-    ports:
-      - "8082:8081"
     depends_on:
       - auth_bdd
 
@@ -47,8 +43,6 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
-    ports:
-      - "5432:5432"
 
   catalog:
     build: ./services/catalog
@@ -61,8 +55,6 @@ services:
       DB_NAME: catalog_db
       DB_USER: catalog_user
       DB_PASSWORD: catalog_pass
-    ports:
-      - "4001:4001"
 
   booking:
     build: ./services/booking
@@ -77,8 +69,6 @@ services:
       DB_USER: booking_user
       DB_PASSWORD: booking_pass
       SECRET_KEY: "A2g1MepEXXRV7ffoAdfnw3a_pvSTxclfx65UVoNuxlcMw-9UGoo3PZYb4E4V0CWR51U_2B65-ocIHMnBsDNnKQ"
-    ports:
-      - "4003:4003"
 
   payment:
     build: ./services/payment
@@ -92,8 +82,6 @@ services:
       DB_NAME: payment_db
       DB_USER: payment_user
       DB_PASSWORD: payment_pass
-    ports:
-      - "4004:4004"
 
   front:
     build:
@@ -103,16 +91,12 @@ services:
     container_name: ms-cinema-front
     environment:
       VITE_API_BASE: ${VITE_API_BASE:-http://yc4w8g0ows8so00kcs0wo4cs.72.62.179.60.sslip.io}
-    ports:
-      - "80:80"
     depends_on:
       - api-gateway
 
   api-gateway:
     build: ./api-gateway
     container_name: ms-cinema-gateway
-    ports:
-      - "3030:3030"
     environment:
       - APP_PORT=3030
       - AUTH_URL=${AUTH_URL:-http://auth_api:4002}
