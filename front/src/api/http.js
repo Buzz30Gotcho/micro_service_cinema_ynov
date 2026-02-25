@@ -7,9 +7,7 @@ let failedQueue = [];
 
 // Lire l'URL de l'API Gateway depuis Vite ou depuis la fenêtre globale (runtime)
 const API_BASE_URL = import.meta.env.VITE_API_BASE ||
-  (typeof window !== 'undefined' && window.__ENV__?.VITE_API_BASE) ||
-  "http://localhost:3030";
-
+  (typeof window !== 'undefined' && window.__ENV__?.VITE_API_BASE)
 console.log('API Base URL:', API_BASE_URL);
 
 const http = axios.create({
