@@ -96,14 +96,17 @@ services:
       - "4004:4004"
 
   front:
-    build: ./front
+    build:
+      context: ./front
+      args:
+        VITE_API_BASE: ${VITE_API_BASE:-http://localhost:3030}
     container_name: ms-cinema-front
     environment:
-      VITE_API_BASE: "http://yc4w8g0ows8so00kcs0wo4cs.72.62.179.60.sslip.io"
+      VITE_API_BASE: ${VITE_API_BASE:-http://localhost:3030}
     ports:
-      - "5173:80"
-    volumes:
-      - ./front:/app
+      - "80:80"
+    depends_on:
+      - api-gateway
 
   api-gateway:
     build: ./api-gateway
@@ -111,10 +114,11 @@ services:
     ports:
       - "3030:3030"
     environment:
-      - AUTH_URL=http://auth_api:4002
-      - CATALOG_URL=http://catalog:4001
-      - BOOKING_URL=http://booking:4003
-      - PAYMENT_URL=http://payment:4004
+      - APP_PORT=3030
+      - AUTH_URL=${AUTH_URL:-http://auth_api:4002}
+      - CATALOG_URL=${CATALOG_URL:-http://catalog:4001}
+      - BOOKING_URL=${BOOKING_URL:-http://booking:4003}
+      - PAYMENT_URL=${PAYMENT_URL:-http://payment:4004}
     depends_on:
       - auth_api
       - catalog

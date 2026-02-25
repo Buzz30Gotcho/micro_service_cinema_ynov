@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
-const PORT = 3030;
+const PORT = process.env.APP_PORT || 3030;
 
 // --- Logs et CORS
 app.use(morgan('dev'));
@@ -22,7 +22,7 @@ app.use(cors({
 // }));
 
 app.options('*', cors({
-    origin: 'http://jgsw0c0ggggwsg4ss000skgc.72.62.179.60.sslip.io',
+    origin: '*',
     credentials: true
 }));
 
@@ -33,6 +33,13 @@ const services = [
     { route: '/sessions', target: process.env.BOOKING_URL || 'http://127.0.0.1:4003' },
     { route: '/payments', target: process.env.PAYMENT_URL || 'http://127.0.0.1:4004' },
 ];
+
+// Log des services configurés au démarrage
+console.log('\n=== 🚀 API Gateway Configuration ===');
+services.forEach(({ route, target }) => {
+    console.log(`${route.padEnd(12)} → ${target}`);
+});
+console.log('===================================\n');
 
 services.forEach(({ route, target }) => {
     app.use(
@@ -54,5 +61,5 @@ services.forEach(({ route, target }) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`API Gateway running on http://localhost:${PORT}`);
+    console.log(`✅ API Gateway running on http://localhost:${PORT}`);
 });
