@@ -99,7 +99,7 @@ services:
     build: ./front
     container_name: ms-cinema-front
     environment:
-      VITE_API_BASE: ""
+      VITE_API_BASE: "http://yc4w8g0ows8so00kcs0wo4cs.72.62.179.60.sslip.io"
     ports:
       - "5173:80"
     volumes:
