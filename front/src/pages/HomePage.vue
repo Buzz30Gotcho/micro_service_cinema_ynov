@@ -145,7 +145,7 @@ const featuredMovie = ref({
   overview: "Découvrez les meilleurs films du moment.",
   backdropUrl: 'https://picsum.photos/seed/cinemabackdrop/1920/1080',
 });
-
+console.log("API Base URL:", import.meta.env.VITE_API_BASE);
 const popularMovies = ref([])
 
 onMounted(async () => {
