@@ -99,12 +99,12 @@ services:
     build:
       context: ./front
       args:
-        VITE_API_BASE: ${VITE_API_BASE:-http://yc4w8g0ows8so00kcs0wo4cs.72.62.179.60.sslip.io:3030}
+        VITE_API_BASE: ${VITE_API_BASE:-http://yc4w8g0ows8so00kcs0wo4cs.72.62.179.60.sslip.io}
     container_name: ms-cinema-front
     environment:
-      VITE_API_BASE: ${VITE_API_BASE:-http://yc4w8g0ows8so00kcs0wo4cs.72.62.179.60.sslip.io:3030}
+      VITE_API_BASE: ${VITE_API_BASE:-http://yc4w8g0ows8so00kcs0wo4cs.72.62.179.60.sslip.io}
     ports:
-      - "5173:5173"
+      - "80:80"
     depends_on:
       - api-gateway
 
