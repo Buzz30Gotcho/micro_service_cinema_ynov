@@ -91,6 +91,8 @@ services:
     container_name: ms-cinema-front
     environment:
       VITE_API_BASE: ${VITE_API_BASE:-http://yc4w8g0ows8so00kcs0wo4cs.72.62.179.60.sslip.io}
+    labels:
+      - "traefik.http.services.front.loadbalancer.server.port=80"
     depends_on:
       - api-gateway
 
@@ -103,6 +105,8 @@ services:
       - CATALOG_URL=${CATALOG_URL:-http://catalog:4001}
       - BOOKING_URL=${BOOKING_URL:-http://booking:4003}
       - PAYMENT_URL=${PAYMENT_URL:-http://payment:4004}
+    labels:
+      - "traefik.http.services.api-gateway.loadbalancer.server.port=3030"
     depends_on:
       - auth_api
       - catalog
