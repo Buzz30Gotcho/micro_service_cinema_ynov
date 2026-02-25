@@ -69,6 +69,7 @@ services:
       DB_USER: booking_user
       DB_PASSWORD: booking_pass
       SECRET_KEY: "A2g1MepEXXRV7ffoAdfnw3a_pvSTxclfx65UVoNuxlcMw-9UGoo3PZYb4E4V0CWR51U_2B65-ocIHMnBsDNnKQ"
+      FRONTEND_ORIGIN: "http://jgsw0c0ggggwsg4ss000skgc.72.62.179.60.sslip.io"
 
   payment:
     build: ./services/payment
