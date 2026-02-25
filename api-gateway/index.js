@@ -9,7 +9,10 @@ const PORT = process.env.APP_PORT || 3030;
 // --- Logs et CORS
 app.use(morgan('dev'));
 app.use(cors({
-    origin: '*',
+    origin: [
+        'http://jgsw0c0ggggwsg4ss000skgc.72.62.179.60.sslip.io',
+        'http://localhost:5173'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
