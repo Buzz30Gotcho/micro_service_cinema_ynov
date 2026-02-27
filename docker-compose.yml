@@ -13,6 +13,15 @@ services:
       - MONGO_HOST=auth_bdd
     depends_on:
       - auth_bdd
+    labels:
+      - "traefik.http.routers.auth_api.rule=Host(`yc4w8g0ows8so00kcs0wo4cs.72.62.179.60.sslip.io`)"
+      - "traefik.http.routers.auth_api.entrypoints=web"
+      - "traefik.http.services.auth_api.loadbalancer.server.port=4002"
+      - "traefik.http.routers.auth_api.middlewares=auth_api-cors"
+      - "traefik.http.middlewares.auth_api-cors.headers.accessControlAllowMethods=GET,OPTIONS,PUT,POST,DELETE,PATCH"
+      - "traefik.http.middlewares.auth_api-cors.headers.accessControlAllowOriginList=http://jgsw0c0ggggwsg4ss000skgc.72.62.179.60.sslip.io"
+      - "traefik.http.middlewares.auth_api-cors.headers.accessControlAllowHeaders=*"
+      - "traefik.http.middlewares.auth_api-cors.headers.accessControlAllowCredentials=true"
 
   auth_bdd:
     image: mongo:6.0
