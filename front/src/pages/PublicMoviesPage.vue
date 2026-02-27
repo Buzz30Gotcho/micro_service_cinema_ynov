@@ -22,7 +22,7 @@
         >
           <div 
             class="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-            :style="{ backgroundImage: movie.poster ? `url('${movie.poster}')` : '' }"
+            :style="{ backgroundImage: movie.image ? `url('${getAssetUrl(movie.image)}')` : '' }"
           ></div>
           <!-- Fond dégradé avec transparence -->
           <div class="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/60 to-transparent group-hover:from-dark-bg/90 group-hover:via-dark-bg/70 transition-all"></div>
@@ -51,6 +51,11 @@ import { storeToRefs } from 'pinia'
 import Header from '@/components/common/Header.vue'
 const moviesStore = useMoviesStore()
 const { movies, loading, error } = storeToRefs(moviesStore)
+
+function getAssetUrl(imageName) {
+  // Vite syntax for static assets
+  return new URL(`../assets/${imageName}`, import.meta.url).href
+}
 
 onMounted(() => {
   moviesStore.fetchMovies()
