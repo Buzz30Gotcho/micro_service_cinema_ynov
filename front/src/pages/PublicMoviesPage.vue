@@ -54,7 +54,15 @@ const { movies, loading, error } = storeToRefs(moviesStore)
 
 function getAssetUrl(imageName) {
   // Vite syntax for static assets
-  return new URL(`../assets/${imageName}`, import.meta.url).href
+  try {
+    if (imageName) {
+      return new URL(`../assets/${imageName}`, import.meta.url).href
+    }
+  } catch (e) {
+    // If image not found, fallback to placeholder
+    return 'https://via.placeholder.com/200x300?text=No+Image'
+  }
+  return 'https://via.placeholder.com/200x300?text=No+Image'
 }
 
 onMounted(() => {
