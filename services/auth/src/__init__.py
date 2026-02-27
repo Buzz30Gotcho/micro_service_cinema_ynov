@@ -33,10 +33,12 @@ def create_app(config_class=Config):
                     "http://localhost:4010",
                     "http://127.0.0.1:3000",
                     "http://127.0.0.1:4010",
+                    "http://jgsw0c0ggggwsg4ss000skgc.72.62.179.60.sslip.io",
                 ]
             }
         },
         supports_credentials=True,
+        methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     )
 
     # 1. Configuration base de données
