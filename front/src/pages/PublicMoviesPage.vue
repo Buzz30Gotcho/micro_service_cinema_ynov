@@ -21,10 +21,9 @@
                      hover:scale-105 hover:shadow-xl hover:shadow-primary-accent/40 border border-dark-border"
         >
           <img
-            :src="movie.image || 'https://via.placeholder.com/200x300?text=No+Image'"
+            :src="movie.image"
             alt="Affiche du film"
             class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
-            @error="event.target.src = 'https://via.placeholder.com/200x300?text=No+Image'"
           />
           <!-- Fond dégradé avec transparence -->
           <div class="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/60 to-transparent group-hover:from-dark-bg/90 group-hover:via-dark-bg/70 transition-all"></div>
