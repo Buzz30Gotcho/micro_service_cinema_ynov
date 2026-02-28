@@ -20,10 +20,12 @@
                      transform-gpu transition-all duration-300
                      hover:scale-105 hover:shadow-xl hover:shadow-primary-accent/40 border border-dark-border"
         >
-          <div 
-            class="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-            :style="{ backgroundImage: movie.image ? `url('${movie.image}')` : '' }"
-          ></div>
+          <img
+            :src="movie.image || 'https://via.placeholder.com/200x300?text=No+Image'"
+            alt="Affiche du film"
+            class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+            @error="event.target.src = 'https://via.placeholder.com/200x300?text=No+Image'"
+          />
           <!-- Fond dégradé avec transparence -->
           <div class="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/60 to-transparent group-hover:from-dark-bg/90 group-hover:via-dark-bg/70 transition-all"></div>
 
@@ -53,17 +55,6 @@ const moviesStore = useMoviesStore()
 const { movies, loading, error } = storeToRefs(moviesStore)
 
 function getAssetUrl(imageName) {
-  // Vite syntax for static assets
-  try {
-    if (imageName) {
-      return new URL(`../assets/${imageName}`, import.meta.url).href
-    }
-  } catch (e) {
-    // If image not found, fallback to placeholder
-    return 'https://via.placeholder.com/200x300?text=No+Image'
-  }
-  return 'https://via.placeholder.com/200x300?text=No+Image'
-}
 
 onMounted(() => {
   moviesStore.fetchMovies()

@@ -23,7 +23,12 @@
             <!-- Poster -->
             <div class="hidden md:block md:col-span-1 transform hover:scale-105 transition-transform duration-300">
               <div class="aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border border-primary-accent/20 backdrop-blur max-w-xs">
-                <img :src="movie.posterUrl || movie.image" :alt="movie.title" class="w-full h-full object-cover">
+                <img
+                  :src="movie.posterUrl || movie.image || 'https://via.placeholder.com/200x300?text=No+Image'"
+                  :alt="movie.title"
+                  class="w-full h-full object-cover"
+                  @error="event.target.src = 'https://via.placeholder.com/200x300?text=No+Image'"
+                >
               </div>
             </div>
 
@@ -155,7 +160,12 @@
               @click="goToMovie(similar.id)"
               class="group cursor-pointer transform hover:scale-110 transition-transform duration-300">
               <div class="relative aspect-[2/3] rounded-xl overflow-hidden border border-dark-border/50 hover:border-primary-accent/50 transition-colors duration-300">
-                <img :src="similar.posterUrl || similar.image" :alt="similar.title" class="w-full h-full object-cover group-hover:brightness-75 transition-all duration-300">
+                <img
+                  :src="similar.posterUrl || similar.image || 'https://via.placeholder.com/200x300?text=No+Image'"
+                  :alt="similar.title"
+                  class="w-full h-full object-cover group-hover:brightness-75 transition-all duration-300"
+                  @error="event.target.src = 'https://via.placeholder.com/200x300?text=No+Image'"
+                >
                 <div class="absolute inset-0 bg-gradient-to-t from-dark-bg via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                   <h3 class="font-bold text-sm mb-1">{{ similar.title }}</h3>
                   <p class="text-xs text-muted-text">{{ similar.genre }}</p>
