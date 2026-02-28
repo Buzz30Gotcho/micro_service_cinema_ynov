@@ -17,3 +17,5 @@ RUN mkdir -p /usr/share/nginx/html/images
 COPY --from=build /app/public/images/. /usr/share/nginx/html/images/
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
+
+

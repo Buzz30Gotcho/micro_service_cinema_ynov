@@ -50,10 +50,9 @@ import { onMounted } from 'vue'
 import { useMoviesStore } from '@/stores/movies.store'
 import { storeToRefs } from 'pinia'
 import Header from '@/components/common/Header.vue'
+
 const moviesStore = useMoviesStore()
 const { movies, loading, error } = storeToRefs(moviesStore)
-
-function getAssetUrl(imageName) {
 
 onMounted(() => {
   moviesStore.fetchMovies()
