@@ -109,7 +109,7 @@ function seedFilmsIfEmpty(PDO $pdo): void
             'rating' => 4.9,
             'year' => 1994,
             'age_rating' => 'R',
-            'image' => '/images/the-shawshank-redemption.jpg',
+            'image' => '/images/the_shawshank_redemption.jpg',
             'description' => 'Deux hommes emprisonnés nouent une amitié profonde qui deviendra leur salut et leur liberté.',
             'director' => 'Frank Darabont',
         ],
