@@ -5,7 +5,7 @@
     <main class="flex-1">
 
       <!-- HERO SECTION - Enhanced Cinematic Showcase -->
-      <section class="relative h-[70vh] flex items-center justify-center text-light-text overflow-hidden">
+      <section class="relative h-[60vh] md:h-[70vh] flex items-center justify-center text-light-text overflow-hidden">
         <!-- Background Image/Video Placeholder -->
         <div class="absolute inset-0 w-full h-full">
           <img src="https://picsum.photos/seed/cinemabackdrop/1920/1080" alt="Cinematic Background" class="w-full h-full object-cover brightness-75">
@@ -16,26 +16,26 @@
         <!-- Content Overlay -->
         <div class="relative z-10 max-w-5xl mx-auto text-center p-6 space-y-4">
           <div class="space-y-2">
-            <p class="text-base md:text-lg uppercase tracking-widest text-primary-accent font-semibold opacity-80">
+            <p class="text-sm md:text-lg uppercase tracking-[0.2em] text-primary-accent font-semibold opacity-80">
               Bienvenue au cinéma
             </p>
-            <h1 class="text-9xl md:text-[140px] font-heading font-extrabold leading-none text-primary-accent drop-shadow-2xl animate-pulse" style="text-shadow: 0 0 20px rgba(var(--primary-accent-rgb), 0.5);">
+            <h1 class="text-5xl sm:text-7xl md:text-[140px] font-heading font-extrabold leading-none text-primary-accent drop-shadow-2xl animate-pulse" style="text-shadow: 0 0 20px rgba(var(--primary-accent-rgb), 0.5);">
               CENTRAL
             </h1>
-            <h2 class="text-7xl md:text-9xl font-heading font-bold leading-none text-light-text drop-shadow-lg">
+            <h2 class="text-4xl sm:text-6xl md:text-9xl font-heading font-bold leading-none text-light-text drop-shadow-lg">
               CINEMA
             </h2>
           </div>
 
-          <p class="text-lg md:text-xl text-muted-text max-w-2xl mx-auto mt-8">
+          <p class="text-sm sm:text-base md:text-xl text-muted-text max-w-2xl mx-auto mt-6 md:mt-8">
             Explorez nos derniers films, découvrez les horaires et réservez vos places
           </p>
 
-          <div class="flex justify-center gap-6 pt-6">
-            <router-link to="/films" class="px-8 py-3 bg-primary-accent hover:bg-primary-hover rounded-lg font-semibold transition-colors shadow-lg">
+          <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-6 pt-4 md:pt-6">
+            <router-link to="/films" class="px-6 sm:px-8 py-3 bg-primary-accent hover:bg-primary-hover rounded-lg font-semibold transition-colors shadow-lg text-center">
               Voir les films
             </router-link>
-            <router-link to="/seances" class="px-8 py-3 bg-dark-card hover:bg-dark-border border border-dark-border rounded-lg font-semibold transition-colors shadow-lg">
+            <router-link to="/seances" class="px-6 sm:px-8 py-3 bg-dark-card hover:bg-dark-border border border-dark-border rounded-lg font-semibold transition-colors shadow-lg text-center">
               Toutes les séances
             </router-link>
           </div>
@@ -43,11 +43,11 @@
       </section>
 
       <!-- FILMS - Enhanced Movie Listings Grid -->
-      <section class="px-6 md:px-12 py-20 bg-dark-card/30 border-t border-dark-border">
+      <section class="px-4 md:px-12 py-14 md:py-20 bg-dark-card/30 border-t border-dark-border">
         <div class="max-w-7xl mx-auto">
 
-          <div class="flex items-center justify-between mb-12">
-            <h2 class="text-4xl font-heading font-bold text-light-text">À l’affiche en ce moment</h2>
+          <div class="flex items-center justify-between gap-4 mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-4xl font-heading font-bold text-light-text">À l’affiche en ce moment</h2>
             <router-link to="/films" class="text-base text-primary-accent hover:underline">
               Voir tous les films →
             </router-link>
@@ -88,10 +88,10 @@
       </section>
       
       <!-- HOW IT WORKS - Polished Section -->
-      <section class="px-6 md:px-12 py-24 border-t border-dark-border bg-dark-bg">
+      <section class="px-4 md:px-12 py-14 md:py-24 border-t border-dark-border bg-dark-bg">
         <div class="max-w-5xl mx-auto text-center">
-          <h2 class="text-4xl font-heading font-bold text-light-text mb-4">Votre soirée ciné en 3 étapes</h2>
-          <p class="text-xl text-muted-text mb-12">C'est simple, rapide et sécurisé.</p>
+          <h2 class="text-2xl md:text-4xl font-heading font-bold text-light-text mb-4">Votre soirée ciné en 3 étapes</h2>
+          <p class="text-base md:text-xl text-muted-text mb-10 md:mb-12">C'est simple, rapide et sécurisé.</p>
 
           <div class="grid md:grid-cols-3 gap-12">
             <div class="flex flex-col items-center space-y-4">
@@ -114,10 +114,10 @@
       </section>
 
       <!-- PROMO BANNER - Polished Section -->
-      <section class="px-6 md:px-12 py-16">
+      <section class="px-4 md:px-12 py-12 md:py-16">
         <div class="max-w-6xl mx-auto bg-primary-accent/10 border border-primary-accent/30 rounded-lg p-8 md:p-12 text-center shadow-lg">
-          <h2 class="text-4xl font-heading font-bold text-light-text mb-3">Offre Spéciale Étudiants</h2>
-          <p class="text-xl text-primary-accent max-w-xl mx-auto">
+          <h2 class="text-2xl md:text-4xl font-heading font-bold text-light-text mb-3">Offre Spéciale Étudiants</h2>
+          <p class="text-base md:text-xl text-primary-accent max-w-xl mx-auto">
             Bénéficiez de -25% sur toutes les séances du lundi au jeudi sur présentation de votre carte étudiante.
           </p>
         </div>

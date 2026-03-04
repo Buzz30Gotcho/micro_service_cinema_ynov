@@ -1,5 +1,5 @@
 <template>
-  <aside class="w-full md:w-64 bg-cinema-darkAlt border-r border-slate-700 flex flex-col flex-shrink-0">
+  <aside :class="asideClasses">
     <!-- Logo Area -->
     <div class="p-6 flex items-center justify-between md:justify-start gap-3 border-b border-slate-700">
       <router-link to="/admin/dashboard" class="flex items-center gap-3">
@@ -10,8 +10,8 @@
       </router-link>
       
       <!-- Mobile Menu Button -->
-      <button class="md:hidden text-slate-400 hover:text-white">
-        <i class="fa-solid fa-bars text-xl"></i>
+      <button @click="$emit('close')" class="md:hidden text-slate-400 hover:text-white" aria-label="Fermer le menu">
+        <i class="fa-solid fa-xmark text-xl"></i>
       </button>
     </div>
 
@@ -25,6 +25,7 @@
           
           <router-link 
             to="/admin/dashboard"
+            @click="handleNavClick"
             active-class="bg-cinema-accent/10 text-cinema-accent border-r-2 border-cinema-accent"
             class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-l-md transition-all text-slate-300 hover:bg-slate-700/50 hover:text-slate-100"
           >
@@ -34,6 +35,7 @@
 
           <router-link 
             to="/admin/movies"
+            @click="handleNavClick"
             active-class="bg-cinema-accent/10 text-cinema-accent border-r-2 border-cinema-accent"
             class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-l-md transition-all text-slate-300 hover:bg-slate-700/50 hover:text-slate-100"
           >
@@ -43,6 +45,7 @@
 
           <router-link 
             to="/admin/sessions"
+            @click="handleNavClick"
             active-class="bg-cinema-accent/10 text-cinema-accent border-r-2 border-cinema-accent"
             class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-l-md transition-all text-slate-300 hover:bg-slate-700/50 hover:text-slate-100"
           >
@@ -52,6 +55,7 @@
 
           <router-link 
             to="/admin/users"
+            @click="handleNavClick"
             active-class="bg-cinema-accent/10 text-cinema-accent border-r-2 border-cinema-accent"
             class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-l-md transition-all text-slate-300 hover:bg-slate-700/50 hover:text-slate-100"
           >
@@ -68,6 +72,7 @@
           
           <router-link 
             to="/client/booking"
+            @click="handleNavClick"
             active-class="bg-cinema-accent/10 text-cinema-accent border-r-2 border-cinema-accent"
             class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-l-md transition-all text-slate-300 hover:bg-slate-700/50 hover:text-slate-100"
           >
@@ -77,6 +82,7 @@
 
           <router-link 
             to="/client/my-bookings"
+            @click="handleNavClick"
             active-class="bg-cinema-accent/10 text-cinema-accent border-r-2 border-cinema-accent"
             class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-l-md transition-all text-slate-300 hover:bg-slate-700/50 hover:text-slate-100"
           >
@@ -94,10 +100,29 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 
+const props = defineProps({
+  isMobileOpen: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['close'])
+
 const router = useRouter()
 const authStore = useAuthStore()
+
+const asideClasses = computed(() => [
+  'bg-cinema-darkAlt border-r border-slate-700 flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out',
+  'fixed inset-y-0 left-0 z-50 w-72 md:static md:translate-x-0 md:z-auto md:w-64',
+  props.isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+])
 
 const currentView = computed(() => {
   return router.currentRoute.value.path.startsWith('/admin') ? 'admin' : 'client'
 })
+
+const handleNavClick = () => {
+  emit('close')
+}
 </script>
