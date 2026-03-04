@@ -3,11 +3,30 @@
 @tailwind utilities;
 
 /* Global Styles for a more realistic and stylish theme */
-body {
-    @apply font-sans bg-dark-bg text-light-text;
+html {
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
 }
 
-h1, h2, h3, h4, h5, h6 {
+body {
+    @apply font-sans bg-dark-bg text-light-text;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    position: relative;
+}
+
+#app {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     @apply font-heading;
 }
 
@@ -18,11 +37,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-track {
-    background: #282828; /* Slightly lighter than dark-bg for contrast */
+    background: #282828;
+    /* Slightly lighter than dark-bg for contrast */
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #555555; /* Muted gray for the thumb */
+    background: #555555;
+    /* Muted gray for the thumb */
     border-radius: 4px;
 }
 
@@ -32,6 +53,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* For Firefox */
 html {
-    scrollbar-color: #555555 #282828; /* thumb and track color */
-    scrollbar-width: thin; /* auto | thin | none */
+    scrollbar-color: #555555 #282828;
+    /* thumb and track color */
+    scrollbar-width: thin;
+    /* auto | thin | none */
 }
