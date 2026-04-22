@@ -118,7 +118,7 @@
         <div class="max-w-6xl mx-auto bg-primary-accent/10 border border-primary-accent/30 rounded-lg p-8 md:p-12 text-center shadow-lg">
           <h2 class="text-2xl md:text-4xl font-heading font-bold text-light-text mb-3">Offre Spéciale Étudiants</h2>
           <p class="text-base md:text-xl text-primary-accent max-w-xl mx-auto">
-            Bénéficiez de -25% sur toutes les séances du lundi au jeudi sur présentation de votre carte étudiante.
+            Bénéficiez de -30% sur toutes les séances du lundi au jeudi sur présentation de votre carte étudiante.
           </p>
         </div>
       </section>

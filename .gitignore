@@ -8,3 +8,15 @@ dist/
 .vscode/
 coverage/
 __pycache__/
+.info_auth/
+.idea/
+*.log
+*.bak
+*.swp
+*.swo
+*.zip
+*.tar.gz
+*.tar
+*.rar
+*.7z
+*.exe
