@@ -65,7 +65,7 @@
             >
               <div
                 class="absolute inset-0 w-full h-full"
-                :style="{ backgroundImage: `url('${movie.posterUrl}')`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }"
+                :style="{ backgroundImage: `url('${movie.posterUrl}')`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }"
               ></div>
               <!-- Overlay for details on hover -->
               <div class="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
